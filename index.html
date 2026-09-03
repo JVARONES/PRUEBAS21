@@ -61,17 +61,14 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#004154}
 </div></div>
 
 <div class="card"><div class="ch">3 · VEHÍCULO, TESTIGOS Y DAÑO</div><div class="cb">
-<div class="g4">
-<div><label>MARCA</label><input id="vm" value="-"></div>
-<div><label>MODELO</label><input id="vmo" value="-"></div>
-<div><label>EMPRESA</label><input id="ve" value="-"></div>
-<div><label>PLACA</label><input id="vp" value="-"></div>
-</div>
-<div class="g3" style="margin-top:14px">
-<div><label>TESTIGO N° 1</label><input id="t1" value="Díaz Yenque Pier"></div>
-<div><label>TESTIGO N° 2</label><input id="t2" value="Obregón Torres Aldo"></div>
-<div><label>TESTIGO N° 3</label><input id="t3" value="Oliveros Silva Rosmery"></div>
-</div>
+<div id="vehiculos"></div>
+<button class="btn sec" id="btnAgregarVehiculo">+ Agregar vehículo</button>
+
+<div style="height:14px"></div>
+
+<div id="testigos"></div>
+<button class="btn sec" id="btnAgregarTestigo">+ Agregar testigo</button>
+
 <div class="g2" style="margin-top:14px">
 <div><label>SUPERVISOR DE TURNO</label><input id="sup" value="Barzola Tinoco Víctor"></div>
 <div><label>DAÑO CAUSADO</label><input id="dano" value="ESGUINCE Y TORCEDURA DE TOBILLO IZQUIERDO."></div>
@@ -122,6 +119,13 @@ let trabajadores=[{
  area:'MANTENIMIENTO'
 }];
 
+let vehiculos=[];
+let testigos=[
+ {nom:'Díaz Yenque Pier'},
+ {nom:'Obregón Torres Aldo'},
+ {nom:'Oliveros Silva Rosmery'}
+];
+
 let fotos=[],firma=null,firmaRatio=2;
 
 function toast(msg,error=false){
@@ -137,6 +141,67 @@ function escapeHtml(v){
   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
  }[m]));
 }
+
+
+function pintarVehiculos(){
+ $('vehiculos').innerHTML=vehiculos.map((v,i)=>`
+ <div class="inv">
+ <button class="del" data-veh-del="${i}">×</button>
+ <div class="g4">
+ <div><label>MARCA</label><input data-veh-i="${i}" data-k="marca" value="${escapeHtml(v.marca)}"></div>
+ <div><label>MODELO</label><input data-veh-i="${i}" data-k="modelo" value="${escapeHtml(v.modelo)}"></div>
+ <div><label>EMPRESA</label><input data-veh-i="${i}" data-k="empresa" value="${escapeHtml(v.empresa)}"></div>
+ <div><label>PLACA</label><input data-veh-i="${i}" data-k="placa" value="${escapeHtml(v.placa)}"></div>
+ </div></div>`).join('');
+}
+
+$('vehiculos').addEventListener('input',e=>{
+ if(e.target.dataset.vehI!==undefined){
+  vehiculos[+e.target.dataset.vehI][e.target.dataset.k]=e.target.value;
+ }
+});
+
+$('vehiculos').addEventListener('click',e=>{
+ const b=e.target.closest('[data-veh-del]');
+ if(!b)return;
+ vehiculos.splice(+b.dataset.vehDel,1);
+ pintarVehiculos();
+});
+
+$('btnAgregarVehiculo').addEventListener('click',()=>{
+ const emp=EMPRESAS[+$('empresa').value].nom;
+ vehiculos.push({marca:'',modelo:'',empresa:emp,placa:''});
+ pintarVehiculos();
+ toast('Vehículo agregado');
+});
+
+function pintarTestigos(){
+ $('testigos').innerHTML=testigos.map((v,i)=>`
+ <div class="inv">
+ ${testigos.length>1?`<button class="del" data-test-del="${i}">×</button>`:''}
+ <div><label>TESTIGO N° ${String(i+1).padStart(2,'0')}</label>
+ <input data-test-i="${i}" data-k="nom" value="${escapeHtml(v.nom)}"></div>
+ </div>`).join('');
+}
+
+$('testigos').addEventListener('input',e=>{
+ if(e.target.dataset.testI!==undefined){
+  testigos[+e.target.dataset.testI][e.target.dataset.k]=e.target.value;
+ }
+});
+
+$('testigos').addEventListener('click',e=>{
+ const b=e.target.closest('[data-test-del]');
+ if(!b)return;
+ testigos.splice(+b.dataset.testDel,1);
+ pintarTestigos();
+});
+
+$('btnAgregarTestigo').addEventListener('click',()=>{
+ testigos.push({nom:''});
+ pintarTestigos();
+ toast('Testigo agregado');
+});
 
 function pintarTrabajadores(){
  $('invs').innerHTML=trabajadores.map((v,i)=>`
@@ -171,6 +236,8 @@ $('btnAgregar').addEventListener('click',()=>{
 });
 
 pintarTrabajadores();
+pintarVehiculos();
+pintarTestigos();
 
 $('zonaFotos').addEventListener('click',()=>$('fotoInput').click());
 
@@ -188,7 +255,7 @@ $('fotoInput').addEventListener('change',()=>{
 
    img.onload=()=>{
     // Optimización: máximo 1400 px en el lado mayor,
-    // conservando proporción y comprimiendo a JPEG de calidad 72%.
+    // conservando proporción y comprimiendo a JPEG de calidad 60%.
     const maxPx=1400;
     const scale=Math.min(1,maxPx/Math.max(img.naturalWidth,img.naturalHeight));
     const c=document.createElement('canvas');
@@ -201,7 +268,7 @@ $('fotoInput').addEventListener('change',()=>{
     ctx.drawImage(img,0,0,c.width,c.height);
 
     fotos.push({
-     data:c.toDataURL('image/jpeg',.72),
+     data:c.toDataURL('image/jpeg',.60),
      ratio:img.naturalWidth/img.naturalHeight
     });
 
@@ -536,33 +603,36 @@ async function generarPDF(){
  const hVehCab=4;
  const hVehDato=4;
 
- newPageIf(hVehCab);
+ if(vehiculos.length){
+  newPageIf(hVehCab);
 
- ['MARCA','MODELO','EMPRESA','PLACA'].forEach((s,i)=>{
-  cell(vx[i],vw[i],hVehCab,s,{
-   bg:plomo,
-   bold:true,
-   fs:6
+  ['MARCA','MODELO','EMPRESA','PLACA'].forEach((s,i)=>{
+   cell(vx[i],vw[i],hVehCab,s,{
+    bg:plomo,
+    bold:true,
+    fs:6
+   });
   });
- });
 
- y+=hVehCab;
+  y+=hVehCab;
 
- newPageIf(hVehDato);
+  vehiculos.forEach(v=>{
+   newPageIf(hVehDato);
 
- ['vm','vmo','ve','vp'].forEach((id,i)=>{
-  cell(vx[i],vw[i],hVehDato,$(id).value,{fs:6});
- });
+   [v.marca,v.modelo,v.empresa,v.placa].forEach((s,i)=>{
+    cell(vx[i],vw[i],hVehDato,s,{fs:6});
+   });
 
- y+=hVehDato;
+   y+=hVehDato;
+  });
+ }
 
  // Sin espacio en blanco: TESTIGOS empieza inmediatamente después
- // de la fila de datos del vehículo.
- const tests=[
-  $('t1').value,
-  $('t2').value,
-  $('t3').value
- ].filter(s=>String(s).trim());
+ // de la última fila de vehículo. Si no hay vehículos, empieza
+ // inmediatamente después de la banda de sección.
+ const tests=testigos
+  .map(v=>String(v.nom||'').trim())
+  .filter(Boolean);
 
  const wTestLabel=39.5;
  const wTestNum=9;
@@ -849,7 +919,7 @@ async function generarExcel(){
  excelRange(ws,'K3:L3','FECHA 2024-12-11',{bold:true,size:9,h:'center'});
 
  let r=5;
- r=excelSection(ws,r,'1. DATOS GENERALES DEL EVENTO');
+ r=excelSection(ws,r,'1. INFORMACIÓN GENERAL');
  excelRange(ws,`A${r}:D${r}`,'TIPO DE EVENTO',{bg:'FFE1E0D7',bold:true,size:8,h:'center'});
  excelRange(ws,`E${r}:L${r}`,'GERENCIA / RESP. DEL PROY. / ÁREA',{bg:'FFE1E0D7',bold:true,size:8,h:'center'}); r++;
  excelRange(ws,`A${r}:D${r}`,$('tipo').value,{size:8});
@@ -866,7 +936,7 @@ async function generarExcel(){
  excelRange(ws,`E${r}:L${r}`,$('lugar').value,{size:8}); r++;
  ws.getRow(r-1).height=28; r+=1;
 
- r=excelSection(ws,r,'2. PERSONAS INVOLUCRADAS');
+ r=excelSection(ws,r,'2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)');
  const headers=['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA'];
  ['A:D','E:G','H:J','K:L'].forEach((range,i)=>excelRange(ws,`${range.split(':')[0]}${r}:${range.split(':')[1]}${r}`,headers[i],{bg:'FFE1E0D7',bold:true,size:8,h:'center'}));
  r++;
@@ -879,17 +949,37 @@ async function generarExcel(){
  });
  r++;
 
- r=excelSection(ws,r,'3. VEHÍCULOS INVOLUCRADOS Y TESTIGOS');
- ['MARCA','MODELO','EMPRESA','PLACA'].forEach((h,i)=>excelRange(ws,`${String.fromCharCode(65+i*3)}${r}:${String.fromCharCode(67+i*3)}${r}`,h,{bg:'FFE1E0D7',bold:true,size:8,h:'center'}));
- r++;
- const veh=[$('marca').value,$('modelo').value,$('vempresa').value,$('placa').value];
- veh.forEach((v,i)=>excelRange(ws,`${String.fromCharCode(65+i*3)}${r}:${String.fromCharCode(67+i*3)}${r}`,v,{size:8,h:'center'}));
- r++;
- const testigos=[$('test1').value,$('test2').value,$('test3').value];
- testigos.forEach((v,i)=>{
+ r=excelSection(ws,r,'3. VEHÍCULO, TESTIGOS Y DAÑO');
+
+ if(vehiculos.length){
+  ['MARCA','MODELO','EMPRESA','PLACA'].forEach((h,i)=>{
+   const ranges=['A:C','D:F','G:I','J:L'];
+   const [a,b]=ranges[i].split(':');
+   excelRange(ws,`${a}${r}:${b}${r}`,h,{bg:'FFE1E0D7',bold:true,size:8,h:'center'});
+  });
+  r++;
+
+  vehiculos.forEach(v=>{
+   const vals=[v.marca,v.modelo,v.empresa,v.placa];
+   vals.forEach((val,i)=>{
+    const ranges=['A:C','D:F','G:I','J:L'];
+    const [a,b]=ranges[i].split(':');
+    excelRange(ws,`${a}${r}:${b}${r}`,val,{size:8,h:'center'});
+   });
+   ws.getRow(r).height=22;
+   r++;
+  });
+ }
+
+ const testsExcel=testigos
+  .map(v=>String(v.nom||'').trim())
+  .filter(Boolean);
+
+ testsExcel.forEach((v,i)=>{
   excelRange(ws,`A${r}:C${r}`,'TESTIGOS DEL ACCIDENTE:',{bg:'FFE1E0D7',bold:true,size:8});
   excelRange(ws,`D${r}:D${r}`,`N° ${String(i+1).padStart(2,'0')}`,{bg:'FFE1E0D7',bold:true,size:8,h:'center'});
-  excelRange(ws,`E${r}:L${r}`,v,{size:8}); r++;
+  excelRange(ws,`E${r}:L${r}`,v,{size:8});
+  r++;
  });
  r++;
 
@@ -949,11 +1039,23 @@ async function generarExcel(){
  const buffer=await wb.xlsx.writeBuffer();
  const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
  const url=URL.createObjectURL(blob);
+ const nombre=(($('fecha').value||'FECHA')+' FLASH REPORT '+($('proyecto').value||'PROYECTO').replace(/[\\/:*?"<>|]/g,'_')+'.xlsx');
+
  const a=document.createElement('a');
+ a.style.display='none';
  a.href=url;
- a.download=(($('fecha').value||'FECHA')+' FLASH REPORT '+($('proyecto').value||'PROYECTO').replace(/[\\/:*?"<>|]/g,'_')+'.xlsx');
- document.body.appendChild(a); a.click(); a.remove();
- setTimeout(()=>URL.revokeObjectURL(url),1000);
+ a.download=nombre;
+ document.body.appendChild(a);
+
+ try{
+  a.click();
+ }finally{
+  setTimeout(()=>{
+   a.remove();
+   URL.revokeObjectURL(url);
+  },1500);
+ }
+
  toast('Excel editable generado correctamente');
 }
 
