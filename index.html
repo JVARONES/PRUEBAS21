@@ -2,834 +2,509 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flash Report F034</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,Segoe UI,sans-serif;background:#f5f6f4;color:#17343c;font-size:14px}
-header{background:#004154;color:#fff;padding:16px 24px}
-header h1{margin:0;font-size:17px}
-header p{margin:4px 0 0;font-size:12px;opacity:.75}
-.app{max-width:980px;margin:auto;padding:22px 16px 60px}
-.card{background:#fff;border:1px solid #d7dfdc;border-radius:12px;margin-bottom:16px;overflow:hidden}
-.ch{background:#E1E0D7;color:#004154;padding:11px 18px;font-size:12px;font-weight:700}
-.cb{padding:18px}
-.g2,.g3,.g4{display:grid;gap:14px}
-.g2{grid-template-columns:1fr 1fr}
-.g3{grid-template-columns:1fr 1fr 1fr}
-.g4{grid-template-columns:repeat(4,1fr)}
-label{display:block;font-size:11px;font-weight:700;color:#52666d;margin-bottom:6px}
-input,select,textarea{width:100%;border:1px solid #d7dfdc;border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit;color:#17343c;background:#fff}
-textarea{resize:vertical;min-height:150px;line-height:1.55}
-input:focus,select:focus,textarea:focus{outline:0;border-color:#004154}
-.btn{border:0;border-radius:8px;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer}
-.pri{background:#004154;color:#fff}
-.sec{background:#fff;color:#004154;border:1px solid #d7dfdc}
-.row{display:flex;gap:10px;margin-top:16px}
-.inv{border:1px solid #d7dfdc;border-radius:10px;padding:14px;margin-bottom:10px;background:#fafbfa}
-.del{float:right;border:0;background:none;color:#a44848;font-size:20px;font-weight:800;cursor:pointer}
-.zone{border:1.5px dashed #d7dfdc;border-radius:10px;padding:26px;text-align:center;cursor:pointer;background:#fafbfa}
-.zone:hover{border-color:#004154}
-.zone strong{display:block;color:#004154}
-.zone span{display:block;color:#687a80;font-size:11px;margin-top:4px}
-.fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
-.foto{position:relative;border:1px solid #d7dfdc;border-radius:8px;overflow:hidden;background:#fff;aspect-ratio:4/3}
-.foto img{width:100%;height:100%;object-fit:cover;display:block}
-.foto button{position:absolute;right:5px;top:5px;width:24px;height:24px;border:0;border-radius:50%;background:#a44848;color:#fff;cursor:pointer;font-weight:bold}
-.fbox{display:flex;align-items:center;gap:14px}
-.fprev{width:150px;height:60px;border:1.5px dashed #d7dfdc;border-radius:8px;display:grid;place-items:center;color:#687a80;background:#fafbfa}
-.fprev img{max-width:142px;max-height:54px;object-fit:contain}
-.nota{margin-top:12px;background:#fdf8ec;border-left:3px solid #d9b262;padding:11px 14px;border-radius:8px;font-size:12px;color:#6b5a30}
-.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#004154;color:#fff;padding:12px 20px;border-radius:9px;z-index:9999;box-shadow:0 8px 24px #0003}
-.toast.err{background:#a44848}
-@media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}.fotos{grid-template-columns:1fr}}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f5f7;color:#222}
+  .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+  .card{background:#fff;border:1px solid #d9dee3;border-radius:10px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+  h1{margin:0 0 6px;font-size:22px}
+  .sub{margin:0 0 20px;color:#666;font-size:13px}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .full{grid-column:1/-1}
+  label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}
+  input,textarea{width:100%;border:1px solid #cbd2d8;border-radius:6px;padding:9px 10px;font:13px Arial;background:#fff}
+  textarea{min-height:90px;resize:vertical}
+  .section{margin-top:22px;padding-top:18px;border-top:1px solid #e3e6e9}
+  .section h2{font-size:15px;margin:0 0 12px}
+  .worker,.witness{border:1px solid #d8dde2;border-radius:7px;padding:12px;margin-bottom:10px}
+  .worker-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px}
+  .witness-grid{display:grid;grid-template-columns:2fr 1fr 3fr;gap:8px}
+  .vehicle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  button{border:0;border-radius:7px;padding:10px 16px;font-weight:700;cursor:pointer}
+  .primary{background:#163f67;color:#fff}
+  .secondary{background:#e9edf1;color:#24313d}
+  .danger{background:#f5dddd;color:#8c1d1d}
+  .photo-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .photo-item{border:1px dashed #bcc5cd;border-radius:7px;padding:10px}
+  .photo-item img{width:100%;height:110px;object-fit:contain;background:#f6f7f8;border-radius:5px;margin-top:7px}
+  .note{font-size:11px;color:#666;margin-top:6px}
+  @media(max-width:760px){
+    .grid,.worker-grid,.witness-grid,.vehicle-grid{grid-template-columns:1fr}
+    .photo-list{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
-<header>
-<h1>Reporte Preliminar de Accidente e Incidente — Flash Report</h1>
-<p>SGSST_INDRAGROUP_F 034 · Versión 01 · Generador</p>
-</header>
+<div class="wrap">
+  <div class="card">
+    <h1>Flash Report F034</h1>
+    <p class="sub">Reporte preliminar de accidente e incidente</p>
 
-<div class="app">
+    <div class="grid">
+      <div class="full">
+        <label>TIPO DE REPORTE</label>
+        <input id="tipo" value="Accidente de trabajo incapacitante temporal.">
+      </div>
+      <div>
+        <label>EMPRESA</label>
+        <input id="empresa" value="INDRA T & D S.A.C.">
+      </div>
+      <div>
+        <label>GERENCIA / RESP. DEL PROY. / ÁREA</label>
+        <input id="gerencia" value="Abel Cieza">
+      </div>
+      <div>
+        <label>FECHA DE OCURRENCIA</label>
+        <input id="fecha" type="date" value="2026-05-28">
+      </div>
+      <div>
+        <label>HORA</label>
+        <input id="hora" type="time" value="22:15">
+      </div>
+      <div>
+        <label>PROYECTO</label>
+        <input id="proyecto" value="AEROPUERTO">
+      </div>
+      <div>
+        <label>LUGAR EXACTO DEL EVENTO</label>
+        <input id="lugar" value="Facility 2516 - P10 - Nuevo Aeropuerto Jorge Chávez">
+      </div>
+    </div>
 
-<div class="card"><div class="ch">1 · INFORMACIÓN GENERAL</div><div class="cb">
-<div class="g2">
-<div><label>TIPO DE ACCIDENTE / INCIDENTE</label><input id="tipo" value="Accidente de trabajo incapacitante temporal."></div>
-<div><label>EMPRESA</label><select id="empresa"><option value="0">INDRA PERÚ S.A.</option><option value="1" selected>INDRA T & D S.A.C.</option><option value="2">NUEK PAYMENTS PERÚ S.A.C.</option></select></div>
-</div>
-<div style="margin-top:14px"><label>GERENCIA / RESP. DEL PROY. / ÁREA</label><input id="gerencia" value="Abel Cieza"></div>
-<div class="g3" style="margin-top:14px">
-<div><label>FECHA DE OCURRENCIA</label><input type="date" id="fecha" value="2026-05-28"></div>
-<div><label>HORA</label><input type="time" id="hora" value="22:15"></div>
-<div><label>PROYECTO</label><input id="proyecto" value="AEROPUERTO"></div>
-</div>
-<div style="margin-top:14px"><label>LUGAR EXACTO DEL EVENTO</label><input id="lugar" value="Facility 2516 - P10 - Nuevo Aeropuerto Jorge Chávez"></div>
-</div></div>
+    <div class="section">
+      <h2>2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)</h2>
+      <div id="workers"></div>
+      <button class="secondary" type="button" onclick="addWorker()">+ Agregar trabajador</button>
+    </div>
 
-<div class="card"><div class="ch">2 · DATOS DEL TRABAJADOR(ES) AFECTADO(S)</div><div class="cb">
-<div id="invs"></div><button class="btn sec" id="btnAgregar">+ Agregar trabajador</button>
-</div></div>
+    <div class="section">
+      <h2>3. VEHÍCULO, TESTIGOS Y DAÑO</h2>
 
-<div class="card"><div class="ch">3 · VEHÍCULO, TESTIGOS Y DAÑO</div><div class="cb">
-<div class="g4">
-<div><label>MARCA</label><input id="vm" value="-"></div>
-<div><label>MODELO</label><input id="vmo" value="-"></div>
-<div><label>EMPRESA</label><input id="ve" value="-"></div>
-<div><label>PLACA</label><input id="vp" value="-"></div>
-</div>
-<div class="g3" style="margin-top:14px">
-<div><label>TESTIGO N° 1</label><input id="t1" value="Díaz Yenque Pier"></div>
-<div><label>TESTIGO N° 2</label><input id="t2" value="Obregón Torres Aldo"></div>
-<div><label>TESTIGO N° 3</label><input id="t3" value="Oliveros Silva Rosmery"></div>
-</div>
-<div class="g2" style="margin-top:14px">
-<div><label>SUPERVISOR DE TURNO</label><input id="sup" value="Barzola Tinoco Víctor"></div>
-<div><label>DAÑO CAUSADO</label><input id="dano" value="ESGUINCE Y TORCEDURA DE TOBILLO IZQUIERDO."></div>
-</div>
-</div></div>
+      <div class="vehicle-grid">
+        <div><label>MARCA</label><input id="marca" value="-"></div>
+        <div><label>MODELO</label><input id="modelo" value="-"></div>
+        <div><label>EMPRESA</label><input id="vehEmpresa" value="-"></div>
+        <div><label>PLACA</label><input id="placa" value="-"></div>
+      </div>
 
-<div class="card"><div class="ch">4 · BREVE DESCRIPCIÓN DEL EVENTO</div><div class="cb">
-<textarea id="desc">El día 28/05/2026 aproximadamente a las 22:15 horas, el trabajador Gianfranco Ludeña se encontraba realizando actividades de coordinación previas al mantenimiento programado en el Facility 2516 - P10. Al descender por la escalera de acceso, pisó de forma irregular el último peldaño, sufriendo una torcedura del tobillo izquierdo. Fue asistido de inmediato por el personal presente y trasladado al tópico para su evaluación.</textarea>
-</div></div>
+      <div id="witnesses" style="margin-top:10px"></div>
+      <button class="secondary" type="button" onclick="addWitness()">+ Agregar testigo</button>
 
-<div class="card"><div class="ch">5 · EVIDENCIA FOTOGRÁFICA</div><div class="cb">
-<div class="zone" id="zonaFotos"><strong>Seleccionar imágenes</strong><span>3 por fila · Puedes seleccionar varias imágenes</span></div>
-<input type="file" id="fotoInput" accept="image/*" multiple hidden>
-<div class="fotos" id="fotos"></div>
-</div></div>
+      <div class="grid" style="margin-top:12px">
+        <div class="full">
+          <label>SUPERVISOR DE TURNO</label>
+          <input id="sup" value="Barzola Tinoco Víctor">
+        </div>
+        <div class="full">
+          <label>DAÑO CAUSADO</label>
+          <input id="dano" value="ESGUINCE Y TORCEDURA DE TOBILLO IZQUIERDO.">
+        </div>
+      </div>
+    </div>
 
-<div class="card"><div class="ch">6 · RESPONSABLE DEL REGISTRO</div><div class="cb">
-<div class="g3">
-<div><label>NOMBRES Y APELLIDOS</label><input id="rnom" value="OLIVEROS SILVA ROSMERY"></div>
-<div><label>CARGO / PUESTO</label><input id="rcar" value="SUPERVISOR SSOMA"></div>
-<div><label>FECHA DEL REGISTRO</label><input type="date" id="rfec" value="2026-06-02"></div>
-</div>
-<div style="margin-top:16px"><label>FIRMA</label><div class="fbox">
-<div class="fprev" id="fprev">Sin firma</div>
-<div><button class="btn sec" id="btnFirma">Subir firma</button><button class="btn sec" id="btnBorrarFirma" style="display:none;color:#a44848;margin-left:6px">Eliminar</button></div>
-</div>
-<input type="file" id="finput" accept="image/*" hidden>
-<div class="nota">La firma se guarda solo en este navegador.</div>
-</div>
-</div></div>
+    <div class="section">
+      <h2>4. DESCRIPCIÓN DEL EVENTO</h2>
+      <textarea id="descripcion" placeholder="Describa lo ocurrido..."></textarea>
+    </div>
 
-<div class="row"><button class="btn pri" id="btnPDF">Generar PDF</button></div>
+    <div class="section">
+      <h2>5. REGISTRO FOTOGRÁFICO</h2>
+      <input id="photos" type="file" accept="image/*" multiple>
+      <div class="note">Las imágenes se organizarán automáticamente en filas de máximo 3, centradas y sin deformación.</div>
+      <div id="photoPreview" class="photo-list" style="margin-top:10px"></div>
+    </div>
+
+    <div class="section">
+      <h2>6. RESPONSABLE DEL REPORTE</h2>
+      <div class="grid">
+        <div><label>NOMBRE</label><input id="responsable" value="OLIVEROS SILVA ROSMERY"></div>
+        <div><label>CARGO</label><input id="cargoResp" value="SUPERVISOR SSOMA"></div>
+        <div><label>FECHA</label><input id="fechaResp" type="date" value="2026-06-02"></div>
+      </div>
+      <div style="margin-top:10px">
+        <label>FIRMA</label>
+        <input id="firma" type="file" accept="image/*">
+        <div id="firmaPreview"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" type="button" onclick="generarPDF()">Generar PDF</button>
+      <button class="secondary" type="button" onclick="window.print()">Vista / Imprimir</button>
+    </div>
+  </div>
 </div>
 
 <script>
-'use strict';
+const { jsPDF } = window.jspdf;
 
-const $=id=>document.getElementById(id);
+let workerCount = 0;
+let witnessCount = 0;
+let photoFiles = [];
+let firmaFile = null;
 
-const EMPRESAS=[
- {nom:'INDRA PERÚ S.A.',ruc:'20100123411'},
- {nom:'INDRA T & D S.A.C.',ruc:'20604487901'},
- {nom:'NUEK PAYMENTS PERÚ S.A.C.',ruc:'20374984838'}
-];
-
-let trabajadores=[{
- nom:'BRAVO LUDEÑA GIANFRANCO EDUARDO',
- emp:'INDRA T & D S.A.C.',
- car:'TÉCNICO DE MANTENIMIENTO',
- area:'MANTENIMIENTO'
-}];
-
-let fotos=[];
-let firma=null;
-let firmaRatio=2;
-
-function toast(msg,error=false){
- const t=document.createElement('div');
- t.className='toast'+(error?' err':'');
- t.textContent=msg;
- document.body.appendChild(t);
- setTimeout(()=>t.remove(),3000);
+function addWorker(data = {}) {
+  workerCount++;
+  const id = workerCount;
+  const div = document.createElement('div');
+  div.className = 'worker';
+  div.id = 'worker-' + id;
+  div.innerHTML = `
+    <div class="worker-grid">
+      <div><label>NOMBRES Y APELLIDOS</label><input class="wnombre" value="${esc(data.nombre || 'BRAVO LUDEÑA GIANFRANCO EDUARDO')}"></div>
+      <div><label>EMPRESA</label><input class="wempresa" value="${esc(data.empresa || 'INDRA T & D S.A.C.')}"></div>
+      <div><label>CARGO / PUESTO</label><input class="wcargo" value="${esc(data.cargo || 'TÉCNICO DE MANTENIMIENTO')}"></div>
+      <div><label>ÁREA</label><input class="warea" value="${esc(data.area || 'MANTENIMIENTO')}"></div>
+    </div>
+    <button class="danger" type="button" style="margin-top:8px" onclick="document.getElementById('worker-${id}').remove()">Eliminar</button>
+  `;
+  document.getElementById('workers').appendChild(div);
 }
 
-function escapeHtml(v){
- return String(v??'').replace(/[&<>"']/g,m=>({
-  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
- }[m]));
+function addWitness(data = {}) {
+  witnessCount++;
+  const id = witnessCount;
+  const div = document.createElement('div');
+  div.className = 'witness';
+  div.id = 'witness-' + id;
+  div.innerHTML = `
+    <div class="witness-grid">
+      <div><label>TESTIGOS DEL ACCIDENTE:</label><input class="tlabel" value="TESTIGOS DEL ACCIDENTE:"></div>
+      <div><label>N°</label><input class="tnum" value="${String(id).padStart(2,'0')}"></div>
+      <div><label>NOMBRE</label><input class="tname" value="${esc(data.nombre || (id===1 ? 'Díaz Yenque Pier' : id===2 ? 'Obregón Torres Aldo' : 'Oliveros Silva Rosmery'))}"></div>
+    </div>
+    <button class="danger" type="button" style="margin-top:8px" onclick="document.getElementById('witness-${id}').remove()">Eliminar</button>
+  `;
+  document.getElementById('witnesses').appendChild(div);
 }
 
-function pintarTrabajadores(){
- $('invs').innerHTML=trabajadores.map((v,i)=>`
- <div class="inv">
- ${trabajadores.length>1?`<button class="del" data-del="${i}">×</button>`:''}
- <div class="g4">
- <div><label>NOMBRES Y APELLIDOS</label><input data-i="${i}" data-k="nom" value="${escapeHtml(v.nom)}"></div>
- <div><label>EMPRESA</label><input data-i="${i}" data-k="emp" value="${escapeHtml(v.emp)}"></div>
- <div><label>CARGO / PUESTO</label><input data-i="${i}" data-k="car" value="${escapeHtml(v.car)}"></div>
- <div><label>ÁREA</label><input data-i="${i}" data-k="area" value="${escapeHtml(v.area)}"></div>
- </div></div>`).join('');
-}
-
-$('invs').addEventListener('input',e=>{
- if(e.target.dataset.i!==undefined){
-  trabajadores[+e.target.dataset.i][e.target.dataset.k]=e.target.value;
- }
+document.getElementById('photos').addEventListener('change', e => {
+  photoFiles = Array.from(e.target.files || []);
+  renderPhotos();
 });
 
-$('invs').addEventListener('click',e=>{
- const b=e.target.closest('[data-del]');
- if(!b)return;
- trabajadores.splice(+b.dataset.del,1);
- pintarTrabajadores();
-});
-
-$('btnAgregar').addEventListener('click',()=>{
- const emp=EMPRESAS[+$('empresa').value].nom;
- trabajadores.push({nom:'',emp,car:'',area:''});
- pintarTrabajadores();
- toast('Trabajador agregado');
-});
-
-pintarTrabajadores();
-
-$('zonaFotos').addEventListener('click',()=>$('fotoInput').click());
-
-$('fotoInput').addEventListener('change',()=>{
- const files=[...$('fotoInput').files];
- if(!files.length)return;
-
- let pendientes=files.length;
-
- files.forEach(file=>{
-  const reader=new FileReader();
-
-  reader.onload=e=>{
-   const img=new Image();
-
-   img.onload=()=>{
-    const scale=Math.min(1,900/img.naturalWidth);
-    const c=document.createElement('canvas');
-
-    c.width=Math.max(1,Math.round(img.naturalWidth*scale));
-    c.height=Math.max(1,Math.round(img.naturalHeight*scale));
-
-    const ctx=c.getContext('2d');
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,c.width,c.height);
-    ctx.drawImage(img,0,0,c.width,c.height);
-
-    fotos.push({
-     data:c.toDataURL('image/jpeg',.75),
-     ratio:img.naturalWidth/img.naturalHeight
-    });
-
-    pendientes--;
-
-    if(pendientes===0){
-     pintarFotos();
-     toast(fotos.length+' imagen(es) cargada(s)');
-    }
-   };
-
-   img.onerror=()=>{
-    pendientes--;
-    if(pendientes===0)toast('No se pudo cargar una imagen',true);
-   };
-
-   img.src=e.target.result;
-  };
-
-  reader.readAsDataURL(file);
- });
-
- $('fotoInput').value='';
-});
-
-function pintarFotos(){
- $('fotos').innerHTML=fotos.map((f,i)=>
-  `<div class="foto"><img src="${f.data}"><button data-foto-del="${i}">×</button></div>`
- ).join('');
-}
-
-$('fotos').addEventListener('click',e=>{
- const b=e.target.closest('[data-foto-del]');
- if(!b)return;
- fotos.splice(+b.dataset.fotoDel,1);
- pintarFotos();
-});
-
-$('btnFirma').addEventListener('click',()=>$('finput').click());
-
-$('finput').addEventListener('change',()=>{
- const file=$('finput').files[0];
- if(!file)return;
-
- const reader=new FileReader();
-
- reader.onload=e=>{
-  const img=new Image();
-
-  img.onload=()=>{
-   firmaRatio=img.naturalWidth/img.naturalHeight;
-   firma=e.target.result;
-   $('fprev').innerHTML='<img src="'+firma+'">';
-   $('btnBorrarFirma').style.display='inline-block';
-
-   try{
-    localStorage.setItem('f034_firma',firma);
-    localStorage.setItem('f034_ratio',firmaRatio);
-   }catch(_){}
-
-   toast('Firma cargada');
-  };
-
-  img.src=e.target.result;
- };
-
- reader.readAsDataURL(file);
-});
-
-$('btnBorrarFirma').addEventListener('click',()=>{
- firma=null;
- firmaRatio=2;
- $('finput').value='';
- $('fprev').textContent='Sin firma';
- $('btnBorrarFirma').style.display='none';
- localStorage.removeItem('f034_firma');
- localStorage.removeItem('f034_ratio');
-});
-
-(function cargarFirmaGuardada(){
- try{
-  firma=localStorage.getItem('f034_firma')||null;
-  firmaRatio=parseFloat(localStorage.getItem('f034_ratio'))||2;
-
-  if(firma){
-   $('fprev').innerHTML='<img src="'+firma+'">';
-   $('btnBorrarFirma').style.display='inline-block';
+document.getElementById('firma').addEventListener('change', e => {
+  firmaFile = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+  const box = document.getElementById('firmaPreview');
+  box.innerHTML = '';
+  if (firmaFile) {
+    const img = document.createElement('img');
+    img.style.cssText = 'max-width:260px;max-height:90px;object-fit:contain;margin-top:8px';
+    img.src = URL.createObjectURL(firmaFile);
+    box.appendChild(img);
   }
- }catch(_){}
-})();
+});
+
+function renderPhotos() {
+  const box = document.getElementById('photoPreview');
+  box.innerHTML = '';
+  photoFiles.forEach((f, i) => {
+    const item = document.createElement('div');
+    item.className = 'photo-item';
+    item.innerHTML = `<b>Imagen ${i+1}</b>`;
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(f);
+    item.appendChild(img);
+    box.appendChild(item);
+  });
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function clean(s){ return String(s ?? '').trim(); }
 
 function fechaDMY(v){
- if(!v)return '';
- const p=v.split('-');
- return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:'';
+  if(!v) return '';
+  const p=v.split('-');
+  return p.length===3 ? `${p[2]}/${p[1]}/${p[0]}` : v;
 }
 
 function hora12(v){
- if(!v)return '';
- let [h,m]=v.split(':').map(Number);
- const ap=h>=12?'P.M.':'A.M.';
- h=h%12||12;
- return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+' '+ap;
+  if(!v) return '';
+  const [hh,mm] = v.split(':');
+  let h = Number(hh);
+  const ap = h >= 12 ? 'P.M.' : 'A.M.';
+  h = h % 12 || 12;
+  return `${String(h).padStart(2,'0')}:${mm} ${ap}`;
 }
 
-function generarPDF(){
+function imgData(file, maxWpx=1800, quality=.82){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let w=img.naturalWidth, h=img.naturalHeight;
+        if(w > maxWpx){
+          const r=maxWpx/w;
+          w=Math.round(w*r);
+          h=Math.round(h*r);
+        }
+        const c=document.createElement('canvas');
+        c.width=w; c.height=h;
+        const ctx=c.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        resolve({data:c.toDataURL('image/jpeg',quality),w,h});
+      };
+      img.onerror=reject;
+      img.src=reader.result;
+    };
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
 
- if(!window.jspdf||!window.jspdf.jsPDF){
-  toast('No se cargó jsPDF. Revisa tu conexión a Internet.',true);
-  return;
- }
+function fitImage(img, boxW, boxH){
+  const r = Math.min(boxW/img.w, boxH/img.h);
+  return {w:img.w*r,h:img.h*r};
+}
 
- const {jsPDF}=window.jspdf;
+async function generarPDF(){
+  const doc = new jsPDF({orientation:'p',unit:'mm',format:'a4',compress:true});
+  const M=8, W=194, LIM=289;
+  const azul=[31,78,121], gris=[235,239,243], blanco=[255,255,255];
+  let y=8;
 
- const pdf=new jsPDF({
-  orientation:'portrait',
-  unit:'mm',
-  format:'a4',
-  compress:true
- });
-
- const azul=[0,65,84];
- const plomo=[225,224,215];
- const negro=[0,0,0];
- const blanco=[255,255,255];
-
- const M=8;
- const W=194;
- const LIM=289;
-
- let y=8;
- let page=1;
-
- function header(){
-  pdf.setTextColor(...azul);
-  pdf.setFont('helvetica','bold');
-  pdf.setFontSize(13);
-  pdf.text('INDRA',M+2,y+7);
-
-  pdf.setTextColor(104,122,128);
-  pdf.setFontSize(7);
-  pdf.text('GROUP',M+2,y+11);
-
-  pdf.setTextColor(...negro);
-  pdf.setFontSize(10);
-  pdf.text('REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE',105,y+5,{align:'center'});
-
-  pdf.setFontSize(9);
-  pdf.text('FLASH REPORT',105,y+10,{align:'center'});
-
-  pdf.setFont('helvetica','normal');
-  pdf.setFontSize(5.5);
-  pdf.text('CÓDIGO: SGSST_INDRAGROUP_F 034',202,y+2,{align:'right'});
-  pdf.text('VERSIÓN: 01',202,y+4.5,{align:'right'});
-  pdf.text('FECHA: 2024-12-11',202,y+7,{align:'right'});
-  pdf.text('Página: '+page,202,y+9.5,{align:'right'});
-
-  y+=16;
- }
-
- function newPageIf(h){
-  if(y+h>LIM){
-   pdf.addPage();
-   page++;
-   y=8;
-   header();
-  }
- }
-
- // BANDA: SIEMPRE 5 MM
- function band(s){
-  newPageIf(5);
-  pdf.setFillColor(...azul);
-  pdf.setDrawColor(...negro);
-  pdf.rect(M,y,W,5,'FD');
-  pdf.setTextColor(...blanco);
-  pdf.setFont('helvetica','bold');
-  pdf.setFontSize(7);
-  pdf.text(s,M+2,y+3.2);
-  y+=5;
- }
-
- // TODAS LAS CELDAS NORMALES: 4 MM
- function cell(x,w,h,s,opt={}){
-  pdf.setFillColor(...(opt.bg||blanco));
-  pdf.setDrawColor(...negro);
-  pdf.rect(x,y,w,h,'FD');
-
-  pdf.setTextColor(...(opt.fg||negro));
-  pdf.setFont('helvetica',opt.bold?'bold':'normal');
-  pdf.setFontSize(opt.fs||6);
-
-  const lines=pdf.splitTextToSize(
-   String(s??''),
-   Math.max(4,w-2.5)
-  );
-
-  const total=(lines.length-1)*2.9;
-  const sy=y+h/2-total/2;
-
-  lines.forEach((line,i)=>{
-   pdf.text(
-    line,
-    opt.left?x+1.5:x+w/2,
-    sy+i*2.9,
-    {
-     align:opt.left?'left':'center',
-     baseline:'middle'
+  function newPageIf(h){
+    if(y+h > LIM){
+      doc.addPage();
+      y=8;
     }
-   );
-  });
- }
-
- // FILAS GENERALES: 48.5 MM DE ETIQUETA + RESTO, 4 MM DE ALTO
- function row(label,value){
-  const lw=48.5;
-  const vw=W-lw;
-  const h=4;
-
-  newPageIf(h);
-
-  cell(M,lw,h,label,{
-   bg:azul,
-   fg:blanco,
-   bold:true,
-   left:true,
-   fs:6
-  });
-
-  cell(M+lw,vw,h,value,{fs:6});
-
-  y+=h;
- }
-
- header();
-
- // =========================================================
- // 1. INFORMACIÓN GENERAL
- // =========================================================
-
- band('1. INFORMACIÓN GENERAL');
-
- row('TIPO DE ACCIDENTE / INCIDENTE:',$('tipo').value);
- row('EMPRESA:',EMPRESAS[+$('empresa').value].nom);
- row('GERENCIA / RESP. DEL PROY. / ÁREA:',$('gerencia').value);
-
- // FECHA / HORA
- // HORA empieza en la columna EMPRESA de VEHÍCULO (M+97)
- // y termina exactamente en la columna EMPRESA de TRABAJADOR (M+114).
- const hFH=4;
-
- const fechaLbl=48.5;
- const fechaVal=48.5;
-
- const horaInicio=M+97;
- const horaFin=M+114;
-
- const horaLbl=14;
- const horaVal=horaFin-horaInicio-horaLbl;
-
- newPageIf(hFH);
-
- cell(
-  M,
-  fechaLbl,
-  hFH,
-  'FECHA DE OCURRENCIA:',
-  {bg:azul,fg:blanco,bold:true,left:true,fs:6}
- );
-
- cell(
-  M+fechaLbl,
-  fechaVal,
-  hFH,
-  fechaDMY($('fecha').value),
-  {fs:6}
- );
-
- cell(
-  horaInicio,
-  horaLbl,
-  hFH,
-  'HORA:',
-  {bg:azul,fg:blanco,bold:true,left:true,fs:6}
- );
-
- cell(
-  horaInicio+horaLbl,
-  horaVal,
-  hFH,
-  hora12($('hora').value),
-  {fs:6}
- );
-
- y+=hFH;
-
- row('PROYECTO:',$('proyecto').value);
- row('LUGAR EXACTO DEL EVENTO:',$('lugar').value);
-
- y+=3;
-
- // =========================================================
- // 2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)
- // =========================================================
-
- band('2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)');
-
- // NOMBRE 74 MM / EMPRESA-CARGO-ÁREA 40 MM CADA UNO
- const tw=[74,40,40,40];
- const tx=[M,M+74,M+114,M+154];
-
- const hCabTrab=4;
- const hDatoTrab=4;
-
- newPageIf(hCabTrab);
-
- ['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA']
- .forEach((s,i)=>{
-  cell(tx[i],tw[i],hCabTrab,s,{
-   bg:plomo,
-   bold:true,
-   fs:6
-  });
- });
-
- y+=hCabTrab;
-
- trabajadores.forEach(v=>{
-  const vals=[v.nom,v.emp,v.car,v.area];
-
-  newPageIf(hDatoTrab);
-
-  vals.forEach((s,i)=>{
-   cell(tx[i],tw[i],hDatoTrab,s,{fs:6});
-  });
-
-  y+=hDatoTrab;
- });
-
- y+=3;
-
- // =========================================================
- // 3. VEHÍCULO, TESTIGOS Y DAÑO
- // =========================================================
-
- band('3. VEHÍCULO, TESTIGOS Y DAÑO');
-
- const vw=[48.5,48.5,48.5,48.5];
- const vx=[M,M+48.5,M+97,M+145.5];
-
- const hVehCab=4;
- const hVehDato=4;
-
- // VEHÍCULO: encabezado 4 mm
- newPageIf(hVehCab);
-
- ['MARCA','MODELO','EMPRESA','PLACA']
- .forEach((s,i)=>{
-  cell(vx[i],vw[i],hVehCab,s,{
-   bg:plomo,
-   bold:true,
-   fs:6
-  });
- });
-
- y+=hVehCab;
-
- // VEHÍCULO: datos 4 mm, pegados al encabezado
- newPageIf(hVehDato);
-
- ['vm','vmo','ve','vp']
- .forEach((id,i)=>{
-  cell(vx[i],vw[i],hVehDato,$(id).value,{fs:6});
- });
-
- y+=hVehDato;
-
- // TESTIGOS:
- // TESTIGOS DEL ACCIDENTE = 48.5 MM
- // N° 01 = 12 MM
- // NOMBRE = TODO EL RESTO
- // TODA LA FILA = 4 MM
- const tests=[
-  $('t1').value,
-  $('t2').value,
-  $('t3').value
- ].filter(s=>String(s).trim());
-
- const wTestLabel=48.5;
- const wTestNum=12;
- const wTestDato=W-wTestLabel-wTestNum;
- const hTest=4;
-
- tests.forEach((s,i)=>{
-  newPageIf(hTest);
-
-  cell(
-   M,
-   wTestLabel,
-   hTest,
-   'TESTIGOS DEL ACCIDENTE:',
-   {
-    bg:azul,
-    fg:blanco,
-    bold:true,
-    left:true,
-    fs:6
-   }
-  );
-
-  cell(
-   M+wTestLabel,
-   wTestNum,
-   hTest,
-   'N° '+String(i+1).padStart(2,'0'),
-   {
-    bg:plomo,
-    bold:true,
-    fs:6
-   }
-  );
-
-  cell(
-   M+wTestLabel+wTestNum,
-   wTestDato,
-   hTest,
-   s,
-   {fs:6}
-  );
-
-  y+=hTest;
- });
-
- // SUPERVISOR Y DAÑO: 48.5 MM + RESTO, 4 MM
- row('SUPERVISOR DE TURNO:',$('sup').value);
- row('DAÑO CAUSADO:',$('dano').value);
-
- y+=3;
-
- // =========================================================
- // 4. DESCRIPCIÓN
- // =========================================================
-
- band('4. BREVE DESCRIPCIÓN DEL EVENTO');
-
- pdf.setFont('helvetica','normal');
- pdf.setFontSize(6.5);
-
- let lines=pdf.splitTextToSize($('desc').value,W-5);
- let idx=0;
-
- while(idx<lines.length){
-
-  let avail=LIM-y-4;
-  let can=Math.floor(avail/3.4);
-
-  if(can<1){
-   pdf.addPage();
-   page++;
-   y=8;
-   header();
-   continue;
   }
 
-  let part=lines.slice(idx,idx+can);
-  let h=part.length*3.4+4;
+  function cell(x,w,h,text,opt={}){
+    const bg=opt.bg ?? blanco, fg=opt.fg ?? [0,0,0];
+    doc.setFillColor(...bg);
+    doc.setDrawColor(70,70,70);
+    doc.setLineWidth(.15);
+    doc.rect(x,y,w,h,'FD');
 
-  newPageIf(h);
+    doc.setTextColor(...fg);
+    doc.setFont('helvetica', opt.bold?'bold':'normal');
+    doc.setFontSize(opt.fs ?? 6);
 
-  pdf.setFillColor(...blanco);
-  pdf.setDrawColor(...negro);
-  pdf.rect(M,y,W,h,'FD');
+    const pad=opt.pad ?? 1;
+    const maxW=Math.max(1,w-pad*2);
+    const txt=clean(text);
+    if(!txt) return;
 
-  pdf.setTextColor(...negro);
+    const lines=doc.splitTextToSize(txt,maxW);
+    const lineH=(opt.fs ?? 6)*0.38;
+    let ty=y+(h-lineH*lines.length)/2+lineH*.78;
+    if(opt.left){
+      lines.forEach((line,i)=>doc.text(line,x+pad,ty+i*lineH));
+    }else{
+      lines.forEach((line,i)=>doc.text(line,x+w/2,ty+i*lineH,{align:'center'}));
+    }
+  }
 
-  part.forEach((s,i)=>{
-   pdf.text(s,M+2.5,y+4+i*3.4);
+  function sectionTitle(t){
+    const h=5;
+    newPageIf(h);
+    cell(M,W,h,t,{bg:azul,fg:blanco,bold:true,fs:7});
+    y+=h;
+  }
+
+  function row(label,value){
+    const lw=48.5, vw=W-lw, h=4;
+    newPageIf(h);
+    cell(M,lw,h,label,{bg:azul,fg:blanco,bold:true,left:true,fs:6});
+    cell(M+lw,vw,h,value,{fs:6,left:true});
+    y+=h;
+  }
+
+  // Encabezado
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.text('REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE',105,12,{align:'center'});
+  doc.setFontSize(8);
+  doc.text('FLASH REPORT',105,16,{align:'center'});
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(5.5);
+  doc.text('SGSST_INDRAGROUP_F 034   |   V01   |   2024-12-11',105,20,{align:'center'});
+  y=24;
+
+  sectionTitle('1. INFORMACIÓN GENERAL');
+  row('TIPO DE REPORTE:',$('tipo').value);
+  row('EMPRESA:',$('empresa').value);
+  row('GERENCIA / RESP. DEL PROY. / ÁREA:',$('gerencia').value);
+  row('PROYECTO:',$('proyecto').value);
+  row('LUGAR EXACTO DEL EVENTO:',$('lugar').value);
+
+  // Fecha + hora con geometría solicitada.
+  // Fecha ocupa 48.5 + 48.5. HORA empieza en x=105 (EMPRESA vehículo)
+  // y su etiqueta ocupa únicamente X=17 mm, hasta x=122 (EMPRESA trabajador).
+  // El valor 10:15 P.M. ocupa desde x=122 (inicio CARGO) hasta x=202 (final ÁREA): 80 mm.
+  const hFH=4;
+  const fechaLbl=48.5, fechaVal=48.5;
+  const horaInicio=M+97; // 105
+  const horaX=M+114-horaInicio; // 17
+  const horaFin=M+114; // 122
+  const horaValFin=M+W; // 202
+  const horaVal=horaValFin-horaFin; // 80
+
+  newPageIf(hFH);
+  cell(M,fechaLbl,hFH,'FECHA DE OCURRENCIA:',{bg:azul,fg:blanco,bold:true,left:true,fs:6});
+  cell(M+fechaLbl,fechaVal,hFH,fechaDMY($('fecha').value),{fs:6});
+  cell(horaInicio,horaX,hFH,'HORA:',{bg:azul,fg:blanco,bold:true,left:true,fs:6,pad:.8});
+  cell(horaFin,horaVal,hFH,hora12($('hora').value),{fs:6,left:true,pad:1});
+  y+=hFH;
+
+  // Conservamos exactamente el espacio que ya existe en el formulario entre
+  // la fila del trabajador y la sección 3, y lo reutilizamos entre vehículo y testigos.
+  // Este valor es deliberadamente único para ambos lugares.
+  const gap = 3;
+
+  sectionTitle('2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)');
+
+  const tw=[74,40,40,40];
+  const tx=[M,M+74,M+114,M+154];
+  const hCabTrab=4, hDatoTrab=4;
+
+  newPageIf(hCabTrab);
+  ['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA'].forEach((t,i)=>{
+    cell(tx[i],tw[i],hCabTrab,t,{bg:azul,fg:blanco,bold:true,fs:5.5});
+  });
+  y+=hCabTrab;
+
+  const workers=[...document.querySelectorAll('#workers .worker')];
+  workers.forEach(w=>{
+    const vals=[
+      w.querySelector('.wnombre')?.value||'',
+      w.querySelector('.wempresa')?.value||'',
+      w.querySelector('.wcargo')?.value||'',
+      w.querySelector('.warea')?.value||''
+    ];
+    newPageIf(hDatoTrab);
+    vals.forEach((v,i)=>cell(tx[i],tw[i],hDatoTrab,v,{fs:5.5}));
+    y+=hDatoTrab;
   });
 
-  y+=h;
-  idx+=can;
- }
+  // Espacio real solicitado.
+  y+=gap;
 
- y+=3;
+  sectionTitle('3. VEHÍCULO, TESTIGOS Y DAÑO');
 
- // =========================================================
- // 5. FOTOS
- // =========================================================
+  const vw=[48.5,48.5,48.5,48.5];
+  const vx=[M,M+48.5,M+97,M+145.5];
+  const hVehCab=4, hVehDato=4;
 
- band('5. EVIDENCIA FOTOGRÁFICA');
+  ['MARCA','MODELO','EMPRESA','PLACA'].forEach((t,i)=>{
+    cell(vx[i],vw[i],hVehCab,t,{bg:azul,fg:blanco,bold:true,fs:6});
+  });
+  y+=hVehCab;
 
- const gap=3;
- const mg=4;
- const fh=52;
- const fw=(W-gap*2)/3;
- const ih=fh-mg*2;
+  const vehVals=[$('marca').value,$('modelo').value,$('vehEmpresa').value,$('placa').value];
+  vehVals.forEach((v,i)=>cell(vx[i],vw[i],hVehDato,v,{fs:6}));
+  y+=hVehDato;
 
- if(!fotos.length){
+  // El mismo espacio que existe entre trabajador y sección 3.
+  y+=gap;
 
-  newPageIf(fh);
-  cell(M,W,fh,'');
-  y+=fh;
+  const wTestLabel=48.5, wTestNum=12, wTestDato=W-wTestLabel-wTestNum, hTest=4;
+  const witnesses=[...document.querySelectorAll('#witnesses .witness')];
 
- }else{
+  witnesses.forEach(w=>{
+    const num=w.querySelector('.tnum')?.value||'';
+    const name=w.querySelector('.tname')?.value||'';
+    newPageIf(hTest);
+    cell(M,wTestLabel,hTest,'TESTIGOS DEL ACCIDENTE:',{bg:azul,fg:blanco,bold:true,left:true,fs:5.5});
+    cell(M+wTestLabel,wTestNum,hTest,'N° '+num,{bg:azul,fg:blanco,bold:true,fs:5.5});
+    cell(M+wTestLabel+wTestNum,wTestDato,hTest,name,{fs:5.5,left:true});
+    y+=hTest;
+  });
 
-  for(let i=0;i<fotos.length;i+=3){
+  row('SUPERVISOR DE TURNO:',$('sup').value);
+  row('DAÑO CAUSADO:',$('dano').value);
 
-   newPageIf(fh);
+  sectionTitle('4. DESCRIPCIÓN DEL EVENTO');
+  const desc=clean($('descripcion').value)||'-';
+  const descLines=doc.splitTextToSize(desc,W-4);
+  const descH=Math.max(18, Math.min(55, descLines.length*3.2+5));
+  newPageIf(descH);
+  cell(M,W,descH,desc,{fs:7,left:true,pad:2});
+  y+=descH+3;
 
-   const group=fotos.slice(i,i+3);
+  sectionTitle('5. REGISTRO FOTOGRÁFICO');
 
-   pdf.setFillColor(...blanco);
-   pdf.setDrawColor(...negro);
-   pdf.rect(M,y,W,fh,'FD');
+  const imgs=[];
+  for(const f of photoFiles){
+    try{ imgs.push(await imgData(f,1800,.82)); }catch(e){}
+  }
 
-   const used=group.length*fw+(group.length-1)*gap;
-   let x=M+(W-used)/2;
+  // 3 imágenes por fila. Cada fila se divide imaginariamente en 3 cuadros.
+  // Si hay 1: un cuadro total. Si hay 2: dos cuadros. Si hay 3: tres cuadros.
+  // En todos los casos la imagen se centra H/V y mantiene su proporción.
+  const photoH=52;
+  for(let start=0; start<imgs.length; start+=3){
+    const group=imgs.slice(start,start+3);
+    const n=group.length;
+    const colW=W/n;
+    newPageIf(photoH);
 
-   group.forEach(f=>{
+    group.forEach((im,j)=>{
+      const bx=M+j*colW;
+      cell(bx,colW,photoH,'',{bg:[250,250,250]});
+      const pad=2.5;
+      const fit=fitImage(im,colW-pad*2,photoH-pad*2);
+      const ix=bx+(colW-fit.w)/2;
+      const iy=y+(photoH-fit.h)/2;
+      doc.addImage(im.data,'JPEG',ix,iy,fit.w,fit.h,undefined,'FAST');
+    });
+    y+=photoH+3;
+  }
 
-    let w=fw;
-    let h=w/f.ratio;
+  if(imgs.length===0){
+    const h=30;
+    newPageIf(h);
+    cell(M,W,h,'SIN REGISTRO FOTOGRÁFICO',{bg:[250,250,250],fg:[110,110,110],bold:true,fs:7});
+    y+=h+3;
+  }
 
-    if(h>ih){
-     h=ih;
-     w=h*f.ratio;
-    }
+  sectionTitle('6. RESPONSABLE DEL REPORTE');
 
+  // Área de responsable/firma: más alta porque contiene firma, no es una fila estándar de 4 mm.
+  const rh=6;
+  newPageIf(rh);
+  cell(M,48.5,rh,'NOMBRE:',{bg:azul,fg:blanco,bold:true,left:true,fs:6});
+  cell(M+48.5,145.5,rh,$('responsable').value,{fs:6,left:true});
+  y+=rh;
+
+  newPageIf(14);
+  cell(M,48.5,14,'CARGO / FECHA:',{bg:azul,fg:blanco,bold:true,left:true,fs:6});
+  cell(M+48.5,145.5,14,clean($('cargoResp').value)+'   |   '+fechaDMY($('fechaResp').value),{fs:6,left:true});
+
+  if(firmaFile){
     try{
-     pdf.addImage(
-      f.data,
-      'JPEG',
-      x+(fw-w)/2,
-      y+mg+(ih-h)/2,
-      w,
-      h
-     );
+      const f=await imgData(firmaFile,1200,.85);
+      const fit=fitImage(f,80,10);
+      doc.addImage(f.data,'JPEG',M+48.5+2, y+(14-fit.h)/2, fit.w,fit.h,undefined,'FAST');
     }catch(e){}
-
-    x+=fw+gap;
-   });
-
-   y+=fh;
   }
- }
+  y+=14;
 
- y+=3;
+  // Pie
+  newPageIf(6);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(5);
+  doc.setTextColor(90,90,90);
+  doc.text('Documento generado a partir del formato Flash Report F034.',M,y+4);
+  doc.text('Página '+doc.getNumberOfPages(),M+W,y+4,{align:'right'});
 
- // =========================================================
- // 6. RESPONSABLE
- // =========================================================
-
- band('6. RESPONSABLE DEL REGISTRO');
-
- const rw=[62,48,42,42];
- const rx=[M,M+62,M+110,M+152];
-
- newPageIf(20);
-
- ['NOMBRES Y APELLIDOS','CARGO / PUESTO DE TRABAJO','FECHA DEL REGISTRO','FIRMA']
- .forEach((s,i)=>{
-  cell(rx[i],rw[i],6,s,{
-   bg:plomo,
-   bold:true,
-   fs:6
-  });
- });
-
- y+=6;
-
- const rh=14;
-
- cell(rx[0],rw[0],rh,$('rnom').value,{fs:6});
- cell(rx[1],rw[1],rh,$('rcar').value,{fs:6});
- cell(rx[2],rw[2],rh,fechaDMY($('rfec').value),{fs:6});
- cell(rx[3],rw[3],rh,'',{fs:6});
-
- if(firma){
-
-  try{
-
-   let h=rh-4;
-   let w=h*firmaRatio;
-
-   if(w>rw[3]-4){
-    w=rw[3]-4;
-    h=w/firmaRatio;
-   }
-
-   pdf.addImage(
-    firma,
-    'PNG',
-    rx[3]+(rw[3]-w)/2,
-    y+(rh-h)/2,
-    w,
-    h
-   );
-
-  }catch(e){}
- }
-
- y+=rh;
-
- pdf.save(
-  ($('fecha').value||'FECHA')+
-  ' FLASH REPORT '+
-  ($('proyecto').value||'PROYECTO').replace(/[\\/:*?"<>|]/g,'_')+
-  '.pdf'
- );
-
- toast('PDF generado correctamente');
+  doc.save('SGSST_INDRAGROUP_F034_Flash_Report.pdf');
 }
 
-$('btnPDF').addEventListener('click',generarPDF);
+// Valores iniciales
+addWorker();
+addWitness();
+addWitness();
+addWitness();
 </script>
 </body>
 </html>
