@@ -1,9 +1,4 @@
-from pathlib import Path
-
-# Recover the complete HTML from the assistant-provided source in this turn is not available
-# as a runtime variable, so create the file by using a compact reconstruction of the requested
-# corrected version, preserving the original UI and PDF logic.
-html = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -11,131 +6,830 @@ html = """<!DOCTYPE html>
 <title>Flash Report F034</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,Segoe UI,sans-serif;background:#f5f6f4;color:#17343c;font-size:14px}
-header{background:#004154;color:#fff;padding:16px 24px}header h1{margin:0;font-size:17px}header p{margin:4px 0 0;font-size:12px;opacity:.75}
-.app{max-width:980px;margin:auto;padding:22px 16px 60px}.card{background:#fff;border:1px solid #d7dfdc;border-radius:12px;margin-bottom:16px;overflow:hidden}.ch{background:#E1E0D7;color:#004154;padding:11px 18px;font-size:12px;font-weight:700}.cb{padding:18px}
-.g2,.g3,.g4{display:grid;gap:14px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:repeat(4,1fr)}
-label{display:block;font-size:11px;font-weight:700;color:#52666d;margin-bottom:6px}input,select,textarea{width:100%;border:1px solid #d7dfdc;border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit;color:#17343c;background:#fff}textarea{resize:vertical;min-height:150px;line-height:1.55}
-input:focus,select:focus,textarea:focus{outline:0;border-color:#004154}.btn{border:0;border-radius:8px;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer}.pri{background:#004154;color:#fff}.sec{background:#fff;color:#004154;border:1px solid #d7dfdc}.row{display:flex;gap:10px;margin-top:16px}
-.inv{border:1px solid #d7dfdc;border-radius:10px;padding:14px;margin-bottom:10px;background:#fafbfa}.del{float:right;border:0;background:none;color:#a44848;font-size:20px;font-weight:800;cursor:pointer}
-.zone{border:1.5px dashed #d7dfdc;border-radius:10px;padding:26px;text-align:center;cursor:pointer;background:#fafbfa}.zone:hover{border-color:#004154}.zone strong{display:block;color:#004154}.zone span{display:block;color:#687a80;font-size:11px;margin-top:4px}
-.fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.foto{position:relative;border:1px solid #d7dfdc;border-radius:8px;overflow:hidden;background:#fff;aspect-ratio:4/3}.foto img{width:100%;height:100%;object-fit:cover;display:block}.foto button{position:absolute;right:5px;top:5px;width:24px;height:24px;border:0;border-radius:50%;background:#a44848;color:#fff;cursor:pointer;font-weight:bold}
-.fbox{display:flex;align-items:center;gap:14px}.fprev{width:150px;height:60px;border:1.5px dashed #d7dfdc;border-radius:8px;display:grid;place-items:center;color:#687a80;background:#fafbfa}.fprev img{max-width:142px;max-height:54px;object-fit:contain}
-.nota{margin-top:12px;background:#fdf8ec;border-left:3px solid #d9b262;padding:11px 14px;border-radius:8px;font-size:12px;color:#6b5a30}.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#004154;color:#fff;padding:12px 20px;border-radius:9px;z-index:9999;box-shadow:0 8px 24px #0003}.toast.err{background:#a44848}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Segoe UI,sans-serif;background:#f5f6f4;color:#17343c;font-size:14px}
+header{background:#004154;color:#fff;padding:16px 24px}
+header h1{margin:0;font-size:17px}
+header p{margin:4px 0 0;font-size:12px;opacity:.75}
+.app{max-width:980px;margin:auto;padding:22px 16px 60px}
+.card{background:#fff;border:1px solid #d7dfdc;border-radius:12px;margin-bottom:16px;overflow:hidden}
+.ch{background:#E1E0D7;color:#004154;padding:11px 18px;font-size:12px;font-weight:700}
+.cb{padding:18px}
+.g2,.g3,.g4{display:grid;gap:14px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g4{grid-template-columns:repeat(4,1fr)}
+label{display:block;font-size:11px;font-weight:700;color:#52666d;margin-bottom:6px}
+input,select,textarea{width:100%;border:1px solid #d7dfdc;border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit;color:#17343c;background:#fff}
+textarea{resize:vertical;min-height:150px;line-height:1.55}
+input:focus,select:focus,textarea:focus{outline:0;border-color:#004154}
+.btn{border:0;border-radius:8px;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer}
+.pri{background:#004154;color:#fff}
+.sec{background:#fff;color:#004154;border:1px solid #d7dfdc}
+.row{display:flex;gap:10px;margin-top:16px}
+.inv{border:1px solid #d7dfdc;border-radius:10px;padding:14px;margin-bottom:10px;background:#fafbfa}
+.del{float:right;border:0;background:none;color:#a44848;font-size:20px;font-weight:800;cursor:pointer}
+.zone{border:1.5px dashed #d7dfdc;border-radius:10px;padding:26px;text-align:center;cursor:pointer;background:#fafbfa}
+.zone:hover{border-color:#004154}
+.zone strong{display:block;color:#004154}
+.zone span{display:block;color:#687a80;font-size:11px;margin-top:4px}
+.fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.foto{position:relative;border:1px solid #d7dfdc;border-radius:8px;overflow:hidden;background:#fff;aspect-ratio:4/3}
+.foto img{width:100%;height:100%;object-fit:cover;display:block}
+.foto button{position:absolute;right:5px;top:5px;width:24px;height:24px;border:0;border-radius:50%;background:#a44848;color:#fff;cursor:pointer;font-weight:bold}
+.fbox{display:flex;align-items:center;gap:14px}
+.fprev{width:150px;height:60px;border:1.5px dashed #d7dfdc;border-radius:8px;display:grid;place-items:center;color:#687a80;background:#fafbfa}
+.fprev img{max-width:142px;max-height:54px;object-fit:contain}
+.nota{margin-top:12px;background:#fdf8ec;border-left:3px solid #d9b262;padding:11px 14px;border-radius:8px;font-size:12px;color:#6b5a30}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#004154;color:#fff;padding:12px 20px;border-radius:9px;z-index:9999;box-shadow:0 8px 24px #0003}
+.toast.err{background:#a44848}
 @media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}.fotos{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header><h1>Reporte Preliminar de Accidente e Incidente — Flash Report</h1><p>SGSST_INDRAGROUP_F 034 · Versión 01 · Generador</p></header>
+<header>
+<h1>Reporte Preliminar de Accidente e Incidente — Flash Report</h1>
+<p>SGSST_INDRAGROUP_F 034 · Versión 01 · Generador</p>
+</header>
+
 <div class="app">
+
 <div class="card"><div class="ch">1 · INFORMACIÓN GENERAL</div><div class="cb">
-<div class="g2"><div><label>TIPO DE ACCIDENTE / INCIDENTE</label><input id="tipo" value="Accidente de trabajo incapacitante temporal."></div>
-<div><label>EMPRESA</label><select id="empresa"><option value="0">INDRA PERÚ S.A.</option><option value="1" selected>INDRA T & D S.A.C.</option><option value="2">NUEK PAYMENTS PERÚ S.A.C.</option></select></div></div>
-<div style="margin-top:14px"><label>GERENCIA / RESPONSABLE DEL PROYECTO / ÁREA</label><input id="gerencia" value="Abel Cieza"></div>
-<div class="g3" style="margin-top:14px"><div><label>FECHA DE OCURRENCIA</label><input type="date" id="fecha" value="2026-05-28"></div><div><label>HORA</label><input type="time" id="hora" value="22:15"></div><div><label>PROYECTO</label><input id="proyecto" value="AEROPUERTO"></div></div>
+<div class="g2">
+<div><label>TIPO DE ACCIDENTE / INCIDENTE</label><input id="tipo" value="Accidente de trabajo incapacitante temporal."></div>
+<div><label>EMPRESA</label><select id="empresa"><option value="0">INDRA PERÚ S.A.</option><option value="1" selected>INDRA T & D S.A.C.</option><option value="2">NUEK PAYMENTS PERÚ S.A.C.</option></select></div>
+</div>
+<div style="margin-top:14px"><label>GERENCIA / RESP. DEL PROY. / ÁREA</label><input id="gerencia" value="Abel Cieza"></div>
+<div class="g3" style="margin-top:14px">
+<div><label>FECHA DE OCURRENCIA</label><input type="date" id="fecha" value="2026-05-28"></div>
+<div><label>HORA</label><input type="time" id="hora" value="22:15"></div>
+<div><label>PROYECTO</label><input id="proyecto" value="AEROPUERTO"></div>
+</div>
 <div style="margin-top:14px"><label>LUGAR EXACTO DEL EVENTO</label><input id="lugar" value="Facility 2516 - P10 - Nuevo Aeropuerto Jorge Chávez"></div>
 </div></div>
 
-<div class="card"><div class="ch">2 · DATOS DEL TRABAJADOR(ES) AFECTADO(S)</div><div class="cb"><div id="invs"></div><button class="btn sec" id="btnAgregar">+ Agregar trabajador</button></div></div>
-
-<div class="card"><div class="ch">3 · VEHÍCULO, TESTIGOS Y DAÑO</div><div class="cb">
-<div class="g4"><div><label>MARCA</label><input id="vm" value="-"></div><div><label>MODELO</label><input id="vmo" value="-"></div><div><label>EMPRESA</label><input id="ve" value="-"></div><div><label>PLACA</label><input id="vp" value="-"></div></div>
-<div class="g3" style="margin-top:14px"><div><label>TESTIGO N° 1</label><input id="t1" value="Díaz Yenque Pier"></div><div><label>TESTIGO N° 2</label><input id="t2" value="Obregón Torres Aldo"></div><div><label>TESTIGO N° 3</label><input id="t3" value="Oliveros Silva Rosmery"></div></div>
-<div class="g2" style="margin-top:14px"><div><label>SUPERVISOR DE TURNO</label><input id="sup" value="Barzola Tinoco Víctor"></div><div><label>DAÑO CAUSADO</label><input id="dano" value="ESGUINCE Y TORCEDURA DE TOBILLO IZQUIERDO."></div></div>
+<div class="card"><div class="ch">2 · DATOS DEL TRABAJADOR(ES) AFECTADO(S)</div><div class="cb">
+<div id="invs"></div><button class="btn sec" id="btnAgregar">+ Agregar trabajador</button>
 </div></div>
 
-<div class="card"><div class="ch">4 · BREVE DESCRIPCIÓN DEL EVENTO</div><div class="cb"><textarea id="desc">El día 28/05/2026 aproximadamente a las 22:15 horas, el trabajador Gianfranco Ludeña se encontraba realizando actividades de coordinación previas al mantenimiento programado en el Facility 2516 - P10. Al descender por la escalera de acceso, pisó de forma irregular el último peldaño, sufriendo una torcedura del tobillo izquierdo. Fue asistido de inmediato por el personal presente y trasladado al tópico para su evaluación.</textarea></div></div>
+<div class="card"><div class="ch">3 · VEHÍCULO, TESTIGOS Y DAÑO</div><div class="cb">
+<div class="g4">
+<div><label>MARCA</label><input id="vm" value="-"></div>
+<div><label>MODELO</label><input id="vmo" value="-"></div>
+<div><label>EMPRESA</label><input id="ve" value="-"></div>
+<div><label>PLACA</label><input id="vp" value="-"></div>
+</div>
+<div class="g3" style="margin-top:14px">
+<div><label>TESTIGO N° 1</label><input id="t1" value="Díaz Yenque Pier"></div>
+<div><label>TESTIGO N° 2</label><input id="t2" value="Obregón Torres Aldo"></div>
+<div><label>TESTIGO N° 3</label><input id="t3" value="Oliveros Silva Rosmery"></div>
+</div>
+<div class="g2" style="margin-top:14px">
+<div><label>SUPERVISOR DE TURNO</label><input id="sup" value="Barzola Tinoco Víctor"></div>
+<div><label>DAÑO CAUSADO</label><input id="dano" value="ESGUINCE Y TORCEDURA DE TOBILLO IZQUIERDO."></div>
+</div>
+</div></div>
 
-<div class="card"><div class="ch">5 · EVIDENCIA FOTOGRÁFICA</div><div class="cb"><div class="zone" id="zonaFotos"><strong>Seleccionar imágenes</strong><span>3 por fila · Puedes seleccionar varias imágenes</span></div><input type="file" id="fotoInput" accept="image/*" multiple hidden><div class="fotos" id="fotos"></div></div></div>
+<div class="card"><div class="ch">4 · BREVE DESCRIPCIÓN DEL EVENTO</div><div class="cb">
+<textarea id="desc">El día 28/05/2026 aproximadamente a las 22:15 horas, el trabajador Gianfranco Ludeña se encontraba realizando actividades de coordinación previas al mantenimiento programado en el Facility 2516 - P10. Al descender por la escalera de acceso, pisó de forma irregular el último peldaño, sufriendo una torcedura del tobillo izquierdo. Fue asistido de inmediato por el personal presente y trasladado al tópico para su evaluación.</textarea>
+</div></div>
 
-<div class="card"><div class="ch">6 · RESPONSABLE DEL REGISTRO</div><div class="cb"><div class="g3">
-<div><label>NOMBRES Y APELLIDOS</label><input id="rnom" value="OLIVEROS SILVA ROSMERY"></div><div><label>CARGO / PUESTO</label><input id="rcar" value="SUPERVISOR SSOMA"></div><div><label>FECHA DEL REGISTRO</label><input type="date" id="rfec" value="2026-06-02"></div>
-</div><div style="margin-top:16px"><label>FIRMA</label><div class="fbox"><div class="fprev" id="fprev">Sin firma</div><div><button class="btn sec" id="btnFirma">Subir firma</button><button class="btn sec" id="btnBorrarFirma" style="display:none;color:#a44848;margin-left:6px">Eliminar</button></div></div><input type="file" id="finput" accept="image/*" hidden><div class="nota">La firma se guarda solo en este navegador.</div></div></div></div>
+<div class="card"><div class="ch">5 · EVIDENCIA FOTOGRÁFICA</div><div class="cb">
+<div class="zone" id="zonaFotos"><strong>Seleccionar imágenes</strong><span>3 por fila · Puedes seleccionar varias imágenes</span></div>
+<input type="file" id="fotoInput" accept="image/*" multiple hidden>
+<div class="fotos" id="fotos"></div>
+</div></div>
+
+<div class="card"><div class="ch">6 · RESPONSABLE DEL REGISTRO</div><div class="cb">
+<div class="g3">
+<div><label>NOMBRES Y APELLIDOS</label><input id="rnom" value="OLIVEROS SILVA ROSMERY"></div>
+<div><label>CARGO / PUESTO</label><input id="rcar" value="SUPERVISOR SSOMA"></div>
+<div><label>FECHA DEL REGISTRO</label><input type="date" id="rfec" value="2026-06-02"></div>
+</div>
+<div style="margin-top:16px"><label>FIRMA</label><div class="fbox">
+<div class="fprev" id="fprev">Sin firma</div>
+<div><button class="btn sec" id="btnFirma">Subir firma</button><button class="btn sec" id="btnBorrarFirma" style="display:none;color:#a44848;margin-left:6px">Eliminar</button></div>
+</div>
+<input type="file" id="finput" accept="image/*" hidden>
+<div class="nota">La firma se guarda solo en este navegador.</div>
+</div>
+</div></div>
+
 <div class="row"><button class="btn pri" id="btnPDF">Generar PDF</button></div>
 </div>
 
 <script>
 'use strict';
+
 const $=id=>document.getElementById(id);
-const EMPRESAS=[{nom:'INDRA PERÚ S.A.',ruc:'20100123411'},{nom:'INDRA T & D S.A.C.',ruc:'20604487901'},{nom:'NUEK PAYMENTS PERÚ S.A.C.',ruc:'20374984838'}];
-let trabajadores=[{nom:'BRAVO LUDEÑA GIANFRANCO EDUARDO',emp:'INDRA T & D S.A.C.',car:'TÉCNICO DE MANTENIMIENTO',area:'MANTENIMIENTO'}];
-let fotos=[],firma=null,firmaRatio=2;
-function toast(msg,error=false){const t=document.createElement('div');t.className='toast'+(error?' err':'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000)}
-function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-function pintarTrabajadores(){$('invs').innerHTML=trabajadores.map((v,i)=>`<div class="inv">${trabajadores.length>1?`<button class="del" data-del="${i}">×</button>`:''}<div class="g4"><div><label>NOMBRES Y APELLIDOS</label><input data-i="${i}" data-k="nom" value="${escapeHtml(v.nom)}"></div><div><label>EMPRESA</label><input data-i="${i}" data-k="emp" value="${escapeHtml(v.emp)}"></div><div><label>CARGO / PUESTO</label><input data-i="${i}" data-k="car" value="${escapeHtml(v.car)}"></div><div><label>ÁREA</label><input data-i="${i}" data-k="area" value="${escapeHtml(v.area)}"></div></div></div>`).join('')}
-$('invs').addEventListener('input',e=>{if(e.target.dataset.i!==undefined)trabajadores[+e.target.dataset.i][e.target.dataset.k]=e.target.value});
-$('invs').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;trabajadores.splice(+b.dataset.del,1);pintarTrabajadores()});
-$('btnAgregar').addEventListener('click',()=>{const emp=EMPRESAS[+$('empresa').value].nom;trabajadores.push({nom:'',emp,car:'',area:''});pintarTrabajadores();toast('Trabajador agregado')});
+
+const EMPRESAS=[
+ {nom:'INDRA PERÚ S.A.',ruc:'20100123411'},
+ {nom:'INDRA T & D S.A.C.',ruc:'20604487901'},
+ {nom:'NUEK PAYMENTS PERÚ S.A.C.',ruc:'20374984838'}
+];
+
+let trabajadores=[{
+ nom:'BRAVO LUDEÑA GIANFRANCO EDUARDO',
+ emp:'INDRA T & D S.A.C.',
+ car:'TÉCNICO DE MANTENIMIENTO',
+ area:'MANTENIMIENTO'
+}];
+
+let fotos=[];
+let firma=null;
+let firmaRatio=2;
+
+function toast(msg,error=false){
+ const t=document.createElement('div');
+ t.className='toast'+(error?' err':'');
+ t.textContent=msg;
+ document.body.appendChild(t);
+ setTimeout(()=>t.remove(),3000);
+}
+
+function escapeHtml(v){
+ return String(v??'').replace(/[&<>"']/g,m=>({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+ }[m]));
+}
+
+function pintarTrabajadores(){
+ $('invs').innerHTML=trabajadores.map((v,i)=>`
+ <div class="inv">
+ ${trabajadores.length>1?`<button class="del" data-del="${i}">×</button>`:''}
+ <div class="g4">
+ <div><label>NOMBRES Y APELLIDOS</label><input data-i="${i}" data-k="nom" value="${escapeHtml(v.nom)}"></div>
+ <div><label>EMPRESA</label><input data-i="${i}" data-k="emp" value="${escapeHtml(v.emp)}"></div>
+ <div><label>CARGO / PUESTO</label><input data-i="${i}" data-k="car" value="${escapeHtml(v.car)}"></div>
+ <div><label>ÁREA</label><input data-i="${i}" data-k="area" value="${escapeHtml(v.area)}"></div>
+ </div></div>`).join('');
+}
+
+$('invs').addEventListener('input',e=>{
+ if(e.target.dataset.i!==undefined){
+  trabajadores[+e.target.dataset.i][e.target.dataset.k]=e.target.value;
+ }
+});
+
+$('invs').addEventListener('click',e=>{
+ const b=e.target.closest('[data-del]');
+ if(!b)return;
+ trabajadores.splice(+b.dataset.del,1);
+ pintarTrabajadores();
+});
+
+$('btnAgregar').addEventListener('click',()=>{
+ const emp=EMPRESAS[+$('empresa').value].nom;
+ trabajadores.push({nom:'',emp,car:'',area:''});
+ pintarTrabajadores();
+ toast('Trabajador agregado');
+});
+
 pintarTrabajadores();
+
 $('zonaFotos').addEventListener('click',()=>$('fotoInput').click());
-$('fotoInput').addEventListener('change',()=>{const files=[...$('fotoInput').files];if(!files.length)return;let pendientes=files.length;files.forEach(file=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,900/img.naturalWidth),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.naturalWidth*scale));c.height=Math.max(1,Math.round(img.naturalHeight*scale));const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(img,0,0,c.width,c.height);fotos.push({data:c.toDataURL('image/jpeg',.75),ratio:img.naturalWidth/img.naturalHeight});if(--pendientes===0){pintarFotos();toast(fotos.length+' imagen(es) cargada(s)')}};img.onerror=()=>{if(--pendientes===0)toast('No se pudo cargar una imagen',true)};img.src=e.target.result};reader.readAsDataURL(file)});$('fotoInput').value=''});
-function pintarFotos(){$('fotos').innerHTML=fotos.map((f,i)=>`<div class="foto"><img src="${f.data}"><button data-foto-del="${i}">×</button></div>`).join('')}
-$('fotos').addEventListener('click',e=>{const b=e.target.closest('[data-foto-del]');if(!b)return;fotos.splice(+b.dataset.fotoDel,1);pintarFotos()});
+
+$('fotoInput').addEventListener('change',()=>{
+ const files=[...$('fotoInput').files];
+ if(!files.length)return;
+
+ let pendientes=files.length;
+
+ files.forEach(file=>{
+  const reader=new FileReader();
+
+  reader.onload=e=>{
+   const img=new Image();
+
+   img.onload=()=>{
+    const scale=Math.min(1,900/img.naturalWidth);
+    const c=document.createElement('canvas');
+
+    c.width=Math.max(1,Math.round(img.naturalWidth*scale));
+    c.height=Math.max(1,Math.round(img.naturalHeight*scale));
+
+    const ctx=c.getContext('2d');
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,c.width,c.height);
+    ctx.drawImage(img,0,0,c.width,c.height);
+
+    fotos.push({
+     data:c.toDataURL('image/jpeg',.75),
+     ratio:img.naturalWidth/img.naturalHeight
+    });
+
+    pendientes--;
+
+    if(pendientes===0){
+     pintarFotos();
+     toast(fotos.length+' imagen(es) cargada(s)');
+    }
+   };
+
+   img.onerror=()=>{
+    pendientes--;
+    if(pendientes===0)toast('No se pudo cargar una imagen',true);
+   };
+
+   img.src=e.target.result;
+  };
+
+  reader.readAsDataURL(file);
+ });
+
+ $('fotoInput').value='';
+});
+
+function pintarFotos(){
+ $('fotos').innerHTML=fotos.map((f,i)=>
+  `<div class="foto"><img src="${f.data}"><button data-foto-del="${i}">×</button></div>`
+ ).join('');
+}
+
+$('fotos').addEventListener('click',e=>{
+ const b=e.target.closest('[data-foto-del]');
+ if(!b)return;
+ fotos.splice(+b.dataset.fotoDel,1);
+ pintarFotos();
+});
+
 $('btnFirma').addEventListener('click',()=>$('finput').click());
-$('finput').addEventListener('change',()=>{const file=$('finput').files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{firmaRatio=img.naturalWidth/img.naturalHeight;firma=e.target.result;$('fprev').innerHTML='<img src="'+firma+'">';$('btnBorrarFirma').style.display='inline-block';try{localStorage.setItem('f034_firma',firma);localStorage.setItem('f034_ratio',firmaRatio)}catch(_){}toast('Firma cargada')};img.src=e.target.result};reader.readAsDataURL(file)});
-$('btnBorrarFirma').addEventListener('click',()=>{firma=null;firmaRatio=2;$('finput').value='';$('fprev').textContent='Sin firma';$('btnBorrarFirma').style.display='none';localStorage.removeItem('f034_firma');localStorage.removeItem('f034_ratio')});
-(function(){try{firma=localStorage.getItem('f034_firma')||null;firmaRatio=parseFloat(localStorage.getItem('f034_ratio'))||2;if(firma){$('fprev').innerHTML='<img src="'+firma+'">';$('btnBorrarFirma').style.display='inline-block'}}catch(_){} })();
-function fechaDMY(v){if(!v)return '';const p=v.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:''}
-function hora12(v){if(!v)return '';let[h,m]=v.split(':').map(Number);const ap=h>=12?'P.M.':'A.M.';h=h%12||12;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+' '+ap}
+
+$('finput').addEventListener('change',()=>{
+ const file=$('finput').files[0];
+ if(!file)return;
+
+ const reader=new FileReader();
+
+ reader.onload=e=>{
+  const img=new Image();
+
+  img.onload=()=>{
+   firmaRatio=img.naturalWidth/img.naturalHeight;
+   firma=e.target.result;
+   $('fprev').innerHTML='<img src="'+firma+'">';
+   $('btnBorrarFirma').style.display='inline-block';
+
+   try{
+    localStorage.setItem('f034_firma',firma);
+    localStorage.setItem('f034_ratio',firmaRatio);
+   }catch(_){}
+
+   toast('Firma cargada');
+  };
+
+  img.src=e.target.result;
+ };
+
+ reader.readAsDataURL(file);
+});
+
+$('btnBorrarFirma').addEventListener('click',()=>{
+ firma=null;
+ firmaRatio=2;
+ $('finput').value='';
+ $('fprev').textContent='Sin firma';
+ $('btnBorrarFirma').style.display='none';
+ localStorage.removeItem('f034_firma');
+ localStorage.removeItem('f034_ratio');
+});
+
+(function cargarFirmaGuardada(){
+ try{
+  firma=localStorage.getItem('f034_firma')||null;
+  firmaRatio=parseFloat(localStorage.getItem('f034_ratio'))||2;
+
+  if(firma){
+   $('fprev').innerHTML='<img src="'+firma+'">';
+   $('btnBorrarFirma').style.display='inline-block';
+  }
+ }catch(_){}
+})();
+
+function fechaDMY(v){
+ if(!v)return '';
+ const p=v.split('-');
+ return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:'';
+}
+
+function hora12(v){
+ if(!v)return '';
+ let [h,m]=v.split(':').map(Number);
+ const ap=h>=12?'P.M.':'A.M.';
+ h=h%12||12;
+ return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+' '+ap;
+}
 
 function generarPDF(){
- if(!window.jspdf||!window.jspdf.jsPDF){toast('No se cargó jsPDF. Revisa tu conexión a Internet.',true);return}
- const{jsPDF}=window.jspdf,pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
- const azul=[0,65,84],plomo=[225,224,215],negro=[0,0,0],blanco=[255,255,255],M=8,W=194,LIM=289;let y=8,page=1;
- function header(){pdf.setTextColor(...azul);pdf.setFont('helvetica','bold');pdf.setFontSize(13);pdf.text('INDRA',M+2,y+7);pdf.setTextColor(104,122,128);pdf.setFontSize(7);pdf.text('GROUP',M+2,y+11);pdf.setTextColor(...negro);pdf.setFontSize(10);pdf.text('REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE',105,y+5,{align:'center'});pdf.setFontSize(9);pdf.text('FLASH REPORT',105,y+10,{align:'center'});pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.text('CÓDIGO: SGSST_INDRAGROUP_F 034',202,y+2,{align:'right'});pdf.text('VERSIÓN: 01',202,y+4.5,{align:'right'});pdf.text('FECHA: 2024-12-11',202,y+7,{align:'right'});pdf.text('Página: '+page,202,y+9.5,{align:'right'});y+=16}
- function newPageIf(h){if(y+h>LIM){pdf.addPage();page++;y=8;header()}}
- function band(s){newPageIf(5);pdf.setFillColor(...azul);pdf.setDrawColor(...negro);pdf.rect(M,y,W,5,'FD');pdf.setTextColor(...blanco);pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.text(s,M+2,y+3.2);y+=5}
- function cell(x,w,h,s,opt={}){pdf.setFillColor(...(opt.bg||blanco));pdf.setDrawColor(...negro);pdf.rect(x,y,w,h,'FD');pdf.setTextColor(...(opt.fg||negro));pdf.setFont('helvetica',opt.bold?'bold':'normal');pdf.setFontSize(opt.fs||6);const lines=pdf.splitTextToSize(String(s??''),Math.max(4,w-2.5)),total=(lines.length-1)*2.9,sy=y+h/2-total/2;lines.forEach((line,i)=>pdf.text(line,opt.left?x+1.5:x+w/2,sy+i*2.9,{align:opt.left?'left':'center',baseline:'middle'}))}
- function row(label,value){const lw=48.5,vw=W-lw,h=4;newPageIf(h);cell(M,lw,h,label,{bg:azul,fg:blanco,bold:true,left:true,fs:6});cell(M+lw,vw,h,value,{fs:6});y+=h}
+
+ if(!window.jspdf||!window.jspdf.jsPDF){
+  toast('No se cargó jsPDF. Revisa tu conexión a Internet.',true);
+  return;
+ }
+
+ const {jsPDF}=window.jspdf;
+
+ const pdf=new jsPDF({
+  orientation:'portrait',
+  unit:'mm',
+  format:'a4',
+  compress:true
+ });
+
+ const azul=[0,65,84];
+ const plomo=[225,224,215];
+ const negro=[0,0,0];
+ const blanco=[255,255,255];
+
+ const M=8;
+ const W=194;
+ const LIM=289;
+
+ let y=8;
+ let page=1;
+
+ function header(){
+  pdf.setTextColor(...azul);
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(13);
+  pdf.text('INDRA',M+2,y+7);
+
+  pdf.setTextColor(104,122,128);
+  pdf.setFontSize(7);
+  pdf.text('GROUP',M+2,y+11);
+
+  pdf.setTextColor(...negro);
+  pdf.setFontSize(10);
+  pdf.text('REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE',105,y+5,{align:'center'});
+
+  pdf.setFontSize(9);
+  pdf.text('FLASH REPORT',105,y+10,{align:'center'});
+
+  pdf.setFont('helvetica','normal');
+  pdf.setFontSize(5.5);
+  pdf.text('CÓDIGO: SGSST_INDRAGROUP_F 034',202,y+2,{align:'right'});
+  pdf.text('VERSIÓN: 01',202,y+4.5,{align:'right'});
+  pdf.text('FECHA: 2024-12-11',202,y+7,{align:'right'});
+  pdf.text('Página: '+page,202,y+9.5,{align:'right'});
+
+  y+=16;
+ }
+
+ function newPageIf(h){
+  if(y+h>LIM){
+   pdf.addPage();
+   page++;
+   y=8;
+   header();
+  }
+ }
+
+ // BANDA: SIEMPRE 5 MM
+ function band(s){
+  newPageIf(5);
+  pdf.setFillColor(...azul);
+  pdf.setDrawColor(...negro);
+  pdf.rect(M,y,W,5,'FD');
+  pdf.setTextColor(...blanco);
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(7);
+  pdf.text(s,M+2,y+3.2);
+  y+=5;
+ }
+
+ // TODAS LAS CELDAS NORMALES: 4 MM
+ function cell(x,w,h,s,opt={}){
+  pdf.setFillColor(...(opt.bg||blanco));
+  pdf.setDrawColor(...negro);
+  pdf.rect(x,y,w,h,'FD');
+
+  pdf.setTextColor(...(opt.fg||negro));
+  pdf.setFont('helvetica',opt.bold?'bold':'normal');
+  pdf.setFontSize(opt.fs||6);
+
+  const lines=pdf.splitTextToSize(
+   String(s??''),
+   Math.max(4,w-2.5)
+  );
+
+  const total=(lines.length-1)*2.9;
+  const sy=y+h/2-total/2;
+
+  lines.forEach((line,i)=>{
+   pdf.text(
+    line,
+    opt.left?x+1.5:x+w/2,
+    sy+i*2.9,
+    {
+     align:opt.left?'left':'center',
+     baseline:'middle'
+    }
+   );
+  });
+ }
+
+ // FILAS GENERALES: 48.5 MM DE ETIQUETA + RESTO, 4 MM DE ALTO
+ function row(label,value){
+  const lw=48.5;
+  const vw=W-lw;
+  const h=4;
+
+  newPageIf(h);
+
+  cell(M,lw,h,label,{
+   bg:azul,
+   fg:blanco,
+   bold:true,
+   left:true,
+   fs:6
+  });
+
+  cell(M+lw,vw,h,value,{fs:6});
+
+  y+=h;
+ }
 
  header();
+
+ // =========================================================
+ // 1. INFORMACIÓN GENERAL
+ // =========================================================
+
  band('1. INFORMACIÓN GENERAL');
+
  row('TIPO DE ACCIDENTE / INCIDENTE:',$('tipo').value);
  row('EMPRESA:',EMPRESAS[+$('empresa').value].nom);
- row('GERENCIA / RESPONSABLE DEL PROYECTO / ÁREA:',$('gerencia').value);
+ row('GERENCIA / RESP. DEL PROY. / ÁREA:',$('gerencia').value);
 
- const hFH=4,fechaLbl=48.5,fechaVal=48.5,horaInicio=M+97,horaFin=M+118,horaLbl=14,horaVal=horaFin-horaInicio-horaLbl;
+ // FECHA / HORA
+ // HORA empieza en la columna EMPRESA de VEHÍCULO (M+97)
+ // y termina exactamente en la columna EMPRESA de TRABAJADOR (M+114).
+ const hFH=4;
+
+ const fechaLbl=48.5;
+ const fechaVal=48.5;
+
+ const horaInicio=M+97;
+ const horaFin=M+114;
+
+ const horaLbl=14;
+ const horaVal=horaFin-horaInicio-horaLbl;
+
  newPageIf(hFH);
- cell(M,fechaLbl,hFH,'FECHA DE OCURRENCIA:',{bg:azul,fg:blanco,bold:true,left:true,fs:6});
- cell(M+fechaLbl,fechaVal,hFH,fechaDMY($('fecha').value),{fs:6});
- cell(horaInicio,horaLbl,hFH,'HORA:',{bg:azul,fg:blanco,bold:true,left:true,fs:6});
- cell(horaInicio+horaLbl,horaVal,hFH,hora12($('hora').value),{fs:6});y+=hFH;
- row('PROYECTO:',$('proyecto').value);row('LUGAR EXACTO DEL EVENTO:',$('lugar').value);y+=3;
+
+ cell(
+  M,
+  fechaLbl,
+  hFH,
+  'FECHA DE OCURRENCIA:',
+  {bg:azul,fg:blanco,bold:true,left:true,fs:6}
+ );
+
+ cell(
+  M+fechaLbl,
+  fechaVal,
+  hFH,
+  fechaDMY($('fecha').value),
+  {fs:6}
+ );
+
+ cell(
+  horaInicio,
+  horaLbl,
+  hFH,
+  'HORA:',
+  {bg:azul,fg:blanco,bold:true,left:true,fs:6}
+ );
+
+ cell(
+  horaInicio+horaLbl,
+  horaVal,
+  hFH,
+  hora12($('hora').value),
+  {fs:6}
+ );
+
+ y+=hFH;
+
+ row('PROYECTO:',$('proyecto').value);
+ row('LUGAR EXACTO DEL EVENTO:',$('lugar').value);
+
+ y+=3;
+
+ // =========================================================
+ // 2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)
+ // =========================================================
 
  band('2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)');
- const tw=[74,40,40,40],tx=[M,M+74,M+114,M+154],hCabTrab=4,hDatoTrab=5;
- newPageIf(hCabTrab);['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA'].forEach((s,i)=>cell(tx[i],tw[i],hCabTrab,s,{bg:plomo,bold:true,fs:6}));y+=hCabTrab;
- trabajadores.forEach(v=>{const vals=[v.nom,v.emp,v.car,v.area];newPageIf(hDatoTrab);vals.forEach((s,i)=>cell(tx[i],tw[i],hDatoTrab,s,{fs:6}));y+=hDatoTrab});y+=3;
+
+ // NOMBRE 74 MM / EMPRESA-CARGO-ÁREA 40 MM CADA UNO
+ const tw=[74,40,40,40];
+ const tx=[M,M+74,M+114,M+154];
+
+ const hCabTrab=4;
+ const hDatoTrab=4;
+
+ newPageIf(hCabTrab);
+
+ ['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA']
+ .forEach((s,i)=>{
+  cell(tx[i],tw[i],hCabTrab,s,{
+   bg:plomo,
+   bold:true,
+   fs:6
+  });
+ });
+
+ y+=hCabTrab;
+
+ trabajadores.forEach(v=>{
+  const vals=[v.nom,v.emp,v.car,v.area];
+
+  newPageIf(hDatoTrab);
+
+  vals.forEach((s,i)=>{
+   cell(tx[i],tw[i],hDatoTrab,s,{fs:6});
+  });
+
+  y+=hDatoTrab;
+ });
+
+ y+=3;
+
+ // =========================================================
+ // 3. VEHÍCULO, TESTIGOS Y DAÑO
+ // =========================================================
 
  band('3. VEHÍCULO, TESTIGOS Y DAÑO');
- const vw=[48.5,48.5,48.5,48.5],vx=[M,M+48.5,M+97,M+145.5],hVehCab=4,hVehDato=4;
- newPageIf(hVehCab);['MARCA','MODELO','EMPRESA','PLACA'].forEach((s,i)=>cell(vx[i],vw[i],hVehCab,s,{bg:plomo,bold:true,fs:6}));y+=hVehCab;
- newPageIf(hVehDato);['vm','vmo','ve','vp'].forEach((id,i)=>cell(vx[i],vw[i],hVehDato,$(id).value,{fs:6}));y+=hVehDato;
 
- const tests=[$('t1').value,$('t2').value,$('t3').value].filter(s=>String(s).trim()),wTestLabel=48.5,wTestNum=12,wTestDato=W-wTestLabel-wTestNum,hTest=4;
- tests.forEach((s,i)=>{newPageIf(hTest);cell(M,wTestLabel,hTest,'TESTIGOS DEL ACCIDENTE:',{bg:azul,fg:blanco,bold:true,left:true,fs:6});cell(M+wTestLabel,wTestNum,hTest,'N° '+String(i+1).padStart(2,'0'),{bg:plomo,bold:true,fs:6});cell(M+wTestLabel+wTestNum,wTestDato,hTest,s,{fs:6});y+=hTest});
- row('SUPERVISOR DE TURNO:',$('sup').value);row('DAÑO CAUSADO:',$('dano').value);y+=3;
+ const vw=[48.5,48.5,48.5,48.5];
+ const vx=[M,M+48.5,M+97,M+145.5];
+
+ const hVehCab=4;
+ const hVehDato=4;
+
+ // VEHÍCULO: encabezado 4 mm
+ newPageIf(hVehCab);
+
+ ['MARCA','MODELO','EMPRESA','PLACA']
+ .forEach((s,i)=>{
+  cell(vx[i],vw[i],hVehCab,s,{
+   bg:plomo,
+   bold:true,
+   fs:6
+  });
+ });
+
+ y+=hVehCab;
+
+ // VEHÍCULO: datos 4 mm, pegados al encabezado
+ newPageIf(hVehDato);
+
+ ['vm','vmo','ve','vp']
+ .forEach((id,i)=>{
+  cell(vx[i],vw[i],hVehDato,$(id).value,{fs:6});
+ });
+
+ y+=hVehDato;
+
+ // TESTIGOS:
+ // TESTIGOS DEL ACCIDENTE = 48.5 MM
+ // N° 01 = 12 MM
+ // NOMBRE = TODO EL RESTO
+ // TODA LA FILA = 4 MM
+ const tests=[
+  $('t1').value,
+  $('t2').value,
+  $('t3').value
+ ].filter(s=>String(s).trim());
+
+ const wTestLabel=48.5;
+ const wTestNum=12;
+ const wTestDato=W-wTestLabel-wTestNum;
+ const hTest=4;
+
+ tests.forEach((s,i)=>{
+  newPageIf(hTest);
+
+  cell(
+   M,
+   wTestLabel,
+   hTest,
+   'TESTIGOS DEL ACCIDENTE:',
+   {
+    bg:azul,
+    fg:blanco,
+    bold:true,
+    left:true,
+    fs:6
+   }
+  );
+
+  cell(
+   M+wTestLabel,
+   wTestNum,
+   hTest,
+   'N° '+String(i+1).padStart(2,'0'),
+   {
+    bg:plomo,
+    bold:true,
+    fs:6
+   }
+  );
+
+  cell(
+   M+wTestLabel+wTestNum,
+   wTestDato,
+   hTest,
+   s,
+   {fs:6}
+  );
+
+  y+=hTest;
+ });
+
+ // SUPERVISOR Y DAÑO: 48.5 MM + RESTO, 4 MM
+ row('SUPERVISOR DE TURNO:',$('sup').value);
+ row('DAÑO CAUSADO:',$('dano').value);
+
+ y+=3;
+
+ // =========================================================
+ // 4. DESCRIPCIÓN
+ // =========================================================
 
  band('4. BREVE DESCRIPCIÓN DEL EVENTO');
- pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);let lines=pdf.splitTextToSize($('desc').value,W-5),idx=0;
- while(idx<lines.length){let avail=LIM-y-4,can=Math.floor(avail/3.4);if(can<1){pdf.addPage();page++;y=8;header();continue}let part=lines.slice(idx,idx+can),h=part.length*3.4+4;newPageIf(h);pdf.setFillColor(...blanco);pdf.setDrawColor(...negro);pdf.rect(M,y,W,h,'FD');pdf.setTextColor(...negro);part.forEach((s,i)=>pdf.text(s,M+2.5,y+4+i*3.4));y+=h;idx+=can}y+=3;
+
+ pdf.setFont('helvetica','normal');
+ pdf.setFontSize(6.5);
+
+ let lines=pdf.splitTextToSize($('desc').value,W-5);
+ let idx=0;
+
+ while(idx<lines.length){
+
+  let avail=LIM-y-4;
+  let can=Math.floor(avail/3.4);
+
+  if(can<1){
+   pdf.addPage();
+   page++;
+   y=8;
+   header();
+   continue;
+  }
+
+  let part=lines.slice(idx,idx+can);
+  let h=part.length*3.4+4;
+
+  newPageIf(h);
+
+  pdf.setFillColor(...blanco);
+  pdf.setDrawColor(...negro);
+  pdf.rect(M,y,W,h,'FD');
+
+  pdf.setTextColor(...negro);
+
+  part.forEach((s,i)=>{
+   pdf.text(s,M+2.5,y+4+i*3.4);
+  });
+
+  y+=h;
+  idx+=can;
+ }
+
+ y+=3;
+
+ // =========================================================
+ // 5. FOTOS
+ // =========================================================
 
  band('5. EVIDENCIA FOTOGRÁFICA');
- const gap=3,mg=4,fh=52,fw=(W-gap*2)/3,ih=fh-mg*2;
- if(!fotos.length){newPageIf(fh);cell(M,W,fh,'');y+=fh}else{for(let i=0;i<fotos.length;i+=3){newPageIf(fh);const group=fotos.slice(i,i+3);pdf.setFillColor(...blanco);pdf.setDrawColor(...negro);pdf.rect(M,y,W,fh,'FD');const used=group.length*fw+(group.length-1)*gap;let x=M+(W-used)/2;group.forEach(f=>{let w=fw,h=w/f.ratio;if(h>ih){h=ih;w=h*f.ratio}try{pdf.addImage(f.data,'JPEG',x+(fw-w)/2,y+mg+(ih-h)/2,w,h)}catch(e){}x+=fw+gap});y+=fh}}y+=3;
+
+ const gap=3;
+ const mg=4;
+ const fh=52;
+ const fw=(W-gap*2)/3;
+ const ih=fh-mg*2;
+
+ if(!fotos.length){
+
+  newPageIf(fh);
+  cell(M,W,fh,'');
+  y+=fh;
+
+ }else{
+
+  for(let i=0;i<fotos.length;i+=3){
+
+   newPageIf(fh);
+
+   const group=fotos.slice(i,i+3);
+
+   pdf.setFillColor(...blanco);
+   pdf.setDrawColor(...negro);
+   pdf.rect(M,y,W,fh,'FD');
+
+   const used=group.length*fw+(group.length-1)*gap;
+   let x=M+(W-used)/2;
+
+   group.forEach(f=>{
+
+    let w=fw;
+    let h=w/f.ratio;
+
+    if(h>ih){
+     h=ih;
+     w=h*f.ratio;
+    }
+
+    try{
+     pdf.addImage(
+      f.data,
+      'JPEG',
+      x+(fw-w)/2,
+      y+mg+(ih-h)/2,
+      w,
+      h
+     );
+    }catch(e){}
+
+    x+=fw+gap;
+   });
+
+   y+=fh;
+  }
+ }
+
+ y+=3;
+
+ // =========================================================
+ // 6. RESPONSABLE
+ // =========================================================
 
  band('6. RESPONSABLE DEL REGISTRO');
- const rw=[62,48,42,42],rx=[M,M+62,M+110,M+152];newPageIf(20);['NOMBRES Y APELLIDOS','CARGO / PUESTO DE TRABAJO','FECHA DEL REGISTRO','FIRMA'].forEach((s,i)=>cell(rx[i],rw[i],6,s,{bg:plomo,bold:true,fs:6}));y+=6;
- const rh=14;cell(rx[0],rw[0],rh,$('rnom').value,{fs:6});cell(rx[1],rw[1],rh,$('rcar').value,{fs:6});cell(rx[2],rw[2],rh,fechaDMY($('rfec').value),{fs:6});cell(rx[3],rw[3],rh,'',{fs:6});
- if(firma){try{let h=rh-4,w=h*firmaRatio;if(w>rw[3]-4){w=rw[3]-4;h=w/firmaRatio}pdf.addImage(firma,'PNG',rx[3]+(rw[3]-w)/2,y+(rh-h)/2,w,h)}catch(e){}}
+
+ const rw=[62,48,42,42];
+ const rx=[M,M+62,M+110,M+152];
+
+ newPageIf(20);
+
+ ['NOMBRES Y APELLIDOS','CARGO / PUESTO DE TRABAJO','FECHA DEL REGISTRO','FIRMA']
+ .forEach((s,i)=>{
+  cell(rx[i],rw[i],6,s,{
+   bg:plomo,
+   bold:true,
+   fs:6
+  });
+ });
+
+ y+=6;
+
+ const rh=14;
+
+ cell(rx[0],rw[0],rh,$('rnom').value,{fs:6});
+ cell(rx[1],rw[1],rh,$('rcar').value,{fs:6});
+ cell(rx[2],rw[2],rh,fechaDMY($('rfec').value),{fs:6});
+ cell(rx[3],rw[3],rh,'',{fs:6});
+
+ if(firma){
+
+  try{
+
+   let h=rh-4;
+   let w=h*firmaRatio;
+
+   if(w>rw[3]-4){
+    w=rw[3]-4;
+    h=w/firmaRatio;
+   }
+
+   pdf.addImage(
+    firma,
+    'PNG',
+    rx[3]+(rw[3]-w)/2,
+    y+(rh-h)/2,
+    w,
+    h
+   );
+
+  }catch(e){}
+ }
+
  y+=rh;
- pdf.save(($('fecha').value||'FECHA')+' FLASH REPORT '+($('proyecto').value||'PROYECTO').replace(/[\\\\/:*?"<>|]/g,'_')+'.pdf');toast('PDF generado correctamente')
+
+ pdf.save(
+  ($('fecha').value||'FECHA')+
+  ' FLASH REPORT '+
+  ($('proyecto').value||'PROYECTO').replace(/[\\/:*?"<>|]/g,'_')+
+  '.pdf'
+ );
+
+ toast('PDF generado correctamente');
 }
+
 $('btnPDF').addEventListener('click',generarPDF);
 </script>
 </body>
-</html>"""
-
-path = Path("/mnt/data/index.html")
-path.write_text(html, encoding="utf-8")
-print(f"Archivo creado: {path}")
+</html>
