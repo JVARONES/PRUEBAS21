@@ -80,7 +80,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#004154}
 </div></div>
 
 <div class="card"><div class="ch">5 · EVIDENCIA FOTOGRÁFICA</div><div class="cb">
-<div class="zone" id="zonaFotos"><strong>Seleccionar imágenes</strong><span>4 por fila · Puedes seleccionar varias imágenes</span></div>
+<div class="zone" id="zonaFotos"><strong>Seleccionar imágenes</strong><span>3 por fila · Puedes seleccionar varias imágenes</span></div>
 <input type="file" id="fotoInput" accept="image/*" multiple hidden>
 <div class="fotos" id="fotos"></div>
 </div></div>
@@ -719,11 +719,13 @@ async function generarPDF(){
  band('5. EVIDENCIA FOTOGRÁFICA');
 
  const margenFoto=1;
- const fh=52;
  const separacionFoto=3;
- const maxFotosFila=4;
+ const maxFotosFila=3;
+ const alturaFotoMin=42;
+ const alturaFotoMax=78;
 
  if(!fotos.length){
+  const fh=52;
   newPageIf(fh);
   cell(M,W,fh,'');
   y+=fh;
@@ -732,16 +734,26 @@ async function generarPDF(){
    const group=fotos.slice(i,i+maxFotosFila);
    const n=group.length;
 
+   // La fila se adapta a la cantidad real de fotos (1, 2 o 3)
+   // y a su proporción, manteniendo siempre la imagen sin distorsión.
+   const cuadroW=(W-separacionFoto*(n-1))/n;
+
+   const alturas=group.map(f=>{
+    const maxW=cuadroW-margenFoto*2;
+    return maxW/(f.ratio||1)+margenFoto*2;
+   });
+
+   const fh=Math.max(
+    alturaFotoMin,
+    Math.min(alturaFotoMax,Math.max(...alturas))
+   );
+
    newPageIf(fh);
 
-   // UN SOLO RECUADRO POR FILA.
-   // La división en 4 es solo referencial para ordenar y centrar
-   // las imágenes; no se dibujan recuadros individuales.
+   // UN SOLO RECUADRO EXTERIOR POR FILA.
    pdf.setFillColor(...blanco);
    pdf.setDrawColor(...negro);
    pdf.rect(M,y,W,fh,'FD');
-
-   const cuadroW=(W-separacionFoto*(n-1))/n;
 
    group.forEach((f,j)=>{
     const bx=M+j*(cuadroW+separacionFoto);
@@ -750,14 +762,13 @@ async function generarPDF(){
     const maxH=fh-margenFoto*2;
 
     let w=maxW;
-    let h=w/f.ratio;
+    let h=w/(f.ratio||1);
 
     if(h>maxH){
      h=maxH;
-     w=h*f.ratio;
+     w=h*(f.ratio||1);
     }
 
-    // Centrado horizontal y vertical dentro de su espacio referencial.
     const ix=bx+(cuadroW-w)/2;
     const iy=y+(fh-h)/2;
 
@@ -1091,11 +1102,26 @@ async function generarExcel(){
 
  // 5
  r=section(r,'5. EVIDENCIA FOTOGRÁFICA');
- const fhMm=52;
- const photoRows=Math.max(1,Math.ceil(fotos.length/4));
+ const photoRows=Math.max(1,Math.ceil(fotos.length/3));
+
  for(let g=0;g<photoRows;g++){
-  const group=fotos.slice(g*4,g*4+4);
-  const start=r, end=r+13;
+  const group=fotos.slice(g*3,g*3+3);
+  const n=group.length;
+
+  const gap=2;
+  const usable=C-gap*(n-1);
+  const cw=usable/n;
+
+  // Altura automática aproximada según la proporción de cada foto.
+  const heights=group.map(f=>{
+   return cw/(f.ratio||1);
+  });
+
+  const fh=Math.max(42,Math.min(78,Math.max(...heights)));
+  const start=r;
+  const rowCount=Math.max(1,Math.ceil(fh/4));
+  const end=r+rowCount-1;
+
   ws.mergeCells(rg(1,start,C,end));
   const outer=ws.getCell(start,1);
   outer.value='';
@@ -1105,24 +1131,26 @@ async function generarExcel(){
    left:{style:'thin',color:{argb:NE}},
    right:{style:'thin',color:{argb:NE}}
   };
-  for(let rr=start;rr<=end;rr++) rowHeight(rr,fhMm/14);
+
+  for(let rr=start;rr<=end;rr++) rowHeight(rr,fh/rowCount);
 
   group.forEach((f,j)=>{
    try{
-    const imageId=wb.addImage({base64:excelPhotoBase64(f.data),extension:'jpeg'});
-    const n=group.length;
-    // Cuatro celdas conceptuales; 1-3 fotos ocupan/reparten el ancho real.
-    const gap=2;
-    const usable=C-gap*(n-1);
-    const cw=usable/n;
+    const imageId=wb.addImage({
+     base64:excelPhotoBase64(f.data),
+     extension:'jpeg'
+    });
+
     const c1=Math.round(1+j*(cw+gap));
     const c2=Math.min(C,Math.round(1+(j+1)*cw+j*gap));
+
     ws.addImage(imageId,{
      tl:{col:c1-1,row:start-1+0.2},
      br:{col:c2,row:end-0.2}
     });
    }catch(e){}
   });
+
   r=end+1;
  }
  r+=1;
