@@ -94,7 +94,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#004154}
 </div></div>
 
 <div class="card"><div class="ch">5 · EVIDENCIA FOTOGRÁFICA</div><div class="cb">
-<div class="zone" id="zonaFotos"><strong>Seleccionar imágenes</strong><span>3 por fila · Puedes seleccionar varias imágenes</span></div>
+<div class="zone" id="zonaFotos"><strong>Seleccionar imágenes</strong><span>Máx. 5 verticales / 4 horizontales por fila · Puedes reordenarlas</span></div>
 <input type="file" id="fotoInput" accept="image/*" multiple hidden>
 <div class="fotos" id="fotos"></div>
 </div></div>
@@ -835,32 +835,31 @@ async function generarPDF(descargar=true){
   return (f.ratio||1)>1.05;
  }
 
- function gruposFotograficos(lista){
+ function agruparFotosInteligente(lista){
   const grupos=[];
   let grupo=[];
 
   for(const f of lista){
-   const horizontal=esHorizontal(f);
+   const horizontal=(f.ratio||1)>1.05;
 
-   // Si esta foto es horizontal, una fila nunca puede superar 4.
-   if(grupo.length && (
-      grupo.length >= maxHorizontalesFila ||
-      (horizontal && grupo.length >= maxHorizontalesFila)
-   )){
-    grupos.push(grupo);
-    grupo=[];
+   if(!grupo.length){
+    grupo=[f];
+    continue;
    }
 
-   // Una fila formada solo por verticales puede llegar a 5.
-   if(grupo.length>=maxVerticalesFila){
+   const contieneHorizontal=grupo.some(x=>(x.ratio||1)>1.05);
+   const nuevoContieneHorizontal=contieneHorizontal||horizontal;
+   const limite=nuevoContieneHorizontal?4:5;
+
+   if(grupo.length>=limite){
     grupos.push(grupo);
-    grupo=[];
+    grupo=[f];
+   }else{
+    grupo.push(f);
    }
 
-   grupo.push(f);
-
-   // Si acabamos de colocar una horizontal, el máximo de esa fila es 4.
-   if(horizontal && grupo.length===maxHorizontalesFila){
+   // Si la fila ya tiene una horizontal, no puede pasar de 4.
+   if(grupo.length===4 && grupo.some(x=>(x.ratio||1)>1.05)){
     grupos.push(grupo);
     grupo=[];
    }
@@ -868,7 +867,7 @@ async function generarPDF(descargar=true){
 
   if(grupo.length)grupos.push(grupo);
   return grupos;
- }
+}
 
  if(!fotos.length){
   const fh=52;
@@ -876,7 +875,7 @@ async function generarPDF(descargar=true){
   cell(M,W,fh,'');
   y+=fh;
  }else{
-  const grupos=gruposFotograficos(fotos);
+  const grupos=agruparFotosInteligente(fotos);
 
   grupos.forEach(group=>{
    const n=group.length;
@@ -1138,34 +1137,39 @@ async function generarExcel(){
    return r+1;
   }
 
-  function groupPhotos(lista){
-   const grupos=[];
-   let grupo=[];
+  function agruparFotosExcel(lista){
+  const grupos=[];
+  let grupo=[];
 
-   for(const f of lista){
-    const horizontal=(f.ratio||1)>1.05;
+  for(const f of lista){
+   const horizontal=(f.ratio||1)>1.05;
 
-    if(grupo.length>=4){
-     grupos.push(grupo);
-     grupo=[];
-    }
-
-    if(grupo.length>=5){
-     grupos.push(grupo);
-     grupo=[];
-    }
-
-    grupo.push(f);
-
-    if(horizontal && grupo.length===4){
-     grupos.push(grupo);
-     grupo=[];
-    }
+   if(!grupo.length){
+    grupo=[f];
+    continue;
    }
 
-   if(grupo.length)grupos.push(grupo);
-   return grupos;
+   const contieneHorizontal=grupo.some(x=>(x.ratio||1)>1.05);
+   const nuevoContieneHorizontal=contieneHorizontal||horizontal;
+   const limite=nuevoContieneHorizontal?4:5;
+
+   if(grupo.length>=limite){
+    grupos.push(grupo);
+    grupo=[f];
+   }else{
+    grupo.push(f);
+   }
+
+   // Si la fila ya tiene una horizontal, no puede pasar de 4.
+   if(grupo.length===4 && grupo.some(x=>(x.ratio||1)>1.05)){
+    grupos.push(grupo);
+    grupo=[];
+   }
   }
+
+  if(grupo.length)grupos.push(grupo);
+  return grupos;
+}
 
   // =========================================================
   // ENCABEZADO — misma estructura del PDF
@@ -1306,7 +1310,7 @@ async function generarExcel(){
    for(let rr=start;rr<=end;rr++)rowHeight(rr,52/13);
    r=end+1;
   }else{
-   const grupos=groupPhotos(fotos);
+   const grupos=agruparFotosExcel(fotos);
 
    grupos.forEach(group=>{
     const n=group.length;
