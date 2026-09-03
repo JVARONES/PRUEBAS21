@@ -232,9 +232,11 @@ const CFG = {
   /* ---- Ancho de la columna de etiquetas ---- */
   wEtiqueta:    52,      // "TIPO DE ACCIDENTE / INCIDENTE:" etc.
 
-  /* ---- TESTIGOS: anchos de las tres columnas ---- */
-  wTestLabel:   52,      // "TESTIGOS DEL ACCIDENTE:"
-  wTestNum:     22,      // "N° 1"
+  /* ---- TESTIGOS ----
+     wTestLabel + wTestNum debe ser igual a wVeh[0],
+     así la línea coincide con la columna MARCA.        */
+  wTestLabel:   30,      // "TESTIGOS DEL ACCIDENTE:"
+  wTestNum:   18.5,      // "N° 1"
   // el resto del ancho lo toma el nombre
 
   /* ---- Trabajadores: anchos de columna ---- */
@@ -251,11 +253,14 @@ const CFG = {
   wFechaVal:    48,
   wHoraLbl:     25,
 
-  /* ---- Evidencia fotográfica ---- */
-  fotosPorFila:  3,      // por defecto
-  altoFoto:     42,      // alto de cada foto
-  gapFoto:       3,      // separación entre fotos
-  altoVacio:    24,      // alto del recuadro si no hay fotos
+    /* ---- Evidencia fotográfica ----
+     El recuadro mide siempre lo mismo por fila de fotos.
+     Sube o baja altoFilaFoto para cambiar su tamaño.    */
+  fotosPorFila:  3,      // fotos por fila
+  altoFilaFoto: 52,      // alto del recuadro por cada fila
+  margenFoto:    4,      // aire arriba y abajo de las fotos
+  gapFoto:       3,      // separación horizontal entre fotos
+  altoVacio:    52,      // alto del recuadro si no hay fotos
 
   /* ---- Colores ---- */
   azul:  '#004154',
@@ -564,7 +569,7 @@ function dibujar(pdf,d){
         altoTexto(v.car,w[2],C.fsDato,C.hFilaTrab)
       );
       espacio(h);
-      celda(xs[0],w[0],h,v.nom,{izq:1});
+            celda(xs[0],w[0],h,v.nom);
       celda(xs[1],w[1],h,v.emp);
       celda(xs[2],w[2],h,v.car);
       celda(xs[3],w[3],h,v.area);
@@ -593,21 +598,37 @@ function dibujar(pdf,d){
 
   y+=C.sepVehTest;
 
-  /* Testigos */
+    /* Testigos: solo se dibujan los que tienen nombre */
   {
     const wl=C.wTestLabel, wn=C.wTestNum, wv=tw-wl-wn;
+    const wLbl=wl+wn;   // para que supervisor y daño cuadren
 
-    [['N° 1',d.t1],['N° 2',d.t2],['N° 3',d.t3]].forEach(r=>{
+    const testigos=[d.t1,d.t2,d.t3].filter(function(t){
+      return String(t||'').trim() !== '';
+    });
+
+    testigos.forEach(function(nombre,i){
       espacio(C.hTestigo);
       celda(x0,wl,C.hTestigo,'TESTIGOS DEL ACCIDENTE:',
         {bg:C.azul,fg:C.blanco,b:1,izq:1,fs:C.fsEtiqueta});
-      celda(x0+wl,wn,C.hTestigo,r[0],{bg:C.plomo,b:1,fs:C.fsEtiqueta});
-      celda(x0+wl+wn,wv,C.hTestigo,r[1]);
+      celda(x0+wl,wn,C.hTestigo,'N° '+String(i+1).padStart(2,'0'),
+        {bg:C.plomo,b:1,fs:C.fsEtiqueta});
+      celda(x0+wLbl,wv,C.hTestigo,nombre);
       y+=C.hTestigo;
     });
 
-    filaDato('SUPERVISOR DE TURNO:', d.sup);
-    filaDato('DAÑO CAUSADO:', d.dano);
+    /* Supervisor y daño con el mismo ancho de etiqueta */
+    [['SUPERVISOR DE TURNO:',d.sup],['DAÑO CAUSADO:',d.dano]].forEach(function(r){
+      const wv2=tw-wLbl;
+      const h=Math.max(
+        altoTexto(r[0],wLbl,C.fsEtiqueta),
+        altoTexto(r[1],wv2,C.fsDato)
+      );
+      espacio(h);
+      celda(x0,wLbl,h,r[0],{bg:C.azul,fg:C.blanco,b:1,izq:1,fs:C.fsEtiqueta});
+      celda(x0+wLbl,wv2,h,r[1]);
+      y+=h;
+    });
   }
 
   y+=C.sepBloque;
@@ -649,43 +670,68 @@ function dibujar(pdf,d){
   /* ══ 5. EVIDENCIA FOTOGRÁFICA ══ */
   banda('5. EVIDENCIA FOTOGRÁFICA');
 
-  if(!FOTOS.length){
-    espacio(C.altoVacio);
-    celda(x0,tw,C.altoVacio,'');
-    y+=C.altoVacio;
-  } else {
+    {
     const porFila=C.fotosPorFila;
     const gap=C.gapFoto;
-    const alto=C.altoFoto;
+    const mg=C.margenFoto;
+    const altoFila=C.altoFilaFoto;
     const ancho=(tw-gap*(porFila-1))/porFila;
+    const altoImg=altoFila-mg*2;
 
-    for(let i=0;i<FOTOS.length;i+=porFila){
-      const fila=FOTOS.slice(i,i+porFila);
-      espacio(alto+gap);
+    if(!FOTOS.length){
+      espacio(C.altoVacio);
+      celda(x0,tw,C.altoVacio,'');
+      y+=C.altoVacio;
+    } else {
+      /* Se agrupa en filas de tres */
+      const filas=[];
+      for(let i=0;i<FOTOS.length;i+=porFila){
+        filas.push(FOTOS.slice(i,i+porFila));
+      }
 
-      // Si la fila tiene menos fotos que el máximo, se centra.
-      const usado=fila.length*ancho+(fila.length-1)*gap;
-      let fx=x0+(tw-usado)/2;
+      let i=0;
+      while(i<filas.length){
+        /* Cuántas filas caben en lo que queda de página */
+        let caben=Math.floor((yLimite-y)/altoFila);
 
-      fila.forEach(f=>{
-        // La imagen se ajusta al marco sin deformarse.
-        let w=ancho, h=w/f.ratio;
-        if(h>alto){ h=alto; w=h*f.ratio; }
+        if(caben<1){
+          pdf.addPage(); pagina++; y=C.margenTop; encabezado();
+          banda('5. EVIDENCIA FOTOGRÁFICA (continuación)');
+          continue;
+        }
 
-        line(C.negro);
-        pdf.rect(fx,y,ancho,alto,'S');
+        const grupo=filas.slice(i,i+caben);
+        const alto=grupo.length*altoFila;
 
-        try{
-          pdf.addImage(f.data,'JPEG',
-            fx+(ancho-w)/2, y+(alto-h)/2, w, h);
-        }catch(x){}
+        /* Un solo recuadro para todo el grupo de esta página */
+        fill(C.blanco); line(C.negro);
+        pdf.rect(x0,y,tw,alto,'FD');
 
-        fx+=ancho+gap;
-      });
+        grupo.forEach(function(fila,f){
+          const yFila=y+f*altoFila;
 
-      y+=alto+gap;
+          /* Si la fila tiene menos de tres, se centra */
+          const usado=fila.length*ancho+(fila.length-1)*gap;
+          let fx=x0+(tw-usado)/2;
+
+          fila.forEach(function(foto){
+            let w=ancho, h=w/foto.ratio;
+            if(h>altoImg){ h=altoImg; w=h*foto.ratio; }
+
+            try{
+              pdf.addImage(foto.data,'JPEG',
+                fx+(ancho-w)/2, yFila+mg+(altoImg-h)/2, w, h);
+            }catch(x){}
+
+            fx+=ancho+gap;
+          });
+        });
+
+        y+=alto;
+        i+=caben;
+      }
     }
-    y-=gap;
+  }
   }
 
   y+=C.sepBloque;
