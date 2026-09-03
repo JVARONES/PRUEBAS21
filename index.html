@@ -149,8 +149,11 @@ const LOGO_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAACAAAAAG4CAYAAADRpgf7AAAQAElEQVR4Aez
 
 function agregarLogoPDF(pdf, y){
   const src = 'data:image/png;base64,' + LOGO_BASE64;
-pdf.addImage(src, 'PNG', 8, y, 30, 6.45);
-alert('ESTOY USANDO EL LOGO DE 15 x 3 MM');
+
+  alert('ESTOY EJECUTANDO ESTE HTML');
+
+  pdf.addImage(src, 'PNG', 8, y, 30, 6.45);
+}
 
   'use strict';
 
