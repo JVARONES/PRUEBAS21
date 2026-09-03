@@ -82,6 +82,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#004154}
 
 <div id="testigos"></div>
 <button class="btn sec" id="btnAgregarTestigo">+ Agregar testigo</button>
+<div style="margin-top:8px;font-size:11px;color:#687a80">Puedes dejar 0 testigos. El formato se conservará y mostrará “-”.</div>
 
 <div class="g2" style="margin-top:14px">
 <div><label>SUPERVISOR DE TURNO</label><input id="sup" value="Barzola Tinoco Víctor"></div>
@@ -152,11 +153,7 @@ let trabajadores=[{
 }];
 
 let vehiculos=[];
-let testigos=[
- {nom:'Díaz Yenque Pier'},
- {nom:'Obregón Torres Aldo'},
- {nom:'Oliveros Silva Rosmery'}
-];
+let testigos=[];
 
 let fotos=[],firma=null,firmaRatio=2;
 
@@ -210,7 +207,7 @@ $('btnAgregarVehiculo').addEventListener('click',()=>{
 function pintarTestigos(){
  $('testigos').innerHTML=testigos.map((v,i)=>`
  <div class="inv">
- ${testigos.length>1?`<button class="del" data-test-del="${i}">×</button>`:''}
+ <button class="del" data-test-del="${i}">×</button>
  <div><label>TESTIGO N° ${String(i+1).padStart(2,'0')}</label>
  <input data-test-i="${i}" data-k="nom" value="${escapeHtml(v.nom)}"></div>
  </div>`).join('');
@@ -520,7 +517,7 @@ async function generarPDF(descargar=true){
 
   pdf.setTextColor(...negro);
   pdf.setFontSize(10);
-  pdf.text('REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE',105,y+5,{align:'center'});
+  pdf.text('REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE - FLASH REPORT',105,y+5,{align:'center'});
 
   pdf.setFontSize(9);
   pdf.text('FLASH REPORT',105,y+10,{align:'center'});
@@ -747,7 +744,8 @@ async function generarPDF(descargar=true){
  const wTestDato=W-wTestLabel-wTestNum; // 145.5
  const hTest=4;
 
- tests.forEach((s,i)=>{
+ if(!tests.length){
+  // Si no hay testigos, la fila permanece visible y se muestra "-".
   newPageIf(hTest);
 
   cell(M,wTestLabel,hTest,'TESTIGOS DEL ACCIDENTE:',{
@@ -758,16 +756,38 @@ async function generarPDF(descargar=true){
    fs:6
   });
 
-  cell(M+wTestLabel,wTestNum,hTest,'N° '+String(i+1).padStart(2,'0'),{
+  cell(M+wTestLabel,wTestNum,hTest,'-',{
    bg:plomo,
    bold:true,
    fs:6
   });
 
-  cell(M+wTestLabel+wTestNum,wTestDato,hTest,s,{fs:6});
+  cell(M+wTestLabel+wTestNum,wTestDato,hTest,'-',{fs:6});
 
   y+=hTest;
- });
+ }else{
+  tests.forEach((s,i)=>{
+   newPageIf(hTest);
+
+   cell(M,wTestLabel,hTest,'TESTIGOS DEL ACCIDENTE:',{
+    bg:azul,
+    fg:blanco,
+    bold:true,
+    left:true,
+    fs:6
+   });
+
+   cell(M+wTestLabel,wTestNum,hTest,'N° '+String(i+1).padStart(2,'0'),{
+    bg:plomo,
+    bold:true,
+    fs:6
+   });
+
+   cell(M+wTestLabel+wTestNum,wTestDato,hTest,s,{fs:6});
+
+   y+=hTest;
+  });
+ }
 
  row('SUPERVISOR DE TURNO:',$('sup').value);
  row('DAÑO CAUSADO:',$('dano').value);
@@ -1177,7 +1197,7 @@ async function generarExcel(){
   mergeCell(1,1,C,'INDRA GROUP',{bg:AZ,color:BL,bold:true,size:13,h:'left'});
   rowHeight(1,7);
 
-  mergeCell(2,1,C,'REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE',{bg:AZ,color:BL,bold:true,size:8.5,h:'left'});
+  mergeCell(2,1,C,'REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE - FLASH REPORT',{bg:AZ,color:BL,bold:true,size:8.5,h:'left'});
   rowHeight(2,5);
 
   mergeCell(3,1,97,'SGSST_INDRAGROUP_F 034',{bold:true,size:6.5,h:'left'});
@@ -1262,12 +1282,20 @@ async function generarExcel(){
 
   const testsExcel=testigos.map(v=>String(v.nom||'').trim()).filter(Boolean);
 
-  testsExcel.forEach((v,i)=>{
+  if(!testsExcel.length){
+   // Igual que en el PDF: el bloque de testigos no desaparece.
    mergeCell(r,1,40,'TESTIGOS DEL ACCIDENTE:',{bg:AZ,color:BL,bold:true,size:6,h:'left'});
-   mergeCell(r,41,49,`N° ${String(i+1).padStart(2,'0')}`,{bg:PL,bold:true,size:6});
-   mergeCell(r,50,194,v,{size:6,h:'left'});
+   mergeCell(r,41,49,'-',{bg:PL,bold:true,size:6});
+   mergeCell(r,50,194,'-',{size:6});
    rowHeight(r,4);r++;
-  });
+  }else{
+   testsExcel.forEach((v,i)=>{
+    mergeCell(r,1,40,'TESTIGOS DEL ACCIDENTE:',{bg:AZ,color:BL,bold:true,size:6,h:'left'});
+    mergeCell(r,41,49,`N° ${String(i+1).padStart(2,'0')}`,{bg:PL,bold:true,size:6});
+    mergeCell(r,50,194,v,{size:6,h:'left'});
+    rowHeight(r,4);r++;
+   });
+  }
 
   mergeCell(r,1,97,'SUPERVISOR DE TURNO:',{bg:AZ,color:BL,bold:true,size:6,h:'left'});
   mergeCell(r,98,194,'DAÑO CAUSADO:',{bg:AZ,color:BL,bold:true,size:6,h:'left'});
@@ -1433,6 +1461,71 @@ async function generarExcel(){
   toast('No se pudo generar el Excel: '+(err.message||'error desconocido'),true);
  }
 }
+
+
+let pdfPreviewUrl=null;
+let pdfPreviewData=null;
+
+function cerrarPreview(){
+ $('pdfModal').classList.remove('open');
+ $('pdfModal').setAttribute('aria-hidden','true');
+ $('pdfFrame').src='about:blank';
+
+ if(pdfPreviewUrl){
+  URL.revokeObjectURL(pdfPreviewUrl);
+  pdfPreviewUrl=null;
+ }
+ pdfPreviewData=null;
+}
+
+$('btnPreview').addEventListener('click',async()=>{
+ try{
+  const result=await generarPDF(false);
+
+  if(!result){
+   toast('No se pudo generar la vista previa del PDF',true);
+   return;
+  }
+
+  if(pdfPreviewUrl)URL.revokeObjectURL(pdfPreviewUrl);
+
+  pdfPreviewUrl=result.url;
+  pdfPreviewData=result;
+
+  $('pdfFrame').src=pdfPreviewUrl;
+  $('pdfModal').classList.add('open');
+  $('pdfModal').setAttribute('aria-hidden','false');
+ }catch(err){
+  console.error(err);
+  toast('No se pudo generar la vista previa del PDF',true);
+ }
+});
+
+$('btnCerrarPreview').addEventListener('click',cerrarPreview);
+$('btnCerrarPreview2').addEventListener('click',cerrarPreview);
+
+$('btnDescargarDesdePreview').addEventListener('click',()=>{
+ if(!pdfPreviewData)return;
+
+ const a=document.createElement('a');
+ a.href=pdfPreviewData.url;
+ a.download=pdfPreviewData.nombre;
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+
+ toast('PDF descargado correctamente');
+});
+
+$('pdfModal').addEventListener('click',e=>{
+ if(e.target===$('pdfModal'))cerrarPreview();
+});
+
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape' && $('pdfModal').classList.contains('open')){
+  cerrarPreview();
+ }
+});
 
 $('btnExcel').addEventListener('click',()=>{
  generarExcel().catch(err=>{console.error(err);toast('No se pudo generar el Excel',true);});
