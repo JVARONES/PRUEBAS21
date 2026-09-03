@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Flash Report F034</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,Segoe UI,sans-serif;background:#f5f6f4;color:#17343c;font-size:14px}
@@ -82,7 +83,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#004154}
 </div></div>
 
 <div class="card"><div class="ch">5 · EVIDENCIA FOTOGRÁFICA</div><div class="cb">
-<div class="zone" id="zonaFotos"><strong>Seleccionar imágenes</strong><span>3 por fila · Puedes seleccionar varias imágenes</span></div>
+<div class="zone" id="zonaFotos"><strong>Seleccionar imágenes</strong><span>4 por fila · Puedes seleccionar varias imágenes</span></div>
 <input type="file" id="fotoInput" accept="image/*" multiple hidden>
 <div class="fotos" id="fotos"></div>
 </div></div>
@@ -102,7 +103,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#004154}
 </div>
 </div></div>
 
-<div class="row"><button class="btn pri" id="btnPDF">Generar PDF</button></div>
+<div class="row"><button class="btn pri" id="btnPDF">Generar PDF</button><button class="btn sec" id="btnExcel">Descargar Excel editable</button></div>
 </div>
 <script>
 'use strict';
@@ -186,9 +187,9 @@ $('fotoInput').addEventListener('change',()=>{
    const img=new Image();
 
    img.onload=()=>{
-    // Optimización para PDF: máximo 1200 px en el lado mayor,
-    // conservando proporción y comprimiendo a JPEG de calidad 70%.
-    const maxPx=1200;
+    // Optimización: máximo 1400 px en el lado mayor,
+    // conservando proporción y comprimiendo a JPEG de calidad 72%.
+    const maxPx=1400;
     const scale=Math.min(1,maxPx/Math.max(img.naturalWidth,img.naturalHeight));
     const c=document.createElement('canvas');
     c.width=Math.max(1,Math.round(img.naturalWidth*scale));
@@ -200,7 +201,7 @@ $('fotoInput').addEventListener('change',()=>{
     ctx.drawImage(img,0,0,c.width,c.height);
 
     fotos.push({
-     data:c.toDataURL('image/jpeg',.70),
+     data:c.toDataURL('image/jpeg',.72),
      ratio:img.naturalWidth/img.naturalHeight
     });
 
@@ -645,7 +646,7 @@ async function generarPDF(){
 
  band('5. EVIDENCIA FOTOGRÁFICA');
 
- const margenFoto=4;
+ const margenFoto=1;
  const fh=52;
  const separacionFoto=3;
  const maxFotosFila=4;
@@ -668,7 +669,7 @@ async function generarPDF(){
    pdf.setDrawColor(...negro);
    pdf.rect(M,y,W,fh,'FD');
 
-   const cuadroW=(W-separacionFoto*(maxFotosFila-1))/maxFotosFila;
+   const cuadroW=(W-separacionFoto*(n-1))/n;
 
    group.forEach((f,j)=>{
     const bx=M+j*(cuadroW+separacionFoto);
@@ -763,6 +764,202 @@ async function generarPDF(){
  pdf.save(nombreArchivo);
  toast('PDF generado correctamente');
 }
+
+
+
+// =========================================================
+//  EXPORTAR EXCEL EDITABLE
+// =========================================================
+function excelCell(ws, addr, value, opts={}){
+ const c=ws.getCell(addr);
+ c.value=value??'';
+ c.font={name:'Arial',size:opts.size||9,bold:!!opts.bold,color:{argb:opts.color||'17343C'}};
+ c.alignment={horizontal:opts.h||'left',vertical:'middle',wrapText:true};
+ c.fill={type:'pattern',pattern:'solid',fgColor:{argb:opts.bg||'FFFFFFFF'}};
+ c.border={
+  top:{style:'thin',color:{argb:'00000000'}},
+  left:{style:'thin',color:{argb:'00000000'}},
+  bottom:{style:'thin',color:{argb:'00000000'}},
+  right:{style:'thin',color:{argb:'00000000'}}
+ };
+ return c;
+}
+
+function excelRange(ws,range,value,opts={}){
+ ws.mergeCells(range);
+ const c=ws.getCell(range.split(':')[0]);
+ c.value=value??'';
+ c.font={name:'Arial',size:opts.size||9,bold:!!opts.bold,color:{argb:opts.color||'17343C'}};
+ c.alignment={horizontal:opts.h||'left',vertical:'middle',wrapText:true};
+ c.fill={type:'pattern',pattern:'solid',fgColor:{argb:opts.bg||'FFFFFFFF'}};
+ const [a,b]=range.split(':');
+ const ca=ws.getCell(a), cb=ws.getCell(b);
+ for(let r=ca.row;r<=cb.row;r++){
+  for(let col=ca.col;col<=cb.col;col++){
+   const x=ws.getCell(r,col);
+   x.border={
+    top:{style:'thin',color:{argb:'00000000'}},
+    left:{style:'thin',color:{argb:'00000000'}},
+    bottom:{style:'thin',color:{argb:'00000000'}},
+    right:{style:'thin',color:{argb:'00000000'}}
+   };
+  }
+ }
+}
+
+function excelSection(ws,row,title){
+ excelRange(ws,`A${row}:L${row}`,title,{bg:'FFE1E0D7',color:'FF004154',bold:true,size:9,h:'left'});
+ ws.getRow(row).height=20;
+ return row+1;
+}
+
+function excelPhotoBase64(data){
+ return data.replace(/^data:image\/jpeg;base64,/,'');
+}
+
+async function generarExcel(){
+ if(typeof ExcelJS==='undefined'){
+  toast('No se cargó el módulo de Excel. Revisa tu conexión a Internet.',true);
+  return;
+ }
+
+ const wb=new ExcelJS.Workbook();
+ wb.creator='Flash Report F034';
+ wb.subject='Reporte Preliminar de Accidente e Incidente';
+ wb.title='Flash Report F034';
+ wb.company='INDRA GROUP';
+ wb.created=new Date();
+
+ const ws=wb.addWorksheet('FLASH REPORT',{
+  pageSetup:{paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:0},
+  properties:{defaultRowHeight:15}
+ });
+ ws.views=[{showGridLines:false}];
+
+ // 12 columnas: permiten conservar una distribución cercana al A4.
+ for(let i=1;i<=12;i++) ws.getColumn(i).width=10.8;
+
+ // Encabezado
+ excelRange(ws,'A1:L1','INDRA GROUP',{bg:'FF004154',color:'FFFFFFFF',bold:true,size:14,h:'left'});
+ ws.getRow(1).height=28;
+ excelRange(ws,'A2:L2','REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE — FLASH REPORT',{bg:'FF004154',color:'FFFFFFFF',bold:true,size:11,h:'left'});
+ ws.getRow(2).height=22;
+ excelRange(ws,'A3:H3','SGSST_INDRAGROUP_F 034',{bold:true,size:9});
+ excelRange(ws,'I3:J3','VERSIÓN 01',{bold:true,size:9,h:'center'});
+ excelRange(ws,'K3:L3','FECHA 2024-12-11',{bold:true,size:9,h:'center'});
+
+ let r=5;
+ r=excelSection(ws,r,'1. DATOS GENERALES DEL EVENTO');
+ excelRange(ws,`A${r}:D${r}`,'TIPO DE EVENTO',{bg:'FFE1E0D7',bold:true,size:8,h:'center'});
+ excelRange(ws,`E${r}:L${r}`,'GERENCIA / RESP. DEL PROY. / ÁREA',{bg:'FFE1E0D7',bold:true,size:8,h:'center'}); r++;
+ excelRange(ws,`A${r}:D${r}`,$('tipo').value,{size:8});
+ excelRange(ws,`E${r}:L${r}`,$('gerencia').value,{size:8}); r++;
+ excelRange(ws,`A${r}:D${r}`,'EMPRESA',{bg:'FFE1E0D7',bold:true,size:8,h:'center'});
+ excelRange(ws,`E${r}:F${r}`,'FECHA',{bg:'FFE1E0D7',bold:true,size:8,h:'center'});
+ excelRange(ws,`G${r}:H${r}`,'HORA',{bg:'FFE1E0D7',bold:true,size:8,h:'center'});
+ excelRange(ws,`I${r}:L${r}`,'PROYECTO',{bg:'FFE1E0D7',bold:true,size:8,h:'center'}); r++;
+ excelRange(ws,`A${r}:D${r}`,$('empresa').options[$('empresa').selectedIndex]?.text||$('empresa').value,{size:8});
+ excelRange(ws,`E${r}:F${r}`,fechaDMY($('fecha').value),{size:8,h:'center'});
+ excelRange(ws,`G${r}:H${r}`,$('hora').value,{size:8,h:'center'});
+ excelRange(ws,`I${r}:L${r}`,$('proyecto').value,{size:8}); r++;
+ excelRange(ws,`A${r}:D${r}`,'LUGAR EXACTO DEL EVENTO',{bg:'FFE1E0D7',bold:true,size:8,h:'center'});
+ excelRange(ws,`E${r}:L${r}`,$('lugar').value,{size:8}); r++;
+ ws.getRow(r-1).height=28; r+=1;
+
+ r=excelSection(ws,r,'2. PERSONAS INVOLUCRADAS');
+ const headers=['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA'];
+ ['A:D','E:G','H:J','K:L'].forEach((range,i)=>excelRange(ws,`${range.split(':')[0]}${r}:${range.split(':')[1]}${r}`,headers[i],{bg:'FFE1E0D7',bold:true,size:8,h:'center'}));
+ r++;
+ trabajadores.forEach(t=>{
+  excelRange(ws,`A${r}:D${r}`,t.nom,{size:8});
+  excelRange(ws,`E${r}:G${r}`,t.emp,{size:8});
+  excelRange(ws,`H${r}:J${r}`,t.car,{size:8});
+  excelRange(ws,`K${r}:L${r}`,t.area,{size:8});
+  ws.getRow(r).height=24; r++;
+ });
+ r++;
+
+ r=excelSection(ws,r,'3. VEHÍCULOS INVOLUCRADOS Y TESTIGOS');
+ ['MARCA','MODELO','EMPRESA','PLACA'].forEach((h,i)=>excelRange(ws,`${String.fromCharCode(65+i*3)}${r}:${String.fromCharCode(67+i*3)}${r}`,h,{bg:'FFE1E0D7',bold:true,size:8,h:'center'}));
+ r++;
+ const veh=[$('marca').value,$('modelo').value,$('vempresa').value,$('placa').value];
+ veh.forEach((v,i)=>excelRange(ws,`${String.fromCharCode(65+i*3)}${r}:${String.fromCharCode(67+i*3)}${r}`,v,{size:8,h:'center'}));
+ r++;
+ const testigos=[$('test1').value,$('test2').value,$('test3').value];
+ testigos.forEach((v,i)=>{
+  excelRange(ws,`A${r}:C${r}`,'TESTIGOS DEL ACCIDENTE:',{bg:'FFE1E0D7',bold:true,size:8});
+  excelRange(ws,`D${r}:D${r}`,`N° ${String(i+1).padStart(2,'0')}`,{bg:'FFE1E0D7',bold:true,size:8,h:'center'});
+  excelRange(ws,`E${r}:L${r}`,v,{size:8}); r++;
+ });
+ r++;
+
+ r=excelSection(ws,r,'4. BREVE DESCRIPCIÓN DEL EVENTO');
+ excelRange(ws,`A${r}:L${r}`,$('desc').value,{size:8});
+ ws.getRow(r).height=Math.max(60,Math.min(140,18+String($('desc').value||'').length/3)); r+=2;
+
+ r=excelSection(ws,r,'5. EVIDENCIA FOTOGRÁFICA');
+ if(!fotos.length){
+  excelRange(ws,`A${r}:L${r}`,'',{size:8}); ws.getRow(r).height=180; r+=12;
+ }else{
+  for(let i=0;i<fotos.length;i+=4){
+   const group=fotos.slice(i,i+4);
+   const startRow=r;
+   const endRow=r+10;
+   excelRange(ws,`A${startRow}:L${endRow}`,'',{size:8});
+   ws.getRow(startRow).height=22;
+   for(let rr=startRow+1;rr<=endRow;rr++) ws.getRow(rr).height=18;
+   group.forEach((f,j)=>{
+    try{
+     const imageId=wb.addImage({base64:excelPhotoBase64(f.data),extension:'jpeg'});
+     ws.addImage(imageId,{tl:{col:j*3+0,row:startRow-1},br:{col:j*3+3,row:endRow}});
+    }catch(e){}
+   });
+   r=endRow+1;
+  }
+ }
+ r++;
+
+ r=excelSection(ws,r,'6. RESPONSABLE DEL REGISTRO');
+ ['NOMBRES Y APELLIDOS','CARGO / PUESTO DE TRABAJO','FECHA DEL REGISTRO','FIRMA'].forEach((h,i)=>{
+  const ranges=['A:D','E:G','H:J','K:L'];
+  const [a,b]=ranges[i].split(':');
+  excelRange(ws,`${a}${r}:${b}${r}`,h,{bg:'FFE1E0D7',bold:true,size:8,h:'center'});
+ });
+ r++;
+ excelRange(ws,`A${r}:D${r}`,$('rnom').value,{size:8});
+ excelRange(ws,`E${r}:G${r}`,$('rcar').value,{size:8});
+ excelRange(ws,`H${r}:J${r}`,fechaDMY($('rfec').value),{size:8,h:'center'});
+ excelRange(ws,`K${r}:L${r}`,'',{size:8,h:'center'});
+ ws.getRow(r).height=65;
+ if(firma){
+  try{
+   const ext=firma.startsWith('data:image/png')?'png':'jpeg';
+   const b64=firma.replace(/^data:image\/(png|jpeg);base64,/,'');
+   const id=wb.addImage({base64:b64,extension:ext});
+   ws.addImage(id,{tl:{col:10.2,row:r-1+0.15},br:{col:11.8,row:r-0.15}});
+  }catch(e){}
+ }
+
+ // Configuración de impresión y apariencia.
+ ws.pageSetup.margins={left:0.25,right:0.25,top:0.35,bottom:0.35,header:0.1,footer:0.1};
+ ws.printArea=`A1:L${r}`;
+ ws.headerFooter.oddFooter='Página &P de &N';
+ ws.freezePanes={ySplit:5};
+
+ const buffer=await wb.xlsx.writeBuffer();
+ const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+ a.href=url;
+ a.download=(($('fecha').value||'FECHA')+' FLASH REPORT '+($('proyecto').value||'PROYECTO').replace(/[\\/:*?"<>|]/g,'_')+'.xlsx');
+ document.body.appendChild(a); a.click(); a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+ toast('Excel editable generado correctamente');
+}
+
+$('btnExcel').addEventListener('click',()=>{
+ generarExcel().catch(err=>{console.error(err);toast('No se pudo generar el Excel',true);});
+});
 
 $('btnPDF').addEventListener('click',generarPDF);
 </script>
