@@ -23,7 +23,6 @@ header p{font-size:12px;opacity:.7;margin-top:3px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.full{grid-column:1/-1}
 label{display:block;font-size:11px;font-weight:700;color:#52666d;
   margin-bottom:6px;letter-spacing:.3px}
 input,select,textarea{width:100%;border:1px solid var(--borde);border-radius:8px;
@@ -36,18 +35,29 @@ textarea{resize:vertical;min-height:90px;line-height:1.55}
 .pri:hover{background:#07556a}
 .sec{background:#fff;color:var(--azul);border:1px solid var(--borde)}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-.inv{border:1px solid var(--borde);border-radius:10px;padding:14px;margin-bottom:10px;
-  background:#fafbfa}
-.inv .g4{gap:10px}
+.inv{border:1px solid var(--borde);border-radius:10px;padding:14px;
+  margin-bottom:10px;background:#fafbfa}
 .del{background:transparent;border:0;color:var(--rojo);font-size:19px;
   font-weight:800;cursor:pointer;float:right}
-.hint{font-size:11px;color:var(--muted);margin-top:5px}
 .fbox{display:flex;align-items:center;gap:14px}
 .fprev{width:150px;height:60px;border:1.5px dashed var(--borde);border-radius:8px;
   display:grid;place-items:center;background:#fafbfa;font-size:11px;color:var(--muted)}
 .fprev img{max-width:142px;max-height:54px;object-fit:contain}
 .nota{background:#fdf8ec;border-left:3px solid #d9b262;border-radius:8px;
   padding:11px 14px;font-size:12px;color:#6b5a30;line-height:1.6;margin-top:12px}
+.zone{border:1.5px dashed var(--borde);border-radius:10px;padding:26px;
+  text-align:center;cursor:pointer;background:#fafbfa}
+.zone:hover{border-color:var(--azul);background:#f3f7f6}
+.zone strong{display:block;font-size:13px;color:var(--azul)}
+.zone span{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+.fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:10px;margin-top:14px}
+.foto{position:relative;border:1px solid var(--borde);border-radius:8px;
+  overflow:hidden;background:#fff;aspect-ratio:4/3}
+.foto img{width:100%;height:100%;object-fit:cover;display:block}
+.foto button{position:absolute;top:4px;right:4px;width:22px;height:22px;
+  border:0;border-radius:50%;background:rgba(164,72,72,.92);color:#fff;
+  font-size:14px;font-weight:800;cursor:pointer;line-height:1}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
   background:var(--azul);color:#fff;padding:12px 20px;border-radius:9px;
   font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:999}
@@ -76,12 +86,12 @@ textarea{resize:vertical;min-height:90px;line-height:1.55}
         <label>EMPRESA</label>
         <select id="empresa">
           <option value="0">INDRA PERÚ S.A.</option>
-          <option value="1" selected>INDRA T & D S.A.C.</option>
+          <option value="1" selected>INDRA T &amp; D S.A.C.</option>
           <option value="2">NUEK PAYMENTS PERÚ S.A.C.</option>
         </select>
       </div>
     </div>
-    <div class="full" style="margin-top:14px">
+    <div style="margin-top:14px">
       <label>GERENCIA / RESPONSABLE DEL PROYECTO / ÁREA</label>
       <input type="text" id="gerencia" value="Abel Cieza">
     </div>
@@ -90,7 +100,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.55}
       <div><label>HORA</label><input type="time" id="hora" value="22:15"></div>
       <div><label>PROYECTO</label><input type="text" id="proyecto" value="AEROPUERTO"></div>
     </div>
-    <div class="full" style="margin-top:14px">
+    <div style="margin-top:14px">
       <label>LUGAR EXACTO DEL EVENTO</label>
       <input type="text" id="lugar" value="Facility 2516 - P10 - Nuevo Aeropuerto Jorge Chávez">
     </div>
@@ -129,7 +139,20 @@ textarea{resize:vertical;min-height:90px;line-height:1.55}
 <div class="card">
   <div class="ch">4 · BREVE DESCRIPCIÓN DEL EVENTO</div>
   <div class="cb">
-    <textarea id="desc" style="min-height:140px">El día 28/05/2026 aproximadamente a las 22:15 horas, el trabajador Gianfranco Ludeña se encontraba realizando actividades de coordinación previas al mantenimiento programado en el Facility 2516 - P10. Al descender por la escalera de acceso, pisó de forma irregular el último peldaño, sufriendo una torcedura del tobillo izquierdo. Fue asistido de inmediato por el personal presente y trasladado al tópico para su evaluación.</textarea>
+    <textarea id="desc" style="min-height:150px">El día 28/05/2026 aproximadamente a las 22:15 horas, el trabajador Gianfranco Ludeña se encontraba realizando actividades de coordinación previas al mantenimiento programado en el Facility 2516 - P10. Al descender por la escalera de acceso, pisó de forma irregular el último peldaño, sufriendo una torcedura del tobillo izquierdo. Fue asistido de inmediato por el personal presente y trasladado al tópico para su evaluación.</textarea>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch">5 · EVIDENCIA FOTOGRÁFICA</div>
+  <div class="cb">
+    <div class="zone" onclick="document.getElementById('fotoInput').click()">
+      <strong>Seleccionar imágenes</strong>
+      <span>Se acomodan solas: 3 por fila, centradas si son menos</span>
+    </div>
+    <input type="file" id="fotoInput" accept="image/*" multiple style="display:none"
+      onchange="cargarFotos(this)">
+    <div class="fotos" id="fotos"></div>
   </div>
 </div>
 
@@ -154,8 +177,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.55}
         </div>
         <input type="file" id="finput" accept="image/*" style="display:none" onchange="cargarFirma(this)">
       </div>
-      <div class="nota">La firma se guarda solo en este navegador. No se envía ni se almacena
-      en ningún archivo compartido.</div>
+      <div class="nota">La firma se guarda solo en este navegador. No se envía ni se
+      almacena en ningún archivo compartido.</div>
     </div>
   </div>
 </div>
@@ -169,16 +192,85 @@ textarea{resize:vertical;min-height:90px;line-height:1.55}
 <script>
 const $=id=>document.getElementById(id);
 
+/* ════════════════════════════════════════════════════════════
+   CONFIGURACIÓN DEL PDF
+   Cambia solo estos números para ajustar el diseño.
+   Todas las medidas están en milímetros.
+   ════════════════════════════════════════════════════════════ */
+const CFG = {
+
+  /* ---- Hoja ---- */
+  margen:        8,      // margen izquierdo y derecho
+  margenTop:     8,      // margen superior
+  margenBottom:  8,      // margen inferior (dónde corta la página)
+
+  /* ---- Alturas de fila ---- */
+  hBanda:        5,      // franja azul de cada sección
+  hFila:         6,      // fila normal de un dato
+  hFilaTrab:     7,      // fila de cada trabajador
+  hCabecera:     6,      // fila de encabezados de tabla
+  hTestigo:      6,      // cada fila de testigo
+  hFirma:       14,      // fila del responsable con la firma
+
+  /* ---- Separación entre bloques ---- */
+  sepBloque:     3,      // espacio en blanco entre secciones
+  sepVehTest:    3,      // espacio entre PLACA y los testigos
+  sepTrabVeh:    3,      // espacio entre trabajadores y VEHÍCULO
+
+  /* ---- Interlineado ---- */
+  lh:            2.9,    // dentro de una celda
+  lhDesc:        3.4,    // en la descripción del evento
+
+  /* ---- Tamaños de letra (pt) ---- */
+  fsBanda:       7,      // títulos de sección
+  fsEtiqueta:    6,      // etiquetas azules
+  fsDato:        6,      // datos
+  fsDesc:        6.5,    // descripción
+  fsTitulo:     10,      // título del encabezado
+  fsCodigo:      5.5,    // bloque de código arriba a la derecha
+
+  /* ---- Ancho de la columna de etiquetas ---- */
+  wEtiqueta:    52,      // "TIPO DE ACCIDENTE / INCIDENTE:" etc.
+
+  /* ---- TESTIGOS: anchos de las tres columnas ---- */
+  wTestLabel:   52,      // "TESTIGOS DEL ACCIDENTE:"
+  wTestNum:     22,      // "N° 1"
+  // el resto del ancho lo toma el nombre
+
+  /* ---- Trabajadores: anchos de columna ---- */
+  wTrab:      [74, 44, 42, 34],   // nombre, empresa, cargo, área
+
+  /* ---- Vehículo: anchos de columna ---- */
+  wVeh:       [48.5, 48.5, 48.5, 48.5],
+
+  /* ---- Responsable: anchos de columna ---- */
+  wResp:      [62, 48, 42, 42],   // nombre, cargo, fecha, firma
+
+  /* ---- Fecha y hora: anchos ---- */
+  wFechaLbl:    52,
+  wFechaVal:    48,
+  wHoraLbl:     25,
+
+  /* ---- Evidencia fotográfica ---- */
+  fotosPorFila:  3,      // por defecto
+  altoFoto:     42,      // alto de cada foto
+  gapFoto:       3,      // separación entre fotos
+  altoVacio:    24,      // alto del recuadro si no hay fotos
+
+  /* ---- Colores ---- */
+  azul:  '#004154',
+  plomo: '#E1E0D7',
+  negro: '#000000',
+  blanco:'#FFFFFF'
+};
+
 const EMPRESAS=[
-  {nom:'INDRA PERÚ S.A.', ruc:'20100123411',
-   dir:'AV. JORGE BASADRE NRO. 233 INT. 901 (ALT.CUADRA 01 JAVIER PRADO OESTE) LIMA - LIMA - SAN ISIDRO'},
-  {nom:'INDRA T & D S.A.C.', ruc:'20604487901',
-   dir:'AV. JORGE BASADRE NRO. 233 INT. 9 LIMA - LIMA - SAN ISIDRO'},
-  {nom:'NUEK PAYMENTS PERÚ S.A.C.', ruc:'20374984838',
-   dir:'AV. JORGE BASADRE NRO. 233 INT. 901 (ALT.1RA CUADRA DE AV.JAVIER PRADO OESTE) LIMA - LIMA - SAN ISIDRO'}
+  {nom:'INDRA PERÚ S.A.', ruc:'20100123411'},
+  {nom:'INDRA T & D S.A.C.', ruc:'20604487901'},
+  {nom:'NUEK PAYMENTS PERÚ S.A.C.', ruc:'20374984838'}
 ];
 
-/* ---------- involucrados ---------- */
+/* ---------- trabajadores ---------- */
 let INVS=[
   {nom:'BRAVO LUDEÑA GIANFRANCO EDUARDO', emp:'INDRA T & D S.A.C.',
    car:'TÉCNICO DE MANTENIMIENTO', area:'MANTENIMIENTO'}
@@ -200,7 +292,6 @@ function pintarInvs(){
       </div>
     </div>`).join('');
 }
-
 function agregarInv(){
   INVS.push({nom:'',emp:EMPRESAS[+$('empresa').value].nom,car:'',area:''});
   pintarInvs();
@@ -219,10 +310,9 @@ function cargarFirma(input){
   r.onload=e=>{
     const img=new Image();
     img.onload=()=>{
-      const esc2=Math.min(1,400/img.naturalWidth);
+      const s=Math.min(1,400/img.naturalWidth);
       const c=document.createElement('canvas');
-      c.width=img.naturalWidth*esc2;
-      c.height=img.naturalHeight*esc2;
+      c.width=img.naturalWidth*s; c.height=img.naturalHeight*s;
       const ctx=c.getContext('2d');
       ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);
       ctx.drawImage(img,0,0,c.width,c.height);
@@ -232,30 +322,72 @@ function cargarFirma(input){
         localStorage.setItem('f034_firma',FIRMA);
         localStorage.setItem('f034_ratio',String(RATIO));
       }catch(x){}
-      verFirma();
-      toast('Firma cargada');
+      verFirma(); toast('Firma cargada');
     };
     img.src=e.target.result;
   };
   r.readAsDataURL(f);
 }
-
 function borrarFirma(){
-  FIRMA=null;
-  localStorage.removeItem('f034_firma');
-  $('finput').value='';
-  verFirma();
+  FIRMA=null; localStorage.removeItem('f034_firma');
+  $('finput').value=''; verFirma();
 }
-
 function verFirma(){
-  $('fprev').innerHTML = FIRMA
-    ? '<img src="'+FIRMA+'">'
-    : '<span>Sin firma</span>';
+  $('fprev').innerHTML = FIRMA ? '<img src="'+FIRMA+'">' : '<span>Sin firma</span>';
   $('fdel').style.display = FIRMA ? 'block' : 'none';
 }
 verFirma();
 
-/* ---------- PDF ---------- */
+/* ---------- fotos ---------- */
+let FOTOS=[];
+
+function cargarFotos(input){
+  const files=[...input.files];
+  if(!files.length) return;
+
+  let pend=files.length;
+
+  files.forEach(f=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        // Se reduce a 900px de ancho: suficiente para imprimir
+        // y mantiene el PDF liviano.
+        const s=Math.min(1,900/img.naturalWidth);
+        const c=document.createElement('canvas');
+        c.width=img.naturalWidth*s; c.height=img.naturalHeight*s;
+        const ctx=c.getContext('2d');
+        ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);
+        ctx.drawImage(img,0,0,c.width,c.height);
+
+        FOTOS.push({
+          data: c.toDataURL('image/jpeg',0.72),
+          ratio: img.naturalWidth/img.naturalHeight
+        });
+
+        if(--pend===0){ verFotos(); toast(FOTOS.length+' imagen(es)'); }
+      };
+      img.onerror=()=>{ if(--pend===0) verFotos(); };
+      img.src=e.target.result;
+    };
+    r.readAsDataURL(f);
+  });
+
+  input.value='';
+}
+
+function quitarFoto(i){ FOTOS.splice(i,1); verFotos(); }
+
+function verFotos(){
+  $('fotos').innerHTML=FOTOS.map((f,i)=>
+    '<div class="foto"><img src="'+f.data+'">'+
+    '<button onclick="quitarFoto('+i+')">×</button></div>').join('');
+}
+
+/* ════════════════════════════════════════════════════════════
+   GENERACIÓN DEL PDF
+   ════════════════════════════════════════════════════════════ */
 function generar(){
   const emp=EMPRESAS[+$('empresa').value];
   const [fy,fm,fd]=$('fecha').value.split('-');
@@ -268,8 +400,7 @@ function generar(){
     vm:$('vm').value, vmo:$('vmo').value, ve:$('ve').value, vp:$('vp').value,
     t1:$('t1').value, t2:$('t2').value, t3:$('t3').value,
     sup:$('sup').value, dano:$('dano').value, desc:$('desc').value,
-    rnom:$('rnom').value, rcar:$('rcar').value,
-    rfec:rd+'/'+rm+'/'+ry
+    rnom:$('rnom').value, rcar:$('rcar').value, rfec:rd+'/'+rm+'/'+ry
   };
 
   try{
@@ -293,196 +424,304 @@ function hora12(t){
 }
 
 function dibujar(pdf,d){
-  const AZ='#004154', GR='#E1E0D7', BK='#000000', WH='#FFFFFF';
-  const ml=8, tw=194, x0=ml;
-  const LH=2.9;
+  const C=CFG;
+  const AH=297;                       // alto de A4
+  const tw=210-C.margen*2;            // ancho útil
+  const x0=C.margen;
+  const yLimite=AH-C.margenBottom;    // más allá de esto, salta de página
+
+  let y=C.margenTop;
+  let pagina=1;
 
   const rgb=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
   const fill=c=>{const[r,g,b]=rgb(c);pdf.setFillColor(r,g,b)};
   const line=c=>{const[r,g,b]=rgb(c);pdf.setDrawColor(r,g,b)};
-  const col=c=>{const[r,g,b]=rgb(c);pdf.setTextColor(r,g,b)};
+  const col =c=>{const[r,g,b]=rgb(c);pdf.setTextColor(r,g,b)};
 
-  let y=8;
   pdf.setLineWidth(0.3);
 
-  /* celda: texto centrado y multilínea, alto fijo */
-  function celda(x,w,h,txt,opts){
-    const o=opts||{};
-    fill(o.bg||WH); line(BK);
-    pdf.rect(x,y,w,h,'FD');
-    col(o.fg||BK);
-    pdf.setFont('helvetica',o.b?'bold':'normal');
-    pdf.setFontSize(o.fs||6);
-    const ls=pdf.splitTextToSize(String(txt||''),w-2.5);
-    const th=(ls.length-1)*LH;
-    const sy=y+h/2-th/2;
-    ls.forEach((l,j)=>{
-      const px = o.izq ? x+1.5 : x+w/2;
-      pdf.text(l,px,sy+j*LH,{align:o.izq?'left':'center',baseline:'middle'});
-    });
+  /* Encabezado de página */
+  function encabezado(){
+    col(C.azul); pdf.setFont('helvetica','bold'); pdf.setFontSize(13);
+    pdf.text('INDRA',x0+2,y+7);
+    col('#687a80'); pdf.setFontSize(7);
+    pdf.text('GROUP',x0+2,y+11);
+
+    col(C.negro); pdf.setFont('helvetica','bold'); pdf.setFontSize(C.fsTitulo);
+    pdf.text('REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE',x0+tw/2,y+5,
+      {align:'center',baseline:'middle'});
+    pdf.setFontSize(C.fsTitulo-1);
+    pdf.text('FLASH REPORT',x0+tw/2,y+10,{align:'center',baseline:'middle'});
+
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(C.fsCodigo);
+    const cx=x0+tw;
+    pdf.text('CÓDIGO: SGSST_INDRAGROUP_F 034',cx,y+2,{align:'right'});
+    pdf.text('VERSIÓN: 01',cx,y+4.5,{align:'right'});
+    pdf.text('FECHA: 2024-12-11',cx,y+7,{align:'right'});
+    pdf.text('Página: '+pagina,cx,y+9.5,{align:'right'});
+
+    y+=16;
   }
 
-  /* fila de una sola celda a todo el ancho */
-  function banda(h,txt,opts){
-    celda(x0,tw,h,txt,opts);
+  /* Salta de página si lo que viene no cabe */
+  function espacio(alto){
+    if(y+alto<=yLimite) return;
+    pdf.addPage();
+    pagina++;
+    y=C.margenTop;
+    encabezado();
+  }
+
+  /* Celda con texto centrado o a la izquierda, alto fijo */
+  function celda(x,w,h,txt,o){
+    o=o||{};
+    fill(o.bg||C.blanco); line(C.negro);
+    pdf.rect(x,y,w,h,'FD');
+    col(o.fg||C.negro);
+    pdf.setFont('helvetica',o.b?'bold':'normal');
+    pdf.setFontSize(o.fs||C.fsDato);
+    const ls=pdf.splitTextToSize(String(txt==null?'':txt),w-2.5);
+    const th=(ls.length-1)*C.lh;
+    const sy=y+h/2-th/2;
+    ls.forEach((l,j)=>pdf.text(l,
+      o.izq ? x+1.5 : x+w/2, sy+j*C.lh,
+      {align:o.izq?'left':'center',baseline:'middle'}));
+  }
+
+  /* Alto necesario para un texto en un ancho dado */
+  function altoTexto(txt,w,fs,minimo){
+    pdf.setFont('helvetica','normal');
+    pdf.setFontSize(fs||C.fsDato);
+    const ls=pdf.splitTextToSize(String(txt==null?'':txt),w-2.5);
+    return Math.max(minimo||C.hFila, ls.length*C.lh+3);
+  }
+
+  /* Franja azul de sección, título a la izquierda */
+  function banda(txt){
+    espacio(C.hBanda);
+    fill(C.azul); line(C.negro);
+    pdf.rect(x0,y,tw,C.hBanda,'FD');
+    col(C.blanco); pdf.setFont('helvetica','bold'); pdf.setFontSize(C.fsBanda);
+    pdf.text(txt,x0+2,y+C.hBanda/2,{baseline:'middle'});
+    y+=C.hBanda;
+  }
+
+  /* Fila etiqueta azul + dato centrado, alto automático */
+  function filaDato(etiqueta,valor){
+    const wv=tw-C.wEtiqueta;
+    const h=Math.max(
+      altoTexto(etiqueta,C.wEtiqueta,C.fsEtiqueta),
+      altoTexto(valor,wv,C.fsDato)
+    );
+    espacio(h);
+    celda(x0,C.wEtiqueta,h,etiqueta,{bg:C.azul,fg:C.blanco,b:1,izq:1,fs:C.fsEtiqueta});
+    celda(x0+C.wEtiqueta,wv,h,valor,{fs:C.fsDato});
     y+=h;
   }
 
-  /* ══ ENCABEZADO ══ */
-  col(AZ); pdf.setFont('helvetica','bold'); pdf.setFontSize(13);
-  pdf.text('INDRA',ml+2,y+7);
-  col('#687a80'); pdf.setFontSize(7);
-  pdf.text('GROUP',ml+2,y+11);
-
-  col(BK); pdf.setFont('helvetica','bold'); pdf.setFontSize(10);
-  pdf.text('REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE',ml+tw/2,y+5,
-    {align:'center',baseline:'middle'});
-  pdf.setFontSize(9);
-  pdf.text('FLASH REPORT',ml+tw/2,y+10,{align:'center',baseline:'middle'});
-
-  pdf.setFont('helvetica','normal'); pdf.setFontSize(5.5);
-  const cx=ml+tw;
-  pdf.text('CÓDIGO: SGSST_INDRAGROUP_F 034',cx,y+2,{align:'right'});
-  pdf.text('VERSIÓN: 01',cx,y+4.5,{align:'right'});
-  pdf.text('FECHA: 2024-12-11',cx,y+7,{align:'right'});
-  pdf.text('Página: 1 de 1',cx,y+9.5,{align:'right'});
-
-  y+=16;
+  encabezado();
 
   /* ══ 1. INFORMACIÓN GENERAL ══ */
-  banda(5,'1. INFORMACIÓN GENERAL',{bg:AZ,fg:WH,b:1,fs:7});
+  banda('1. INFORMACIÓN GENERAL');
 
-  const w1=52, w2=tw-w1;
-  celda(x0,w1,6,'TIPO DE ACCIDENTE / INCIDENTE:',{bg:GR,b:1,izq:1});
-  celda(x0+w1,w2,6,d.tipo,{izq:1});
-  y+=6;
+  filaDato('TIPO DE ACCIDENTE / INCIDENTE:', d.tipo);
+  filaDato('EMPRESA:', d.empresa.nom);
+  filaDato('GERENCIA / RESPONSABLE DEL PROYECTO / ÁREA:', d.gerencia);
 
-  celda(x0,w1,6,'EMPRESA:',{bg:GR,b:1,izq:1});
-  celda(x0+w1,w2,6,d.empresa.nom,{izq:1});
-  y+=6;
+  /* Fecha y hora en una sola fila */
+  {
+    const wl=C.wFechaLbl, wv=C.wFechaVal, whl=C.wHoraLbl;
+    const whv=tw-wl-wv-whl;
+    espacio(C.hFila);
+    celda(x0,wl,C.hFila,'FECHA DE OCURRENCIA:',{bg:C.azul,fg:C.blanco,b:1,izq:1,fs:C.fsEtiqueta});
+    celda(x0+wl,wv,C.hFila,d.fecha);
+    celda(x0+wl+wv,whl,C.hFila,'HORA:',{bg:C.azul,fg:C.blanco,b:1,izq:1,fs:C.fsEtiqueta});
+    celda(x0+wl+wv+whl,whv,C.hFila,d.hora);
+    y+=C.hFila;
+  }
 
-  celda(x0,w1,6,'RUC:',{bg:GR,b:1,izq:1});
-  celda(x0+w1,w2,6,d.empresa.ruc,{izq:1});
-  y+=6;
+  filaDato('LUGAR EXACTO DEL EVENTO:', d.lugar);
 
-  celda(x0,w1,7,'GERENCIA / RESPONSABLE DEL PROYECTO / ÁREA:',{bg:GR,b:1,izq:1});
-  celda(x0+w1,w2,7,d.gerencia,{izq:1});
-  y+=7;
-
-  const a=52, b=48, c=25, e=tw-a-b-c;
-  celda(x0,a,6,'FECHA DE OCURRENCIA:',{bg:GR,b:1,izq:1});
-  celda(x0+a,b,6,d.fecha);
-  celda(x0+a+b,c,6,'HORA:',{bg:GR,b:1,izq:1});
-  celda(x0+a+b+c,e,6,d.hora);
-  y+=6;
-
-  celda(x0,a,6,'LUGAR EXACTO DEL EVENTO:',{bg:GR,b:1,izq:1});
-  celda(x0+a,tw-a,6,d.lugar,{izq:1});
-  y+=6;
-
-  y+=2;
+  y+=C.sepBloque;
 
   /* ══ 2. TRABAJADORES ══ */
-  banda(5,'2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)',{bg:AZ,fg:WH,b:1,fs:7});
+  banda('2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)');
 
-  const iw=[74,44,42,34];
-  const ix=[x0]; for(let i=1;i<iw.length;i++) ix.push(ix[i-1]+iw[i-1]);
+  {
+    const w=C.wTrab;
+    const xs=[x0]; for(let i=1;i<w.length;i++) xs.push(xs[i-1]+w[i-1]);
 
-  ['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA']
-    .forEach((h,i)=>celda(ix[i],iw[i],6,h,{bg:GR,b:1}));
-  y+=6;
+    espacio(C.hCabecera);
+    ['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA']
+      .forEach((h,i)=>celda(xs[i],w[i],C.hCabecera,h,
+        {bg:C.azul,fg:C.blanco,b:1,fs:C.fsEtiqueta}));
+    y+=C.hCabecera;
 
-  d.invs.forEach(v=>{
-    celda(ix[0],iw[0],7,v.nom,{izq:1});
-    celda(ix[1],iw[1],7,v.emp);
-    celda(ix[2],iw[2],7,v.car);
-    celda(ix[3],iw[3],7,v.area);
-    y+=7;
-  });
+    d.invs.forEach(v=>{
+      const h=Math.max(
+        C.hFilaTrab,
+        altoTexto(v.nom,w[0],C.fsDato,C.hFilaTrab),
+        altoTexto(v.car,w[2],C.fsDato,C.hFilaTrab)
+      );
+      espacio(h);
+      celda(xs[0],w[0],h,v.nom,{izq:1});
+      celda(xs[1],w[1],h,v.emp);
+      celda(xs[2],w[2],h,v.car);
+      celda(xs[3],w[3],h,v.area);
+      y+=h;
+    });
+  }
 
-  y+=2;
+  y+=C.sepTrabVeh;
 
   /* ══ 3. VEHÍCULO ══ */
-  banda(5,'3. VEHÍCULO SINIESTRADO',{bg:AZ,fg:WH,b:1,fs:7});
+  banda('3. VEHÍCULO SINIESTRADO');
 
-  const vw=[48.5,48.5,48.5,48.5];
-  const vx=[x0]; for(let i=1;i<vw.length;i++) vx.push(vx[i-1]+vw[i-1]);
+  {
+    const w=C.wVeh;
+    const xs=[x0]; for(let i=1;i<w.length;i++) xs.push(xs[i-1]+w[i-1]);
 
-  ['MARCA','MODELO','EMPRESA','PLACA']
-    .forEach((h,i)=>celda(vx[i],vw[i],6,h,{bg:GR,b:1}));
-  y+=6;
+    espacio(C.hCabecera+C.hFila);
+    ['MARCA','MODELO','EMPRESA','PLACA']
+      .forEach((h,i)=>celda(xs[i],w[i],C.hCabecera,h,
+        {bg:C.azul,fg:C.blanco,b:1,fs:C.fsEtiqueta}));
+    y+=C.hCabecera;
 
-  [d.vm,d.vmo,d.ve,d.vp].forEach((v,i)=>celda(vx[i],vw[i],6,v));
-  y+=6;
+    [d.vm,d.vmo,d.ve,d.vp].forEach((v,i)=>celda(xs[i],w[i],C.hFila,v));
+    y+=C.hFila;
+  }
 
-  /* testigos */
-  const tl=52, tn=22, tv=tw-tl-tn;
-  [['TESTIGOS DEL ACCIDENTE:','N° 1',d.t1],
-   ['TESTIGOS DEL ACCIDENTE:','N° 2',d.t2],
-   ['TESTIGOS DEL ACCIDENTE:','N° 3',d.t3]].forEach(r=>{
-    celda(x0,tl,6,r[0],{bg:GR,b:1,izq:1});
-    celda(x0+tl,tn,6,r[1],{bg:GR,b:1});
-    celda(x0+tl+tn,tv,6,r[2],{izq:1});
-    y+=6;
-  });
+  y+=C.sepVehTest;
 
-  celda(x0,tl,6,'SUPERVISOR DE TURNO:',{bg:GR,b:1,izq:1});
-  celda(x0+tl,tw-tl,6,d.sup,{izq:1});
-  y+=6;
+  /* Testigos */
+  {
+    const wl=C.wTestLabel, wn=C.wTestNum, wv=tw-wl-wn;
 
-  celda(x0,tl,7,'DAÑO CAUSADO:',{bg:GR,b:1,izq:1});
-  celda(x0+tl,tw-tl,7,d.dano,{izq:1});
-  y+=7;
+    [['N° 1',d.t1],['N° 2',d.t2],['N° 3',d.t3]].forEach(r=>{
+      espacio(C.hTestigo);
+      celda(x0,wl,C.hTestigo,'TESTIGOS DEL ACCIDENTE:',
+        {bg:C.azul,fg:C.blanco,b:1,izq:1,fs:C.fsEtiqueta});
+      celda(x0+wl,wn,C.hTestigo,r[0],{bg:C.plomo,b:1,fs:C.fsEtiqueta});
+      celda(x0+wl+wn,wv,C.hTestigo,r[1]);
+      y+=C.hTestigo;
+    });
 
-  y+=2;
+    filaDato('SUPERVISOR DE TURNO:', d.sup);
+    filaDato('DAÑO CAUSADO:', d.dano);
+  }
+
+  y+=C.sepBloque;
 
   /* ══ 4. DESCRIPCIÓN ══ */
-  banda(5,'4. BREVE DESCRIPCIÓN DEL EVENTO',{bg:AZ,fg:WH,b:1,fs:7});
+  banda('4. BREVE DESCRIPCIÓN DEL EVENTO');
 
-  pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5);
-  const dl=pdf.splitTextToSize(d.desc,tw-5);
-  const dh=Math.max(20,dl.length*3.3+4);
+  {
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(C.fsDesc);
+    const ls=pdf.splitTextToSize(d.desc,tw-5);
 
-  fill(WH); line(BK); pdf.rect(x0,y,tw,dh,'FD');
-  col(BK);
-  dl.forEach((l,j)=>pdf.text(l,x0+2.5,y+4+j*3.3));
-  y+=dh;
+    // Se reparte en varias páginas si hace falta.
+    let i=0;
+    while(i<ls.length){
+      const disponible=yLimite-y-2;
+      let caben=Math.floor((disponible-4)/C.lhDesc);
 
-  y+=2;
+      if(caben<3){
+        pdf.addPage(); pagina++; y=C.margenTop; encabezado();
+        continue;
+      }
 
-  /* ══ 5. EVIDENCIA ══ */
-  banda(5,'5. EVIDENCIA FOTOGRÁFICA',{bg:AZ,fg:WH,b:1,fs:7});
-  celda(x0,tw,24,'',{});
-  y+=24;
+      const trozo=ls.slice(i,i+caben);
+      const h=trozo.length*C.lhDesc+4;
 
-  y+=2;
+      fill(C.blanco); line(C.negro);
+      pdf.rect(x0,y,tw,h,'FD');
+      col(C.negro);
+      pdf.setFont('helvetica','normal'); pdf.setFontSize(C.fsDesc);
+      trozo.forEach((l,j)=>pdf.text(l,x0+2.5,y+4+j*C.lhDesc));
+
+      y+=h;
+      i+=caben;
+    }
+  }
+
+  y+=C.sepBloque;
+
+  /* ══ 5. EVIDENCIA FOTOGRÁFICA ══ */
+  banda('5. EVIDENCIA FOTOGRÁFICA');
+
+  if(!FOTOS.length){
+    espacio(C.altoVacio);
+    celda(x0,tw,C.altoVacio,'');
+    y+=C.altoVacio;
+  } else {
+    const porFila=C.fotosPorFila;
+    const gap=C.gapFoto;
+    const alto=C.altoFoto;
+    const ancho=(tw-gap*(porFila-1))/porFila;
+
+    for(let i=0;i<FOTOS.length;i+=porFila){
+      const fila=FOTOS.slice(i,i+porFila);
+      espacio(alto+gap);
+
+      // Si la fila tiene menos fotos que el máximo, se centra.
+      const usado=fila.length*ancho+(fila.length-1)*gap;
+      let fx=x0+(tw-usado)/2;
+
+      fila.forEach(f=>{
+        // La imagen se ajusta al marco sin deformarse.
+        let w=ancho, h=w/f.ratio;
+        if(h>alto){ h=alto; w=h*f.ratio; }
+
+        line(C.negro);
+        pdf.rect(fx,y,ancho,alto,'S');
+
+        try{
+          pdf.addImage(f.data,'JPEG',
+            fx+(ancho-w)/2, y+(alto-h)/2, w, h);
+        }catch(x){}
+
+        fx+=ancho+gap;
+      });
+
+      y+=alto+gap;
+    }
+    y-=gap;
+  }
+
+  y+=C.sepBloque;
 
   /* ══ 6. RESPONSABLE ══ */
-  banda(5,'6. RESPONSABLE DEL REGISTRO',{bg:AZ,fg:WH,b:1,fs:7});
+  banda('6. RESPONSABLE DEL REGISTRO');
 
-  const rw=[62,48,42,42];
-  const rx=[x0]; for(let i=1;i<rw.length;i++) rx.push(rx[i-1]+rw[i-1]);
+  {
+    const w=C.wResp;
+    const xs=[x0]; for(let i=1;i<w.length;i++) xs.push(xs[i-1]+w[i-1]);
 
-  ['NOMBRES Y APELLIDOS','CARGO / PUESTO DE TRABAJO','FECHA DEL REGISTRO','FIRMA']
-    .forEach((h,i)=>celda(rx[i],rw[i],6,h,{bg:GR,b:1}));
-  y+=6;
+    espacio(C.hCabecera+C.hFirma);
 
-  const fh=14;
-  celda(rx[0],rw[0],fh,d.rnom);
-  celda(rx[1],rw[1],fh,d.rcar);
-  celda(rx[2],rw[2],fh,d.rfec);
-  celda(rx[3],rw[3],fh,'');
+    ['NOMBRES Y APELLIDOS','CARGO / PUESTO DE TRABAJO','FECHA DEL REGISTRO','FIRMA']
+      .forEach((h,i)=>celda(xs[i],w[i],C.hCabecera,h,
+        {bg:C.azul,fg:C.blanco,b:1,fs:C.fsEtiqueta}));
+    y+=C.hCabecera;
 
-  if(FIRMA){
-    try{
-      const h=10, w=Math.min(h*RATIO,rw[3]-4);
-      pdf.addImage(FIRMA,'PNG',rx[3]+(rw[3]-w)/2,y+(fh-h)/2,w,h);
-    }catch(x){}
+    celda(xs[0],w[0],C.hFirma,d.rnom);
+    celda(xs[1],w[1],C.hFirma,d.rcar);
+    celda(xs[2],w[2],C.hFirma,d.rfec);
+    celda(xs[3],w[3],C.hFirma,'');
+
+    if(FIRMA){
+      try{
+        const h=C.hFirma-4;
+        const wf=Math.min(h*RATIO,w[3]-4);
+        pdf.addImage(FIRMA,'PNG',xs[3]+(w[3]-wf)/2,y+(C.hFirma-h)/2,wf,h);
+      }catch(x){}
+    }
+    y+=C.hFirma;
   }
-  y+=fh;
 }
 
-function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,
+  m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
 
 function toast(m,err){
   const t=document.createElement('div');
