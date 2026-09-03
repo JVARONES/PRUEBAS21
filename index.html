@@ -554,7 +554,7 @@ function dibujar(pdf,d){
     espacio(C.hCabecera);
     ['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA']
       .forEach((h,i)=>celda(xs[i],w[i],C.hCabecera,h,
-        {bg:C.azul,fg:C.blanco,b:1,fs:C.fsEtiqueta}));
+        {bg:C.plomo,fg:C.negro,b:1,fs:C.fsEtiqueta}));
     y+=C.hCabecera;
 
     d.invs.forEach(v=>{
@@ -584,7 +584,7 @@ function dibujar(pdf,d){
     espacio(C.hCabecera+C.hFila);
     ['MARCA','MODELO','EMPRESA','PLACA']
       .forEach((h,i)=>celda(xs[i],w[i],C.hCabecera,h,
-        {bg:C.azul,fg:C.blanco,b:1,fs:C.fsEtiqueta}));
+        {bg:C.plomo,fg:C.negro,b:1,fs:C.fsEtiqueta}));
     y+=C.hCabecera;
 
     [d.vm,d.vmo,d.ve,d.vp].forEach((v,i)=>celda(xs[i],w[i],C.hFila,v));
@@ -701,7 +701,7 @@ function dibujar(pdf,d){
 
     ['NOMBRES Y APELLIDOS','CARGO / PUESTO DE TRABAJO','FECHA DEL REGISTRO','FIRMA']
       .forEach((h,i)=>celda(xs[i],w[i],C.hCabecera,h,
-        {bg:C.azul,fg:C.blanco,b:1,fs:C.fsEtiqueta}));
+        {bg:C.plomo,fg:C.negro,b:1,fs:C.fsEtiqueta}));
     y+=C.hCabecera;
 
     celda(xs[0],w[0],C.hFirma,d.rnom);
