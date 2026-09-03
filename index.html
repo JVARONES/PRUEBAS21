@@ -312,12 +312,12 @@ function generarPDF(){
  row('PROYECTO:',$('proyecto').value);row('LUGAR EXACTO DEL EVENTO:',$('lugar').value);y+=3;
 
  band('2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)');
- const tw=[74,44,42,34], tx=[M,M+74,M+118,M+160];newPageIf(6);['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA'].forEach((s,i)=>cell(tx[i],tw[i],6,s,{bg:plomo,bold:true}));y+=6;
+ const tw=[74,44,42,34], tx=[M,M+74,M+118,M+160];newPageIf(6);['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA'].forEach((s,i)=>cell(tx[i],tw[i],4,s,{bg:plomo,bold:true}));y+=6;
  trabajadores.forEach(v=>{const vals=[v.nom,v.emp,v.car,v.area];const h=Math.max(7,...vals.map((s,i)=>{pdf.setFontSize(6);return pdf.splitTextToSize(s,tw[i]-2.5).length*2.9+3}));newPageIf(h);vals.forEach((s,i)=>cell(tx[i],tw[i],h,s));y+=h});y+=3;
 
  band('3. VEHÍCULO, TESTIGOS Y DAÑO');
- const vw=[48.5,48.5,48.5,48.5],vx=[M,M+48.5,M+97,M+145.5];newPageIf(12);['MARCA','MODELO','EMPRESA','PLACA'].forEach((s,i)=>cell(vx[i],vw[i],6,s,{bg:plomo,bold:true}));y+=6;['vm','vmo','ve','vp'].forEach((id,i)=>cell(vx[i],vw[i],6,$(id).value));y+=6+3;
- const tests=[$('t1').value,$('t2').value,$('t3').value].filter(s=>String(s).trim());tests.forEach((s,i)=>{newPageIf(6);cell(M,30,6,'TESTIGOS DEL ACCIDENTE:',{bg:azul,fg:blanco,bold:true,left:true});cell(M+30,18.5,6,'N° '+String(i+1).padStart(2,'0'),{bg:plomo,bold:true});cell(M+48.5,W-48.5,6,s);y+=6});
+ const vw=[48.5,48.5,48.5,48.5],vx=[M,M+48.5,M+97,M+145.5];newPageIf(12);['MARCA','MODELO','EMPRESA','PLACA'].forEach((s,i)=>cell(vx[i],vw[i],4,s,{bg:plomo,bold:true}));y+=6;['vm','vmo','ve','vp'].forEach((id,i)=>cell(vx[i],vw[i],6,$(id).value));y+=6+3;
+ const tests=[$('t1').value,$('t2').value,$('t3').value].filter(s=>String(s).trim());tests.forEach((s,i)=>{newPageIf(6);cell(M,30,4,'TESTIGOS DEL ACCIDENTE:',{bg:azul,fg:blanco,bold:true,left:true});cell(M+30,18.5,6,'N° '+String(i+1).padStart(2,'0'),{bg:plomo,bold:true});cell(M+48.5,W-48.5,4,s);y+=6});
  row('SUPERVISOR DE TURNO:',$('sup').value);row('DAÑO CAUSADO:',$('dano').value);y+=3;
 
  band('4. BREVE DESCRIPCIÓN DEL EVENTO');
