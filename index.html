@@ -826,9 +826,49 @@ async function generarPDF(descargar=true){
 
  const margenFoto=1;
  const separacionFoto=3;
- const maxFotosFila=3;
- const alturaFotoMin=42;
+ const maxVerticalesFila=5;
+ const maxHorizontalesFila=4;
+ const alturaFotoMin=38;
  const alturaFotoMax=78;
+
+ function esHorizontal(f){
+  return (f.ratio||1)>1.05;
+ }
+
+ function gruposFotograficos(lista){
+  const grupos=[];
+  let grupo=[];
+
+  for(const f of lista){
+   const horizontal=esHorizontal(f);
+
+   // Si esta foto es horizontal, una fila nunca puede superar 4.
+   if(grupo.length && (
+      grupo.length >= maxHorizontalesFila ||
+      (horizontal && grupo.length >= maxHorizontalesFila)
+   )){
+    grupos.push(grupo);
+    grupo=[];
+   }
+
+   // Una fila formada solo por verticales puede llegar a 5.
+   if(grupo.length>=maxVerticalesFila){
+    grupos.push(grupo);
+    grupo=[];
+   }
+
+   grupo.push(f);
+
+   // Si acabamos de colocar una horizontal, el máximo de esa fila es 4.
+   if(horizontal && grupo.length===maxHorizontalesFila){
+    grupos.push(grupo);
+    grupo=[];
+   }
+  }
+
+  if(grupo.length)grupos.push(grupo);
+  return grupos;
+ }
 
  if(!fotos.length){
   const fh=52;
@@ -836,8 +876,9 @@ async function generarPDF(descargar=true){
   cell(M,W,fh,'');
   y+=fh;
  }else{
-  for(let i=0;i<fotos.length;i+=maxFotosFila){
-   const group=fotos.slice(i,i+maxFotosFila);
+  const grupos=gruposFotograficos(fotos);
+
+  grupos.forEach(group=>{
    const n=group.length;
    const cuadroW=(W-separacionFoto*(n-1))/n;
 
@@ -853,7 +894,7 @@ async function generarPDF(descargar=true){
 
    newPageIf(fh);
 
-   // Un solo recuadro exterior por fila.
+   // UN SOLO RECUADRO EXTERIOR POR FILA.
    pdf.setFillColor(...blanco);
    pdf.setDrawColor(...negro);
    pdf.rect(M,y,W,fh,'FD');
@@ -880,7 +921,7 @@ async function generarPDF(descargar=true){
    });
 
    y+=fh;
-  }
+  });
  }
 
  y+=3;
@@ -1016,351 +1057,378 @@ async function generarExcel(){
   return;
  }
 
- const wb=new ExcelJS.Workbook();
- wb.creator='Flash Report F034';
- wb.subject='Reporte Preliminar de Accidente e Incidente';
- wb.title='Flash Report F034';
- wb.company='INDRA GROUP';
- wb.created=new Date();
+ try{
+  const wb=new ExcelJS.Workbook();
+  wb.creator='Flash Report F034';
+  wb.subject='Reporte Preliminar de Accidente e Incidente';
+  wb.title='Flash Report F034';
+  wb.company='INDRA GROUP';
+  wb.created=new Date();
 
- const ws=wb.addWorksheet('FLASH REPORT',{
-  pageSetup:{
-   paperSize:9,
-   orientation:'portrait',
-   fitToPage:true,
-   fitToWidth:1,
-   fitToHeight:0
-  },
-  properties:{defaultRowHeight:11.34}
- });
- ws.views=[{showGridLines:false}];
+  const ws=wb.addWorksheet('FLASH REPORT',{
+   pageSetup:{
+    paperSize:9,
+    orientation:'portrait',
+    fitToPage:true,
+    fitToWidth:1,
+    fitToHeight:0
+   },
+   properties:{defaultRowHeight:11.34}
+  });
+  ws.views=[{showGridLines:false}];
 
- /*
-  * REPLICA GEOMÉTRICA DEL PDF
-  * 194 columnas representan 194 mm útiles del A4.
-  * Cada columna equivale a 1 unidad horizontal; al imprimir,
-  * Excel escala todo el ancho a la misma caja A4 del PDF.
-  */
- const C=194;
- for(let i=1;i<=C;i++) ws.getColumn(i).width=1.15;
+  // 194 columnas = 194 mm útiles del PDF.
+  const C=194;
+  for(let i=1;i<=C;i++)ws.getColumn(i).width=1.15;
 
- const AZ='FF004154', PL='FFE1E0D7', BL='FFFFFFFF', NE='FF000000';
+  const AZ='FF004154',PL='FFE1E0D7',BL='FFFFFFFF',NE='FF000000';
 
- function col(n){return n;}
- function rg(c1,r1,c2,r2){return `${col(c1)}${r1}:${col(c2)}${r2}`;}
+  function rg(c1,r1,c2,r2){
+   return `${excelCol(c1)}${r1}:${excelCol(c2)}${r2}`;
+  }
 
- function mergeCell(r,c1,c2,text,opt={}){
-  ws.mergeCells(rg(c1,r,c2,r));
-  const cell=ws.getCell(r,c1);
-  cell.value=text??'';
-  cell.font={
-   name:'Arial',
-   size:opt.size||7,
-   bold:!!opt.bold,
-   color:{argb:opt.color||NE}
-  };
-  cell.alignment={
-   horizontal:opt.h||'center',
-   vertical:opt.v||'middle',
-   wrapText:opt.wrap!==false
-  };
-  if(opt.bg) cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:opt.bg}};
-  cell.border={
-   top:{style:'thin',color:{argb:NE}},
-   bottom:{style:'thin',color:{argb:NE}},
-   left:{style:'thin',color:{argb:NE}},
-   right:{style:'thin',color:{argb:NE}}
-  };
- }
+  function excelCol(n){
+   let out='';
+   while(n>0){
+    const r=(n-1)%26;
+    out=String.fromCharCode(65+r)+out;
+    n=Math.floor((n-1)/26);
+   }
+   return out;
+  }
 
- function rowHeight(r,mm){ws.getRow(r).height=mm*2.83465;}
+  function borderAll(cell){
+   cell.border={
+    top:{style:'thin',color:{argb:NE}},
+    bottom:{style:'thin',color:{argb:NE}},
+    left:{style:'thin',color:{argb:NE}},
+    right:{style:'thin',color:{argb:NE}}
+   };
+  }
 
- function section(r,title){
-  ws.mergeCells(rg(1,r,C,r));
-  const c=ws.getCell(r,1);
-  c.value=title;
-  c.font={name:'Arial',size:7,bold:true,color:{argb:AZ}};
-  c.alignment={horizontal:'left',vertical:'middle'};
-  c.fill={type:'pattern',pattern:'solid',fgColor:{argb:PL}};
-  c.border={
-   top:{style:'thin',color:{argb:NE}},
-   bottom:{style:'thin',color:{argb:NE}},
-   left:{style:'thin',color:{argb:NE}},
-   right:{style:'thin',color:{argb:NE}}
-  };
-  rowHeight(r,5);
-  return r+1;
- }
+  function mergeCell(r,c1,c2,text,opt={}){
+   const range=rg(c1,r,c2,r);
+   ws.mergeCells(range);
+   const c=ws.getCell(r,c1);
+   c.value=text??'';
+   c.font={
+    name:'Arial',
+    size:opt.size||7,
+    bold:!!opt.bold,
+    color:{argb:opt.color||NE}
+   };
+   c.alignment={
+    horizontal:opt.h||'center',
+    vertical:opt.v||'middle',
+    wrapText:opt.wrap!==false
+   };
+   if(opt.bg){
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:opt.bg}};
+   }
+   borderAll(c);
+  }
 
- function valueRow(r,label,labelW,value){
-  mergeCell(r,1,labelW,label,{bg:PL,bold:true,size:6.2});
-  mergeCell(r,labelW+1,C,value,{size:6.2,h:'left'});
-  rowHeight(r,4);
-  return r+1;
- }
+  function rowHeight(r,mm){
+   ws.getRow(r).height=mm*2.83465;
+  }
 
- // HEADER: misma jerarquía y proporción que el PDF.
- ws.mergeCells(rg(1,1,C,1));
- mergeCell(1,1,C,'INDRA GROUP',{bg:AZ,color:BL,bold:true,size:13,h:'left'});
- rowHeight(1,7);
+  function section(r,title){
+   mergeCell(r,1,C,title,{bg:PL,color:AZ,bold:true,size:7,h:'left'});
+   rowHeight(r,5);
+   return r+1;
+  }
 
- mergeCell(2,1,C,'REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE',{bg:AZ,color:BL,bold:true,size:8.5,h:'left'});
- rowHeight(2,5);
+  function groupPhotos(lista){
+   const grupos=[];
+   let grupo=[];
 
- mergeCell(3,1,97,'SGSST_INDRAGROUP_F 034',{bold:true,size:6.5,h:'left'});
- mergeCell(3,98,122,'VERSIÓN 01',{bold:true,size:6.5});
- mergeCell(3,123,194,'FECHA 2024-12-11',{bold:true,size:6.5});
- rowHeight(3,4);
+   for(const f of lista){
+    const horizontal=(f.ratio||1)>1.05;
 
- let r=5;
+    if(grupo.length>=4){
+     grupos.push(grupo);
+     grupo=[];
+    }
 
- // 1
- r=section(r,'1. INFORMACIÓN GENERAL');
- mergeCell(r,1,97,'TIPO DE EVENTO',{bg:PL,bold:true,size:6.2});
- mergeCell(r,98,194,'GERENCIA / RESP. DEL PROY. / ÁREA',{bg:PL,bold:true,size:6.2});
- rowHeight(r,4); r++;
+    if(grupo.length>=5){
+     grupos.push(grupo);
+     grupo=[];
+    }
 
- mergeCell(r,1,97,$('tipo').value,{size:6.2,h:'left'});
- mergeCell(r,98,194,$('gerencia').value,{size:6.2,h:'left'});
- rowHeight(r,4); r++;
+    grupo.push(f);
 
- mergeCell(r,1,97,'EMPRESA',{bg:PL,bold:true,size:6.2});
- mergeCell(r,98,114,'FECHA',{bg:PL,bold:true,size:6.2});
- mergeCell(r,115,131,'HORA',{bg:PL,bold:true,size:6.2});
- mergeCell(r,132,194,'PROYECTO',{bg:PL,bold:true,size:6.2});
- rowHeight(r,4); r++;
+    if(horizontal && grupo.length===4){
+     grupos.push(grupo);
+     grupo=[];
+    }
+   }
 
- mergeCell(r,1,97,$('empresa').options[$('empresa').selectedIndex]?.text||$('empresa').value,{size:6.2,h:'left'});
- mergeCell(r,98,114,fechaDMY($('fecha').value),{size:6.2});
- mergeCell(r,115,131,$('hora').value,{size:6.2});
- mergeCell(r,132,194,$('proyecto').value,{size:6.2,h:'left'});
- rowHeight(r,4); r++;
+   if(grupo.length)grupos.push(grupo);
+   return grupos;
+  }
 
- mergeCell(r,1,97,'LUGAR EXACTO DEL EVENTO',{bg:PL,bold:true,size:6.2});
- mergeCell(r,98,194,$('lugar').value,{size:6.2,h:'left'});
- rowHeight(r,4); r++;
- r+=1; // mismo espacio visual del PDF
+  // =========================================================
+  // ENCABEZADO — misma estructura del PDF
+  // =========================================================
+  mergeCell(1,1,C,'INDRA GROUP',{bg:AZ,color:BL,bold:true,size:13,h:'left'});
+  rowHeight(1,7);
 
- // 2
- r=section(r,'2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)');
- mergeCell(r,1,74,'NOMBRES Y APELLIDOS',{bg:PL,bold:true,size:6});
- mergeCell(r,75,114,'EMPRESA',{bg:PL,bold:true,size:6});
- mergeCell(r,115,154,'CARGO / PUESTO',{bg:PL,bold:true,size:6});
- mergeCell(r,155,194,'ÁREA',{bg:PL,bold:true,size:6});
- rowHeight(r,4); r++;
+  mergeCell(2,1,C,'REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE',{bg:AZ,color:BL,bold:true,size:8.5,h:'left'});
+  rowHeight(2,5);
 
- trabajadores.forEach(t=>{
-  mergeCell(r,1,74,t.nom,{size:6,h:'left'});
-  mergeCell(r,75,114,t.emp,{size:6,h:'left'});
-  mergeCell(r,115,154,t.car,{size:6,h:'left'});
-  mergeCell(r,155,194,t.area,{size:6,h:'left'});
-  rowHeight(r,4); r++;
- });
- r+=1; // espacio entre personas y sección 3
+  mergeCell(3,1,97,'SGSST_INDRAGROUP_F 034',{bold:true,size:6.5,h:'left'});
+  mergeCell(3,98,122,'VERSIÓN 01',{bold:true,size:6.5});
+  mergeCell(3,123,194,'FECHA 2024-12-11',{bold:true,size:6.5});
+  rowHeight(3,4);
 
- // 3
- r=section(r,'3. VEHÍCULO, TESTIGOS Y DAÑO');
+  let r=5;
 
- // Siempre existe la tabla de vehículo; sin datos => "-"
- 
- // Excel no admite columnas fraccionarias: 48.5 mm se representa con 48/49
- // columnas, manteniendo el reparto visual prácticamente idéntico al PDF.
- const vehCuts=[1,49,98,146,194];
- const vehHeader=['MARCA','MODELO','EMPRESA','PLACA'];
- vehHeader.forEach((h,i)=>{
-  mergeCell(r,vehCuts[i],vehCuts[i+1],h,{bg:PL,bold:true,size:6});
- });
- rowHeight(r,4); r++;
+  // =========================================================
+  // 1. INFORMACIÓN GENERAL
+  // =========================================================
+  r=section(r,'1. INFORMACIÓN GENERAL');
 
- const vehRows=vehiculos.length
-  ? vehiculos
-  : [{marca:'-',modelo:'-',empresa:'-',placa:'-'}];
+  mergeCell(r,1,97,'TIPO DE ACCIDENTE / INCIDENTE',{bg:PL,bold:true,size:6.2});
+  mergeCell(r,98,194,'GERENCIA / RESP. DEL PROY. / ÁREA',{bg:PL,bold:true,size:6.2});
+  rowHeight(r,4);r++;
 
- vehRows.forEach(v=>{
-  const vals=[v.marca||'-',v.modelo||'-',v.empresa||'-',v.placa||'-'];
-  vals.forEach((val,i)=>mergeCell(r,vehCuts[i],vehCuts[i+1],val,{size:6}));
-  rowHeight(r,4); r++;
- });
+  mergeCell(r,1,97,$('tipo').value,{size:6.2,h:'left'});
+  mergeCell(r,98,194,$('gerencia').value,{size:6.2,h:'left'});
+  rowHeight(r,4);r++;
 
- // Testigos: 39.5 / 9 / 145.5 mm -> 40 / 9 / 145 columnas.
- const testLabelEnd=40, testNumEnd=49;
- const testsExcel=testigos.map(v=>String(v.nom||'').trim()).filter(Boolean);
+  mergeCell(r,1,97,'EMPRESA',{bg:PL,bold:true,size:6.2});
+  mergeCell(r,98,114,'FECHA',{bg:PL,bold:true,size:6.2});
+  mergeCell(r,115,131,'HORA',{bg:PL,bold:true,size:6.2});
+  mergeCell(r,132,194,'PROYECTO',{bg:PL,bold:true,size:6.2});
+  rowHeight(r,4);r++;
 
- testsExcel.forEach((v,i)=>{
-  mergeCell(r,1,testLabelEnd,'TESTIGOS DEL ACCIDENTE:',{bg:PL,bold:true,size:6});
-  mergeCell(r,testLabelEnd+1,testNumEnd,`N° ${String(i+1).padStart(2,'0')}`,{bg:PL,bold:true,size:6});
-  mergeCell(r,testNumEnd+1,C,v,{size:6,h:'left'});
-  rowHeight(r,4); r++;
- });
+  mergeCell(r,1,97,EMPRESAS[+$('empresa').value].nom,{size:6.2,h:'left'});
+  mergeCell(r,98,114,fechaDMY($('fecha').value),{size:6.2});
+  mergeCell(r,115,131,hora12($('hora').value),{size:6.2});
+  mergeCell(r,132,194,$('proyecto').value,{size:6.2,h:'left'});
+  rowHeight(r,4);r++;
 
- // Supervisor / daño
- mergeCell(r,1,97,'SUPERVISOR DE TURNO',{bg:PL,bold:true,size:6});
- mergeCell(r,98,194,'DAÑO CAUSADO',{bg:PL,bold:true,size:6});
- rowHeight(r,4); r++;
+  mergeCell(r,1,97,'LUGAR EXACTO DEL EVENTO',{bg:PL,bold:true,size:6.2});
+  mergeCell(r,98,194,$('lugar').value,{size:6.2,h:'left'});
+  rowHeight(r,4);r++;
+  r+=1;
 
- mergeCell(r,1,97,$('sup').value,{size:6,h:'left'});
- mergeCell(r,98,194,$('dano').value,{size:6,h:'left'});
- rowHeight(r,4); r++;
- r+=1;
+  // =========================================================
+  // 2. TRABAJADORES
+  // =========================================================
+  r=section(r,'2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)');
 
- // 4
- r=section(r,'4. BREVE DESCRIPCIÓN DEL EVENTO');
- mergeCell(r,1,C,$('desc').value,{size:6.2,h:'left',v:'top'});
- const descLines=Math.max(1,Math.ceil(String($('desc').value||'').length/170));
- rowHeight(r,Math.max(20,Math.min(45,descLines*4)));
- r+=Math.max(5,Math.ceil(Math.max(20,Math.min(45,descLines*4))/4));
+  mergeCell(r,1,74,'NOMBRES Y APELLIDOS',{bg:PL,bold:true,size:6});
+  mergeCell(r,75,114,'EMPRESA',{bg:PL,bold:true,size:6});
+  mergeCell(r,115,154,'CARGO / PUESTO',{bg:PL,bold:true,size:6});
+  mergeCell(r,155,194,'ÁREA',{bg:PL,bold:true,size:6});
+  rowHeight(r,4);r++;
 
- // 5
- r=section(r,'5. EVIDENCIA FOTOGRÁFICA');
- const photoRows=Math.max(1,Math.ceil(fotos.length/3));
+  trabajadores.forEach(t=>{
+   mergeCell(r,1,74,t.nom,{size:6,h:'left'});
+   mergeCell(r,75,114,t.emp,{size:6,h:'left'});
+   mergeCell(r,115,154,t.car,{size:6,h:'left'});
+   mergeCell(r,155,194,t.area,{size:6,h:'left'});
+   rowHeight(r,4);r++;
+  });
+  r+=1;
 
- for(let g=0;g<photoRows;g++){
-  const group=fotos.slice(g*3,g*3+3);
-  const n=group.length;
-  const gap=2;
-  const usable=C-gap*(n-1);
-  const cw=usable/n;
+  // =========================================================
+  // 3. VEHÍCULO, TESTIGOS Y DAÑO
+  // =========================================================
+  r=section(r,'3. VEHÍCULO, TESTIGOS Y DAÑO');
 
-  const heights=group.map(f=>cw/(f.ratio||1));
-  const fh=Math.max(42,Math.min(78,Math.max(...heights)));
-  const start=r;
-  const rowCount=Math.max(1,Math.ceil(fh/4));
-  const end=r+rowCount-1;
+  const vehCuts=[1,49,98,146,194];
+  ['MARCA','MODELO','EMPRESA','PLACA'].forEach((h,i)=>{
+   mergeCell(r,vehCuts[i],vehCuts[i+1],h,{bg:PL,bold:true,size:6});
+  });
+  rowHeight(r,4);r++;
 
-  ws.mergeCells(rg(1,start,C,end));
-  const outer=ws.getCell(start,1);
-  outer.value='';
-  outer.border={
-   top:{style:'thin',color:{argb:NE}},
-   bottom:{style:'thin',color:{argb:NE}},
-   left:{style:'thin',color:{argb:NE}},
-   right:{style:'thin',color:{argb:NE}}
-  };
+  const vehRows=vehiculos.length
+   ? vehiculos
+   : [{marca:'-',modelo:'-',empresa:'-',placa:'-'}];
 
-  for(let rr=start;rr<=end;rr++) rowHeight(rr,fh/rowCount);
-
-  group.forEach((f,j)=>{
-   try{
-    const imageId=wb.addImage({
-     base64:excelPhotoBase64(f.data),
-     extension:'jpeg'
-    });
-    const c1=Math.round(1+j*(cw+gap));
-    const c2=Math.min(C,Math.round(1+(j+1)*cw+j*gap));
-    ws.addImage(imageId,{
-     tl:{col:c1-1,row:start-1+0.2},
-     br:{col:c2,row:end-0.2}
-    });
-   }catch(e){}
+  vehRows.forEach(v=>{
+   const vals=[v.marca||'-',v.modelo||'-',v.empresa||'-',v.placa||'-'];
+   vals.forEach((val,i)=>{
+    mergeCell(r,vehCuts[i],vehCuts[i+1],val,{size:6});
+   });
+   rowHeight(r,4);r++;
   });
 
-  r=end+1;
- }
- r+=1;
+  const testsExcel=testigos.map(v=>String(v.nom||'').trim()).filter(Boolean);
 
- // 6
- r=section(r,'6. RESPONSABLE DEL REGISTRO');
- const sigCuts=[1,74,114,154,194];
- ['NOMBRES Y APELLIDOS','CARGO / PUESTO DE TRABAJO','FECHA DEL REGISTRO','FIRMA'].forEach((h,i)=>{
-  mergeCell(r,sigCuts[i],sigCuts[i+1],h,{bg:PL,bold:true,size:6});
- });
- rowHeight(r,4); r++;
+  testsExcel.forEach((v,i)=>{
+   mergeCell(r,1,40,'TESTIGOS DEL ACCIDENTE:',{bg:AZ,color:BL,bold:true,size:6,h:'left'});
+   mergeCell(r,41,49,`N° ${String(i+1).padStart(2,'0')}`,{bg:PL,bold:true,size:6});
+   mergeCell(r,50,194,v,{size:6,h:'left'});
+   rowHeight(r,4);r++;
+  });
 
- mergeCell(r,1,74,$('rnom').value,{size:6,h:'left'});
- mergeCell(r,75,114,$('rcar').value,{size:6,h:'left'});
- mergeCell(r,115,154,fechaDMY($('rfec').value),{size:6});
- mergeCell(r,155,194,'',{size:6});
- rowHeight(r,23);
+  mergeCell(r,1,97,'SUPERVISOR DE TURNO:',{bg:AZ,color:BL,bold:true,size:6,h:'left'});
+  mergeCell(r,98,194,'DAÑO CAUSADO:',{bg:AZ,color:BL,bold:true,size:6,h:'left'});
+  rowHeight(r,4);r++;
 
- if(firma){
-  try{
-   const ext=firma.startsWith('data:image/png')?'png':'jpeg';
-   const b64=firma.replace(/^data:image\/(png|jpeg);base64,/,'');
-   const id=wb.addImage({base64:b64,extension:ext});
-   ws.addImage(id,{
-    tl:{col:155-1,row:r-1+0.4},
-    br:{col:194,row:r+0.4}
+  mergeCell(r,1,97,$('sup').value,{size:6,h:'left'});
+  mergeCell(r,98,194,$('dano').value,{size:6,h:'left'});
+  rowHeight(r,4);r++;
+
+  r+=1;
+
+  // =========================================================
+  // 4. DESCRIPCIÓN
+  // =========================================================
+  r=section(r,'4. BREVE DESCRIPCIÓN DEL EVENTO');
+
+  const descText=String($('desc').value||'');
+  mergeCell(r,1,C,descText,{size:6.2,h:'left',v:'top'});
+  const descLines=Math.max(1,Math.ceil(descText.length/170));
+  const descH=Math.max(20,Math.min(45,descLines*4));
+  rowHeight(r,descH);
+  r+=Math.max(5,Math.ceil(descH/4));
+  r+=1;
+
+  // =========================================================
+  // 5. FOTOGRAFÍAS — misma regla del PDF
+  // =========================================================
+  r=section(r,'5. EVIDENCIA FOTOGRÁFICA');
+
+  if(!fotos.length){
+   const start=r,end=r+12;
+   ws.mergeCells(rg(1,start,C,end));
+   const outer=ws.getCell(start,1);
+   outer.border={
+    top:{style:'thin',color:{argb:NE}},
+    bottom:{style:'thin',color:{argb:NE}},
+    left:{style:'thin',color:{argb:NE}},
+    right:{style:'thin',color:{argb:NE}}
+   };
+   for(let rr=start;rr<=end;rr++)rowHeight(rr,52/13);
+   r=end+1;
+  }else{
+   const grupos=groupPhotos(fotos);
+
+   grupos.forEach(group=>{
+    const n=group.length;
+    const gap=2;
+    const usable=C-gap*(n-1);
+    const cw=usable/n;
+
+    const heights=group.map(f=>cw/(f.ratio||1));
+    const fh=Math.max(38,Math.min(78,Math.max(...heights)));
+
+    const start=r;
+    const rowCount=Math.max(1,Math.ceil(fh/4));
+    const end=r+rowCount-1;
+
+    ws.mergeCells(rg(1,start,C,end));
+    const outer=ws.getCell(start,1);
+    outer.border={
+     top:{style:'thin',color:{argb:NE}},
+     bottom:{style:'thin',color:{argb:NE}},
+     left:{style:'thin',color:{argb:NE}},
+     right:{style:'thin',color:{argb:NE}}
+    };
+
+    for(let rr=start;rr<=end;rr++)rowHeight(rr,fh/rowCount);
+
+    group.forEach((f,j)=>{
+     try{
+      const imageId=wb.addImage({
+       base64:excelPhotoBase64(f.data),
+       extension:'jpeg'
+      });
+
+      const c1=Math.round(1+j*(cw+gap));
+      const c2=Math.min(C,Math.round(1+(j+1)*cw+j*gap));
+
+      ws.addImage(imageId,{
+       tl:{col:c1-1,row:start-1+0.2},
+       br:{col:c2,row:end-0.2}
+      });
+     }catch(e){
+      console.warn('No se pudo insertar una fotografía en Excel',e);
+     }
+    });
+
+    r=end+1;
    });
-  }catch(e){}
- }
+  }
 
- // Márgenes/impresión: el contenido ocupa exactamente el ancho de 194 mm del PDF.
- ws.pageSetup.margins={
-  left:0.25,right:0.25,top:0.25,bottom:0.25,
-  header:0,footer:0
- };
- ws.pageSetup.horizontalDpi=300;
- ws.pageSetup.verticalDpi=300;
- ws.printArea=`A1:GR${r}`;
- ws.headerFooter.oddFooter='Página &P de &N';
- ws.freezePanes={ySplit:5};
+  r+=1;
 
- const buffer=await wb.xlsx.writeBuffer();
- const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
- const url=URL.createObjectURL(blob);
- const nombre=(($('fecha').value||'FECHA')+' FLASH REPORT '+($('proyecto').value||'PROYECTO').replace(/[\\/:*?"<>|]/g,'_')+'.xlsx');
+  // =========================================================
+  // 6. RESPONSABLE
+  // =========================================================
+  r=section(r,'6. RESPONSABLE DEL REGISTRO');
 
- const a=document.createElement('a');
- a.style.display='none';
- a.href=url;
- a.download=nombre;
- document.body.appendChild(a);
- try{ a.click(); }
- finally{
-  setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},2000);
- }
- toast('Excel editable generado correctamente');
-}
+  const sigCuts=[1,62,110,152,194];
+  ['NOMBRES Y APELLIDOS','CARGO / PUESTO DE TRABAJO','FECHA DEL REGISTRO','FIRMA']
+  .forEach((h,i)=>{
+   mergeCell(r,sigCuts[i],sigCuts[i+1],h,{bg:PL,bold:true,size:6});
+  });
+  rowHeight(r,4);r++;
 
-let pdfPreviewUrl=null;
-let pdfPreviewData=null;
+  mergeCell(r,1,62,$('rnom').value,{size:6,h:'left'});
+  mergeCell(r,63,110,$('rcar').value,{size:6,h:'left'});
+  mergeCell(r,111,152,fechaDMY($('rfec').value),{size:6});
+  mergeCell(r,153,194,'',{size:6});
+  rowHeight(r,14);
 
-function cerrarPreview(){
- $('pdfModal').classList.remove('open');
- $('pdfModal').setAttribute('aria-hidden','true');
- $('pdfFrame').src='about:blank';
- if(pdfPreviewUrl){
-  URL.revokeObjectURL(pdfPreviewUrl);
-  pdfPreviewUrl=null;
- }
-}
+  if(firma){
+   try{
+    const ext=firma.startsWith('data:image/png')?'png':'jpeg';
+    const b64=firma.replace(/^data:image\/(png|jpeg);base64,/,'');
+    const id=wb.addImage({base64:b64,extension:ext});
+    ws.addImage(id,{
+     tl:{col:152,row:r-1+0.4},
+     br:{col:194,row:r+0.4}
+    });
+   }catch(e){}
+  }
 
-$('btnPreview').addEventListener('click',async()=>{
- try{
-  const result=await generarPDF(false);
-  if(pdfPreviewUrl)URL.revokeObjectURL(pdfPreviewUrl);
-  pdfPreviewUrl=result.url;
-  pdfPreviewData=result;
-  $('pdfFrame').src=pdfPreviewUrl;
-  $('pdfModal').classList.add('open');
-  $('pdfModal').setAttribute('aria-hidden','false');
+  ws.pageSetup.margins={
+   left:0.25,right:0.25,top:0.25,bottom:0.25,
+   header:0,footer:0
+  };
+  ws.pageSetup.horizontalDpi=300;
+  ws.pageSetup.verticalDpi=300;
+  ws.printArea=`A1:${excelCol(C)}${r}`;
+  ws.headerFooter.oddFooter='Página &P de &N';
+  ws.freezePanes={ySplit:5};
+
+  const buffer=await wb.xlsx.writeBuffer();
+  const blob=new Blob(
+   [buffer],
+   {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}
+  );
+
+  const url=URL.createObjectURL(blob);
+  const nombre=(
+   ($('fecha').value||'FECHA')+
+   ' FLASH REPORT '+
+   ($('proyecto').value||'PROYECTO').replace(/[\\/:*?"<>|]/g,'_')+
+   '.xlsx'
+  );
+
+  const a=document.createElement('a');
+  a.style.display='none';
+  a.href=url;
+  a.download=nombre;
+  document.body.appendChild(a);
+  a.click();
+
+  setTimeout(()=>{
+   a.remove();
+   URL.revokeObjectURL(url);
+  },3000);
+
+  toast('Excel editable generado correctamente');
  }catch(err){
   console.error(err);
-  toast('No se pudo generar la vista previa del PDF',true);
+  toast('No se pudo generar el Excel: '+(err.message||'error desconocido'),true);
  }
-});
-
-$('btnCerrarPreview').addEventListener('click',cerrarPreview);
-$('btnCerrarPreview2').addEventListener('click',cerrarPreview);
-
-$('btnDescargarDesdePreview').addEventListener('click',()=>{
- if(!pdfPreviewData)return;
- const a=document.createElement('a');
- a.href=pdfPreviewData.url;
- a.download=pdfPreviewData.nombre;
- document.body.appendChild(a);
- a.click();
- a.remove();
- toast('PDF descargado correctamente');
-});
-
-$('pdfModal').addEventListener('click',e=>{
- if(e.target===$('pdfModal'))cerrarPreview();
-});
-
-document.addEventListener('keydown',e=>{
- if(e.key==='Escape' && $('pdfModal').classList.contains('open'))cerrarPreview();
-});
+}
 
 $('btnExcel').addEventListener('click',()=>{
  generarExcel().catch(err=>{console.error(err);toast('No se pudo generar el Excel',true);});
