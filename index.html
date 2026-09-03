@@ -186,8 +186,10 @@ $('fotoInput').addEventListener('change',()=>{
    const img=new Image();
 
    img.onload=()=>{
-    // Optimización: máximo 1400 px de ancho, conservando proporción.
-    const scale=Math.min(1,1400/img.naturalWidth);
+    // Optimización para PDF: máximo 1200 px en el lado mayor,
+    // conservando proporción y comprimiendo a JPEG de calidad 70%.
+    const maxPx=1200;
+    const scale=Math.min(1,maxPx/Math.max(img.naturalWidth,img.naturalHeight));
     const c=document.createElement('canvas');
     c.width=Math.max(1,Math.round(img.naturalWidth*scale));
     c.height=Math.max(1,Math.round(img.naturalHeight*scale));
@@ -198,7 +200,7 @@ $('fotoInput').addEventListener('change',()=>{
     ctx.drawImage(img,0,0,c.width,c.height);
 
     fotos.push({
-     data:c.toDataURL('image/jpeg',.82),
+     data:c.toDataURL('image/jpeg',.70),
      ratio:img.naturalWidth/img.naturalHeight
     });
 
@@ -448,7 +450,7 @@ async function generarPDF(){
  // FECHA / HORA
  // HORA: desde x=105 hasta x=122 => 17 mm.
  // 10:15 P.M.: desde inicio de CARGO / PUESTO (x=122)
- // hasta final de ÁREA (x=202) => 80 mm.
+ // hasta final de ÁREA (x=202) => 80 mm, centrado H/V.
  const hFH=4;
  const fechaLbl=48.5;
  const fechaVal=48.5;
@@ -478,6 +480,9 @@ async function generarPDF(){
 
  row('PROYECTO:',$('proyecto').value);
  row('LUGAR EXACTO DEL EVENTO:',$('lugar').value);
+
+ // Mismo espacio en blanco que separa los bloques equivalentes.
+ y+=3;
 
  // =========================================================
  // 2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)
@@ -550,18 +555,17 @@ async function generarPDF(){
 
  y+=hVehDato;
 
- // EXACTAMENTE EL MISMO ESPACIO QUE ENTRE TRABAJADOR Y SECCIÓN 3.
- y+=espacioEntreBloques;
-
+ // Sin espacio en blanco: TESTIGOS empieza inmediatamente después
+ // de la fila de datos del vehículo.
  const tests=[
   $('t1').value,
   $('t2').value,
   $('t3').value
  ].filter(s=>String(s).trim());
 
- const wTestLabel=48.5;
- const wTestNum=12;
- const wTestDato=W-wTestLabel-wTestNum; // 133.5
+ const wTestLabel=39.5;
+ const wTestNum=9;
+ const wTestDato=W-wTestLabel-wTestNum; // 145.5
  const hTest=4;
 
  tests.forEach((s,i)=>{
@@ -641,37 +645,34 @@ async function generarPDF(){
 
  band('5. EVIDENCIA FOTOGRÁFICA');
 
- const gapFoto=3;
  const margenFoto=4;
  const fh=52;
+ const separacionFoto=3;
+ const maxFotosFila=4;
 
  if(!fotos.length){
   newPageIf(fh);
   cell(M,W,fh,'');
   y+=fh;
  }else{
-  for(let i=0;i<fotos.length;i+=3){
-   const group=fotos.slice(i,i+3);
+  for(let i=0;i<fotos.length;i+=maxFotosFila){
+   const group=fotos.slice(i,i+maxFotosFila);
    const n=group.length;
 
    newPageIf(fh);
 
-   // El área total se divide en 1, 2 o 3 cuadros según las fotos.
-   const cuadroW=(W-gapFoto*(n-1))/n;
-
+   // UN SOLO RECUADRO POR FILA.
+   // La división en 4 es solo referencial para ordenar y centrar
+   // las imágenes; no se dibujan recuadros individuales.
    pdf.setFillColor(...blanco);
    pdf.setDrawColor(...negro);
    pdf.rect(M,y,W,fh,'FD');
 
+   const cuadroW=(W-separacionFoto*(maxFotosFila-1))/maxFotosFila;
+
    group.forEach((f,j)=>{
-    const bx=M+j*(cuadroW+gapFoto);
+    const bx=M+j*(cuadroW+separacionFoto);
 
-    // Línea divisoria entre cuadros.
-    if(j>0){
-     pdf.line(bx-gapFoto/2,y,bx-gapFoto/2,y+fh);
-    }
-
-    // Área útil del cuadro.
     const maxW=cuadroW-margenFoto*2;
     const maxH=fh-margenFoto*2;
 
@@ -683,7 +684,7 @@ async function generarPDF(){
      w=h*f.ratio;
     }
 
-    // Centrado horizontal y vertical.
+    // Centrado horizontal y vertical dentro de su espacio referencial.
     const ix=bx+(cuadroW-w)/2;
     const iy=y+(fh-h)/2;
 
@@ -707,7 +708,7 @@ async function generarPDF(){
  const rw=[62,48,42,42];
  const rx=[M,M+62,M+110,M+152];
 
- const hRespCab=6;
+ const hRespCab=4;
  const hRespDato=14;
 
  newPageIf(hRespCab);
