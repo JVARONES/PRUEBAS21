@@ -2,733 +2,495 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Flash Report - Formato</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flash Report — Generador F034</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-
-/* =========================================================
-   CONFIGURACIÓN GENERAL
-========================================================= */
-
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
-
-body{
-    background:#d9d9d9;
-    font-family:Arial, Helvetica, sans-serif;
-    color:#000;
-}
-
-
-/* =========================================================
-   HOJA A4
-========================================================= */
-
-.page{
-    width:210mm;
-    min-height:297mm;
-
-    margin:20px auto;
-
-    background:#fff;
-
-    padding:8mm;
-
-    box-shadow:0 0 10px rgba(0,0,0,.25);
-
-    position:relative;
-
-    font-size:8pt;
-}
-
-
-/* =========================================================
-   COLORES DEL FORMATO
-========================================================= */
-
-:root{
-    --azul-indra:#004254;
-    --gris:#E4E3DA;
-    --negro:#000;
-    --blanco:#fff;
-}
-
-
-/* =========================================================
-   ENCABEZADO
-========================================================= */
-
-.header{
-    width:100%;
-
-    display:grid;
-
-    grid-template-columns:40mm 1fr 40mm;
-
-    align-items:center;
-
-    min-height:22mm;
-
-    margin-bottom:5mm;
-}
-
-
-/* LOGO */
-
-.logo{
-    height:17mm;
-
-    display:flex;
-    align-items:center;
-    justify-content:flex-start;
-}
-
-.logo img{
-    max-width:35mm;
-    max-height:16mm;
-    object-fit:contain;
-}
-
-
-/* TÍTULO */
-
-.title{
-    text-align:center;
-
-    font-size:12pt;
-
-    font-weight:bold;
-
-    line-height:1.25;
-
-    text-transform:uppercase;
-}
-
-
-/* CÓDIGO */
-
-.code{
-    font-size:5pt;
-
-    line-height:1.35;
-
-    text-align:left;
-
-    align-self:flex-start;
-}
-
-
-/* =========================================================
-   BLOQUES DE SECCIÓN
-========================================================= */
-
-.section-title{
-
-    width:100%;
-
-    height:7mm;
-
-    background:var(--gris);
-
-    border:1px solid var(--negro);
-
-    display:flex;
-
-    align-items:center;
-
-    padding-left:3mm;
-
-    font-size:7pt;
-
-    font-weight:bold;
-
-    text-transform:uppercase;
-
-    margin-top:2mm;
-}
-
-
-/* SECCIÓN AZUL */
-
-.section-title.blue{
-
-    background:var(--azul-indra);
-
-    color:var(--blanco);
-
-    justify-content:center;
-
-    padding-left:0;
-}
-
-
-/* =========================================================
-   TABLAS
-========================================================= */
-
-.table{
-    width:100%;
-
-    border-collapse:collapse;
-
-    table-layout:fixed;
-}
-
-.table td,
-.table th{
-
-    border:1px solid var(--negro);
-
-    height:8mm;
-
-    padding:2mm;
-
-    vertical-align:middle;
-
-    font-size:7pt;
-}
-
-
-/* CABECERA GRIS */
-
-.table th{
-    background:var(--gris);
-
-    font-weight:bold;
-
-    text-align:center;
-}
-
-
-/* CABECERA AZUL */
-
-.table .blue-cell{
-
-    background:var(--azul-indra);
-
-    color:#fff;
-
-    font-weight:bold;
-
-    text-align:center;
-}
-
-
-/* CELDA VACÍA */
-
-.empty{
-    background:#fff;
-
-    height:8mm;
-}
-
-
-/* =========================================================
-   TABLA DE DATOS GENERALES
-========================================================= */
-
-.general td{
-    height:9mm;
-}
-
-.label{
-    background:var(--gris);
-
-    font-weight:bold;
-
-    width:25%;
-}
-
-
-/* =========================================================
-   ÁREA GRANDE PARA DESCRIPCIÓN
-========================================================= */
-
-.description{
-
-    width:100%;
-
-    height:48mm;
-
-    border:1px solid #000;
-
-    background:#fff;
-}
-
-
-/* =========================================================
-   ÁREA DE EVIDENCIAS FOTOGRÁFICAS
-========================================================= */
-
-.photo-section{
-
-    display:grid;
-
-    grid-template-columns:1fr 1fr;
-
-    gap:3mm;
-
-    padding:3mm;
-
-    border:1px solid #000;
-
-    min-height:65mm;
-}
-
-
-.photo-box{
-
-    border:1px solid #000;
-
-    min-height:55mm;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    background:#fff;
-}
-
-
-/* =========================================================
-   TABLA DE RESPONSABLE
-========================================================= */
-
-.signature-table td{
-
-    height:25mm;
-
-    vertical-align:top;
-}
-
-.signature{
-
-    height:20mm;
-
-    position:relative;
-}
-
-
-/* =========================================================
-   PIE
-========================================================= */
-
-.footer{
-
-    margin-top:4mm;
-
-    display:grid;
-
-    grid-template-columns:1fr 1fr;
-
-    border-top:1px solid #000;
-
-    font-size:5.5pt;
-}
-
-.footer div{
-
-    padding-top:2mm;
-}
-
-
-/* =========================================================
-   IMPRESIÓN
-========================================================= */
-
-@media print{
-
-    body{
-        background:#fff;
-    }
-
-    .page{
-
-        margin:0;
-
-        box-shadow:none;
-
-        width:210mm;
-
-        min-height:297mm;
-
-        page-break-after:always;
-    }
-
-    @page{
-
-        size:A4 portrait;
-
-        margin:0;
-    }
-}
-
-
-/* =========================================================
-   VISTA EN PANTALLA
-========================================================= */
-
-@media(max-width:900px){
-
-    .page{
-        transform-origin:top left;
-        margin-left:10px;
-    }
-
-}
-
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--azul:#004154;--plomo:#E1E0D7;--fondo:#f5f6f4;--texto:#17343c;
+  --muted:#687a80;--borde:#d7dfdc;--rojo:#a44848;--verde:#2d8066}
+body{font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--fondo);
+  color:var(--texto);font-size:14px}
+header{background:var(--azul);padding:16px 24px;color:#fff}
+header h1{font-size:17px;font-weight:600}
+header p{font-size:12px;opacity:.7;margin-top:3px}
+.app{max-width:980px;margin:0 auto;padding:22px 16px 60px}
+.card{background:#fff;border:1px solid var(--borde);border-radius:12px;
+  margin-bottom:16px;overflow:hidden}
+.ch{background:var(--plomo);color:var(--azul);padding:11px 18px;
+  font-size:12px;font-weight:700;letter-spacing:.5px}
+.cb{padding:18px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:11px;font-weight:700;color:#52666d;
+  margin-bottom:6px;letter-spacing:.3px}
+input,select,textarea{width:100%;border:1px solid var(--borde);border-radius:8px;
+  padding:9px 11px;font-size:13px;font-family:inherit;color:var(--texto);background:#fff}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--azul)}
+textarea{resize:vertical;min-height:90px;line-height:1.55}
+.btn{border:0;border-radius:8px;padding:11px 20px;font-size:13px;
+  font-weight:700;cursor:pointer;font-family:inherit}
+.pri{background:var(--azul);color:#fff}
+.pri:hover{background:#07556a}
+.sec{background:#fff;color:var(--azul);border:1px solid var(--borde)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.inv{border:1px solid var(--borde);border-radius:10px;padding:14px;margin-bottom:10px;
+  background:#fafbfa}
+.inv .g4{gap:10px}
+.del{background:transparent;border:0;color:var(--rojo);font-size:19px;
+  font-weight:800;cursor:pointer;float:right}
+.hint{font-size:11px;color:var(--muted);margin-top:5px}
+.fbox{display:flex;align-items:center;gap:14px}
+.fprev{width:150px;height:60px;border:1.5px dashed var(--borde);border-radius:8px;
+  display:grid;place-items:center;background:#fafbfa;font-size:11px;color:var(--muted)}
+.fprev img{max-width:142px;max-height:54px;object-fit:contain}
+.nota{background:#fdf8ec;border-left:3px solid #d9b262;border-radius:8px;
+  padding:11px 14px;font-size:12px;color:#6b5a30;line-height:1.6;margin-top:12px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+  background:var(--azul);color:#fff;padding:12px 20px;border-radius:9px;
+  font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:999}
+.toast.err{background:var(--rojo)}
+@media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}}
 </style>
 </head>
-
-
 <body>
 
+<header>
+  <h1>Reporte Preliminar de Accidente e Incidente — Flash Report</h1>
+  <p>SGSST_INDRAGROUP_F 034 · Versión 01 · Generador de prueba</p>
+</header>
 
-<div class="page">
+<div class="app">
 
+<div class="card">
+  <div class="ch">1 · INFORMACIÓN GENERAL</div>
+  <div class="cb">
+    <div class="g2">
+      <div>
+        <label>TIPO DE ACCIDENTE / INCIDENTE</label>
+        <input type="text" id="tipo" value="Accidente de trabajo incapacitante temporal.">
+      </div>
+      <div>
+        <label>EMPRESA</label>
+        <select id="empresa">
+          <option value="0">INDRA PERÚ S.A.</option>
+          <option value="1" selected>INDRA T & D S.A.C.</option>
+          <option value="2">NUEK PAYMENTS PERÚ S.A.C.</option>
+        </select>
+      </div>
+    </div>
+    <div class="full" style="margin-top:14px">
+      <label>GERENCIA / RESPONSABLE DEL PROYECTO / ÁREA</label>
+      <input type="text" id="gerencia" value="Abel Cieza">
+    </div>
+    <div class="g3" style="margin-top:14px">
+      <div><label>FECHA DE OCURRENCIA</label><input type="date" id="fecha" value="2026-05-28"></div>
+      <div><label>HORA</label><input type="time" id="hora" value="22:15"></div>
+      <div><label>PROYECTO</label><input type="text" id="proyecto" value="AEROPUERTO"></div>
+    </div>
+    <div class="full" style="margin-top:14px">
+      <label>LUGAR EXACTO DEL EVENTO</label>
+      <input type="text" id="lugar" value="Facility 2516 - P10 - Nuevo Aeropuerto Jorge Chávez">
+    </div>
+  </div>
+</div>
 
-    <!-- =====================================================
-         ENCABEZADO
-    ====================================================== -->
+<div class="card">
+  <div class="ch">2 · DATOS DEL TRABAJADOR(ES) AFECTADO(S)</div>
+  <div class="cb">
+    <div id="invs"></div>
+    <button class="btn sec" onclick="agregarInv()">+ Agregar trabajador</button>
+  </div>
+</div>
 
-    <div class="header">
+<div class="card">
+  <div class="ch">3 · VEHÍCULO, TESTIGOS Y DAÑO</div>
+  <div class="cb">
+    <div class="g4">
+      <div><label>MARCA</label><input type="text" id="vm" value="-"></div>
+      <div><label>MODELO</label><input type="text" id="vmo" value="-"></div>
+      <div><label>EMPRESA</label><input type="text" id="ve" value="-"></div>
+      <div><label>PLACA</label><input type="text" id="vp" value="-"></div>
+    </div>
+    <div class="g3" style="margin-top:14px">
+      <div><label>TESTIGO N° 1</label><input type="text" id="t1" value="Díaz Yenque Pier"></div>
+      <div><label>TESTIGO N° 2</label><input type="text" id="t2" value="Obregón Torres Aldo"></div>
+      <div><label>TESTIGO N° 3</label><input type="text" id="t3" value="Oliveros Silva Rosmery"></div>
+    </div>
+    <div class="g2" style="margin-top:14px">
+      <div><label>SUPERVISOR DE TURNO</label><input type="text" id="sup" value="Barzola Tinoco Víctor"></div>
+      <div><label>DAÑO CAUSADO</label><input type="text" id="dano" value="ESGUINCE Y TORCEDURA DE TOBILLO IZQUIERDO."></div>
+    </div>
+  </div>
+</div>
 
-        <div class="logo">
+<div class="card">
+  <div class="ch">4 · BREVE DESCRIPCIÓN DEL EVENTO</div>
+  <div class="cb">
+    <textarea id="desc" style="min-height:140px">El día 28/05/2026 aproximadamente a las 22:15 horas, el trabajador Gianfranco Ludeña se encontraba realizando actividades de coordinación previas al mantenimiento programado en el Facility 2516 - P10. Al descender por la escalera de acceso, pisó de forma irregular el último peldaño, sufriendo una torcedura del tobillo izquierdo. Fue asistido de inmediato por el personal presente y trasladado al tópico para su evaluación.</textarea>
+  </div>
+</div>
 
-            <!-- Reemplazar posteriormente por el logo real -->
-
-            <strong style="
-                color:#004254;
-                font-size:16pt;
-                letter-spacing:-1px;
-            ">
-                INDRA
-            </strong>
-
+<div class="card">
+  <div class="ch">6 · RESPONSABLE DEL REGISTRO</div>
+  <div class="cb">
+    <div class="g3">
+      <div><label>NOMBRES Y APELLIDOS</label><input type="text" id="rnom" value="OLIVEROS SILVA ROSMERY"></div>
+      <div><label>CARGO / PUESTO</label><input type="text" id="rcar" value="SUPERVISOR SSOMA"></div>
+      <div><label>FECHA DEL REGISTRO</label><input type="date" id="rfec" value="2026-06-02"></div>
+    </div>
+    <div style="margin-top:16px">
+      <label>FIRMA</label>
+      <div class="fbox">
+        <div class="fprev" id="fprev"><span>Sin firma</span></div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <button class="btn sec" style="padding:7px 13px;font-size:12px"
+            onclick="document.getElementById('finput').click()">Subir firma</button>
+          <button class="btn sec" id="fdel" style="padding:7px 13px;font-size:12px;
+            display:none;color:var(--rojo);border-color:var(--rojo)"
+            onclick="borrarFirma()">Eliminar</button>
         </div>
-
-
-        <div class="title">
-
-            FLASH REPORT<br>
-            REPORTE PRELIMINAR
-
-        </div>
-
-
-        <div class="code">
-
-            CÓDIGO:<br>
-            VERSIÓN:<br>
-            FECHA:<br>
-            PÁGINA:
-
-        </div>
-
+        <input type="file" id="finput" accept="image/*" style="display:none" onchange="cargarFirma(this)">
+      </div>
+      <div class="nota">La firma se guarda solo en este navegador. No se envía ni se almacena
+      en ningún archivo compartido.</div>
     </div>
-
-
-
-    <!-- =====================================================
-         IDENTIFICACIÓN DEL REPORTE
-    ====================================================== -->
-
-    <div class="section-title">
-
-        IDENTIFICACIÓN DEL REPORTE
-
-    </div>
-
-
-    <table class="table general">
-
-        <tr>
-
-            <td class="label"></td>
-
-            <td class="empty"></td>
-
-            <td class="label"></td>
-
-            <td class="empty"></td>
-
-        </tr>
-
-        <tr>
-
-            <td class="label"></td>
-
-            <td class="empty"></td>
-
-            <td class="label"></td>
-
-            <td class="empty"></td>
-
-        </tr>
-
-    </table>
-
-
-
-    <!-- =====================================================
-         DATOS DEL EVENTO
-    ====================================================== -->
-
-    <div class="section-title blue">
-
-        DATOS DEL EVENTO
-
-    </div>
-
-
-    <table class="table">
-
-        <tr>
-
-            <th></th>
-
-            <th></th>
-
-            <th></th>
-
-            <th></th>
-
-        </tr>
-
-        <tr>
-
-            <td></td>
-
-            <td></td>
-
-            <td></td>
-
-            <td></td>
-
-        </tr>
-
-        <tr>
-
-            <td></td>
-
-            <td></td>
-
-            <td></td>
-
-            <td></td>
-
-        </tr>
-
-    </table>
-
-
-
-    <!-- =====================================================
-         PERSONAS INVOLUCRADAS
-    ====================================================== -->
-
-    <div class="section-title">
-
-        PERSONAS INVOLUCRADAS
-
-    </div>
-
-
-    <table class="table">
-
-        <tr>
-
-            <th></th>
-
-            <th></th>
-
-            <th></th>
-
-            <th></th>
-
-            <th></th>
-
-        </tr>
-
-        <tr>
-
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-
-        </tr>
-
-        <tr>
-
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-
-        </tr>
-
-        <tr>
-
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-
-        </tr>
-
-    </table>
-
-
-
-    <!-- =====================================================
-         DESCRIPCIÓN DEL EVENTO
-    ====================================================== -->
-
-    <div class="section-title blue">
-
-        DESCRIPCIÓN DEL EVENTO
-
-    </div>
-
-
-    <div class="description"></div>
-
-
-
-    <!-- =====================================================
-         DAÑOS / CONSECUENCIAS
-    ====================================================== -->
-
-    <div class="section-title">
-
-        DAÑOS Y CONSECUENCIAS
-
-    </div>
-
-
-    <table class="table">
-
-        <tr>
-
-            <th></th>
-
-            <th></th>
-
-            <th></th>
-
-        </tr>
-
-        <tr>
-
-            <td style="height:22mm"></td>
-
-            <td style="height:22mm"></td>
-
-            <td style="height:22mm"></td>
-
-        </tr>
-
-    </table>
-
-
-
-    <!-- =====================================================
-         EVIDENCIA FOTOGRÁFICA
-    ====================================================== -->
-
-    <div class="section-title blue">
-
-        EVIDENCIA FOTOGRÁFICA
-
-    </div>
-
-
-    <div class="photo-section">
-
-        <div class="photo-box"></div>
-
-        <div class="photo-box"></div>
-
-        <div class="photo-box"></div>
-
-        <div class="photo-box"></div>
-
-    </div>
-
-
-
-    <!-- =====================================================
-         RESPONSABLE
-    ====================================================== -->
-
-    <div class="section-title">
-
-        RESPONSABLE DEL REPORTE
-
-    </div>
-
-
-    <table class="table signature-table">
-
-        <tr>
-
-            <th></th>
-
-            <th></th>
-
-            <th></th>
-
-        </tr>
-
-        <tr>
-
-            <td class="signature"></td>
-
-            <td class="signature"></td>
-
-            <td class="signature"></td>
-
-        </tr>
-
-    </table>
-
-
-
-    <!-- =====================================================
-         PIE
-    ====================================================== -->
-
-    <div class="footer">
-
-        <div>
-
-            Documento controlado
-
-        </div>
-
-        <div style="text-align:right">
-
-            Página 1 de 1
-
-        </div>
-
-    </div>
-
+  </div>
+</div>
+
+<div class="row">
+  <button class="btn pri" onclick="generar()">Generar PDF</button>
+</div>
 
 </div>
 
+<script>
+const $=id=>document.getElementById(id);
 
+const EMPRESAS=[
+  {nom:'INDRA PERÚ S.A.', ruc:'20100123411',
+   dir:'AV. JORGE BASADRE NRO. 233 INT. 901 (ALT.CUADRA 01 JAVIER PRADO OESTE) LIMA - LIMA - SAN ISIDRO'},
+  {nom:'INDRA T & D S.A.C.', ruc:'20604487901',
+   dir:'AV. JORGE BASADRE NRO. 233 INT. 9 LIMA - LIMA - SAN ISIDRO'},
+  {nom:'NUEK PAYMENTS PERÚ S.A.C.', ruc:'20374984838',
+   dir:'AV. JORGE BASADRE NRO. 233 INT. 901 (ALT.1RA CUADRA DE AV.JAVIER PRADO OESTE) LIMA - LIMA - SAN ISIDRO'}
+];
+
+/* ---------- involucrados ---------- */
+let INVS=[
+  {nom:'BRAVO LUDEÑA GIANFRANCO EDUARDO', emp:'INDRA T & D S.A.C.',
+   car:'TÉCNICO DE MANTENIMIENTO', area:'MANTENIMIENTO'}
+];
+
+function pintarInvs(){
+  $('invs').innerHTML=INVS.map((v,i)=>`
+    <div class="inv">
+      ${INVS.length>1?'<button class="del" onclick="quitarInv('+i+')">×</button>':''}
+      <div class="g4">
+        <div><label>NOMBRES Y APELLIDOS</label>
+          <input type="text" value="${esc(v.nom)}" oninput="INVS[${i}].nom=this.value"></div>
+        <div><label>EMPRESA</label>
+          <input type="text" value="${esc(v.emp)}" oninput="INVS[${i}].emp=this.value"></div>
+        <div><label>CARGO / PUESTO</label>
+          <input type="text" value="${esc(v.car)}" oninput="INVS[${i}].car=this.value"></div>
+        <div><label>ÁREA</label>
+          <input type="text" value="${esc(v.area)}" oninput="INVS[${i}].area=this.value"></div>
+      </div>
+    </div>`).join('');
+}
+
+function agregarInv(){
+  INVS.push({nom:'',emp:EMPRESAS[+$('empresa').value].nom,car:'',area:''});
+  pintarInvs();
+}
+function quitarInv(i){ INVS.splice(i,1); pintarInvs(); }
+pintarInvs();
+
+/* ---------- firma ---------- */
+let FIRMA=localStorage.getItem('f034_firma')||null;
+let RATIO=parseFloat(localStorage.getItem('f034_ratio'))||2;
+
+function cargarFirma(input){
+  const f=input.files[0];
+  if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const esc2=Math.min(1,400/img.naturalWidth);
+      const c=document.createElement('canvas');
+      c.width=img.naturalWidth*esc2;
+      c.height=img.naturalHeight*esc2;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);
+      ctx.drawImage(img,0,0,c.width,c.height);
+      FIRMA=c.toDataURL('image/png');
+      RATIO=img.naturalWidth/img.naturalHeight;
+      try{
+        localStorage.setItem('f034_firma',FIRMA);
+        localStorage.setItem('f034_ratio',String(RATIO));
+      }catch(x){}
+      verFirma();
+      toast('Firma cargada');
+    };
+    img.src=e.target.result;
+  };
+  r.readAsDataURL(f);
+}
+
+function borrarFirma(){
+  FIRMA=null;
+  localStorage.removeItem('f034_firma');
+  $('finput').value='';
+  verFirma();
+}
+
+function verFirma(){
+  $('fprev').innerHTML = FIRMA
+    ? '<img src="'+FIRMA+'">'
+    : '<span>Sin firma</span>';
+  $('fdel').style.display = FIRMA ? 'block' : 'none';
+}
+verFirma();
+
+/* ---------- PDF ---------- */
+function generar(){
+  const emp=EMPRESAS[+$('empresa').value];
+  const [fy,fm,fd]=$('fecha').value.split('-');
+  const [ry,rm,rd]=$('rfec').value.split('-');
+
+  const d={
+    tipo:$('tipo').value, empresa:emp, gerencia:$('gerencia').value,
+    fecha:fd+'/'+fm+'/'+fy, hora:hora12($('hora').value),
+    lugar:$('lugar').value, invs:INVS,
+    vm:$('vm').value, vmo:$('vmo').value, ve:$('ve').value, vp:$('vp').value,
+    t1:$('t1').value, t2:$('t2').value, t3:$('t3').value,
+    sup:$('sup').value, dano:$('dano').value, desc:$('desc').value,
+    rnom:$('rnom').value, rcar:$('rcar').value,
+    rfec:rd+'/'+rm+'/'+ry
+  };
+
+  try{
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
+    dibujar(pdf,d);
+    pdf.save($('fecha').value+' FLASH REPORT '+$('proyecto').value+'.pdf');
+    toast('PDF generado');
+  }catch(e){
+    console.error(e);
+    toast('Error: '+e.message,true);
+  }
+}
+
+function hora12(t){
+  if(!t) return '';
+  let [h,m]=t.split(':').map(Number);
+  const s=h>=12?'P.M.':'A.M.';
+  h=h%12||12;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+' '+s;
+}
+
+function dibujar(pdf,d){
+  const AZ='#004154', GR='#E1E0D7', BK='#000000', WH='#FFFFFF';
+  const ml=8, tw=194, x0=ml;
+  const LH=2.9;
+
+  const rgb=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const fill=c=>{const[r,g,b]=rgb(c);pdf.setFillColor(r,g,b)};
+  const line=c=>{const[r,g,b]=rgb(c);pdf.setDrawColor(r,g,b)};
+  const col=c=>{const[r,g,b]=rgb(c);pdf.setTextColor(r,g,b)};
+
+  let y=8;
+  pdf.setLineWidth(0.3);
+
+  /* celda: texto centrado y multilínea, alto fijo */
+  function celda(x,w,h,txt,opts){
+    const o=opts||{};
+    fill(o.bg||WH); line(BK);
+    pdf.rect(x,y,w,h,'FD');
+    col(o.fg||BK);
+    pdf.setFont('helvetica',o.b?'bold':'normal');
+    pdf.setFontSize(o.fs||6);
+    const ls=pdf.splitTextToSize(String(txt||''),w-2.5);
+    const th=(ls.length-1)*LH;
+    const sy=y+h/2-th/2;
+    ls.forEach((l,j)=>{
+      const px = o.izq ? x+1.5 : x+w/2;
+      pdf.text(l,px,sy+j*LH,{align:o.izq?'left':'center',baseline:'middle'});
+    });
+  }
+
+  /* fila de una sola celda a todo el ancho */
+  function banda(h,txt,opts){
+    celda(x0,tw,h,txt,opts);
+    y+=h;
+  }
+
+  /* ══ ENCABEZADO ══ */
+  col(AZ); pdf.setFont('helvetica','bold'); pdf.setFontSize(13);
+  pdf.text('INDRA',ml+2,y+7);
+  col('#687a80'); pdf.setFontSize(7);
+  pdf.text('GROUP',ml+2,y+11);
+
+  col(BK); pdf.setFont('helvetica','bold'); pdf.setFontSize(10);
+  pdf.text('REPORTE PRELIMINAR DE ACCIDENTE E INCIDENTE',ml+tw/2,y+5,
+    {align:'center',baseline:'middle'});
+  pdf.setFontSize(9);
+  pdf.text('FLASH REPORT',ml+tw/2,y+10,{align:'center',baseline:'middle'});
+
+  pdf.setFont('helvetica','normal'); pdf.setFontSize(5.5);
+  const cx=ml+tw;
+  pdf.text('CÓDIGO: SGSST_INDRAGROUP_F 034',cx,y+2,{align:'right'});
+  pdf.text('VERSIÓN: 01',cx,y+4.5,{align:'right'});
+  pdf.text('FECHA: 2024-12-11',cx,y+7,{align:'right'});
+  pdf.text('Página: 1 de 1',cx,y+9.5,{align:'right'});
+
+  y+=16;
+
+  /* ══ 1. INFORMACIÓN GENERAL ══ */
+  banda(5,'1. INFORMACIÓN GENERAL',{bg:AZ,fg:WH,b:1,fs:7});
+
+  const w1=52, w2=tw-w1;
+  celda(x0,w1,6,'TIPO DE ACCIDENTE / INCIDENTE:',{bg:GR,b:1,izq:1});
+  celda(x0+w1,w2,6,d.tipo,{izq:1});
+  y+=6;
+
+  celda(x0,w1,6,'EMPRESA:',{bg:GR,b:1,izq:1});
+  celda(x0+w1,w2,6,d.empresa.nom,{izq:1});
+  y+=6;
+
+  celda(x0,w1,6,'RUC:',{bg:GR,b:1,izq:1});
+  celda(x0+w1,w2,6,d.empresa.ruc,{izq:1});
+  y+=6;
+
+  celda(x0,w1,7,'GERENCIA / RESPONSABLE DEL PROYECTO / ÁREA:',{bg:GR,b:1,izq:1});
+  celda(x0+w1,w2,7,d.gerencia,{izq:1});
+  y+=7;
+
+  const a=52, b=48, c=25, e=tw-a-b-c;
+  celda(x0,a,6,'FECHA DE OCURRENCIA:',{bg:GR,b:1,izq:1});
+  celda(x0+a,b,6,d.fecha);
+  celda(x0+a+b,c,6,'HORA:',{bg:GR,b:1,izq:1});
+  celda(x0+a+b+c,e,6,d.hora);
+  y+=6;
+
+  celda(x0,a,6,'LUGAR EXACTO DEL EVENTO:',{bg:GR,b:1,izq:1});
+  celda(x0+a,tw-a,6,d.lugar,{izq:1});
+  y+=6;
+
+  y+=2;
+
+  /* ══ 2. TRABAJADORES ══ */
+  banda(5,'2. DATOS DEL TRABAJADOR(ES) AFECTADO(S)',{bg:AZ,fg:WH,b:1,fs:7});
+
+  const iw=[74,44,42,34];
+  const ix=[x0]; for(let i=1;i<iw.length;i++) ix.push(ix[i-1]+iw[i-1]);
+
+  ['NOMBRES Y APELLIDOS','EMPRESA','CARGO / PUESTO','ÁREA']
+    .forEach((h,i)=>celda(ix[i],iw[i],6,h,{bg:GR,b:1}));
+  y+=6;
+
+  d.invs.forEach(v=>{
+    celda(ix[0],iw[0],7,v.nom,{izq:1});
+    celda(ix[1],iw[1],7,v.emp);
+    celda(ix[2],iw[2],7,v.car);
+    celda(ix[3],iw[3],7,v.area);
+    y+=7;
+  });
+
+  y+=2;
+
+  /* ══ 3. VEHÍCULO ══ */
+  banda(5,'3. VEHÍCULO SINIESTRADO',{bg:AZ,fg:WH,b:1,fs:7});
+
+  const vw=[48.5,48.5,48.5,48.5];
+  const vx=[x0]; for(let i=1;i<vw.length;i++) vx.push(vx[i-1]+vw[i-1]);
+
+  ['MARCA','MODELO','EMPRESA','PLACA']
+    .forEach((h,i)=>celda(vx[i],vw[i],6,h,{bg:GR,b:1}));
+  y+=6;
+
+  [d.vm,d.vmo,d.ve,d.vp].forEach((v,i)=>celda(vx[i],vw[i],6,v));
+  y+=6;
+
+  /* testigos */
+  const tl=52, tn=22, tv=tw-tl-tn;
+  [['TESTIGOS DEL ACCIDENTE:','N° 1',d.t1],
+   ['TESTIGOS DEL ACCIDENTE:','N° 2',d.t2],
+   ['TESTIGOS DEL ACCIDENTE:','N° 3',d.t3]].forEach(r=>{
+    celda(x0,tl,6,r[0],{bg:GR,b:1,izq:1});
+    celda(x0+tl,tn,6,r[1],{bg:GR,b:1});
+    celda(x0+tl+tn,tv,6,r[2],{izq:1});
+    y+=6;
+  });
+
+  celda(x0,tl,6,'SUPERVISOR DE TURNO:',{bg:GR,b:1,izq:1});
+  celda(x0+tl,tw-tl,6,d.sup,{izq:1});
+  y+=6;
+
+  celda(x0,tl,7,'DAÑO CAUSADO:',{bg:GR,b:1,izq:1});
+  celda(x0+tl,tw-tl,7,d.dano,{izq:1});
+  y+=7;
+
+  y+=2;
+
+  /* ══ 4. DESCRIPCIÓN ══ */
+  banda(5,'4. BREVE DESCRIPCIÓN DEL EVENTO',{bg:AZ,fg:WH,b:1,fs:7});
+
+  pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5);
+  const dl=pdf.splitTextToSize(d.desc,tw-5);
+  const dh=Math.max(20,dl.length*3.3+4);
+
+  fill(WH); line(BK); pdf.rect(x0,y,tw,dh,'FD');
+  col(BK);
+  dl.forEach((l,j)=>pdf.text(l,x0+2.5,y+4+j*3.3));
+  y+=dh;
+
+  y+=2;
+
+  /* ══ 5. EVIDENCIA ══ */
+  banda(5,'5. EVIDENCIA FOTOGRÁFICA',{bg:AZ,fg:WH,b:1,fs:7});
+  celda(x0,tw,24,'',{});
+  y+=24;
+
+  y+=2;
+
+  /* ══ 6. RESPONSABLE ══ */
+  banda(5,'6. RESPONSABLE DEL REGISTRO',{bg:AZ,fg:WH,b:1,fs:7});
+
+  const rw=[62,48,42,42];
+  const rx=[x0]; for(let i=1;i<rw.length;i++) rx.push(rx[i-1]+rw[i-1]);
+
+  ['NOMBRES Y APELLIDOS','CARGO / PUESTO DE TRABAJO','FECHA DEL REGISTRO','FIRMA']
+    .forEach((h,i)=>celda(rx[i],rw[i],6,h,{bg:GR,b:1}));
+  y+=6;
+
+  const fh=14;
+  celda(rx[0],rw[0],fh,d.rnom);
+  celda(rx[1],rw[1],fh,d.rcar);
+  celda(rx[2],rw[2],fh,d.rfec);
+  celda(rx[3],rw[3],fh,'');
+
+  if(FIRMA){
+    try{
+      const h=10, w=Math.min(h*RATIO,rw[3]-4);
+      pdf.addImage(FIRMA,'PNG',rx[3]+(rw[3]-w)/2,y+(fh-h)/2,w,h);
+    }catch(x){}
+  }
+  y+=fh;
+}
+
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+
+function toast(m,err){
+  const t=document.createElement('div');
+  t.className='toast'+(err?' err':'');
+  t.textContent=m;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+</script>
 </body>
 </html>
-```
