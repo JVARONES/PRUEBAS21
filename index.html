@@ -300,7 +300,7 @@ function generarPDF(){
    lines.forEach((line,i)=>pdf.text(line,opt.left?x+1.5:x+w/2,sy+i*2.9,{align:opt.left?'left':'center',baseline:'middle'}));
  }
  function row(label,value){
-   const lw=52,vw=W-lw;pdf.setFontSize(6);const a=pdf.splitTextToSize(label,lw-2.5),b=pdf.splitTextToSize(value,vw-2.5);const h=Math.max(6,a.length*2.9+3,b.length*2.9+3);newPageIf(h);cell(M,lw,h,label,{bg:azul,fg:blanco,bold:true,left:true,fs:6});cell(M+lw,vw,h,value);y+=h;
+   const lw=48,vw=W-lw;pdf.setFontSize(6);const a=pdf.splitTextToSize(label,lw-2.5),b=pdf.splitTextToSize(value,vw-2.5);const h=Math.max(6,a.length*2.9+3,b.length*2.9+3);newPageIf(h);cell(M,lw,h,label,{bg:azul,fg:blanco,bold:true,left:true,fs:6});cell(M+lw,vw,h,value);y+=h;
  }
 
  header();
@@ -317,7 +317,7 @@ function generarPDF(){
 
  band('3. VEHÍCULO, TESTIGOS Y DAÑO');
  const vw=[48.5,48.5,48.5,48.5],vx=[M,M+48.5,M+97,M+145.5];newPageIf(12);['MARCA','MODELO','EMPRESA','PLACA'].forEach((s,i)=>cell(vx[i],vw[i],4,s,{bg:plomo,bold:true}));y+=6;['vm','vmo','ve','vp'].forEach((id,i)=>cell(vx[i],vw[i],6,$(id).value));y+=6+3;
- const tests=[$('t1').value,$('t2').value,$('t3').value].filter(s=>String(s).trim());tests.forEach((s,i)=>{newPageIf(6);cell(M,30,4,'TESTIGOS DEL ACCIDENTE:',{bg:azul,fg:blanco,bold:true,left:true});cell(M+30,18.5,6,'N° '+String(i+1).padStart(2,'0'),{bg:plomo,bold:true});cell(M+48.5,W-48.5,4,s);y+=6});
+ const tests=[$('t1').value,$('t2').value,$('t3').value].filter(s=>String(s).trim());tests.forEach((s,i)=>{newPageIf(6);cell(M,30,4,'TESTIGOS DEL ACCIDENTE:',{bg:azul,fg:blanco,bold:true,left:true});cell(M+30,18.5,6,'N° '+String(i+1).padStart(2,'0'),{bg:plomo,bold:true});cell(M+48.5,W-48.5,6,s);y+=6});
  row('SUPERVISOR DE TURNO:',$('sup').value);row('DAÑO CAUSADO:',$('dano').value);y+=3;
 
  band('4. BREVE DESCRIPCIÓN DEL EVENTO');
