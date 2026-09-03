@@ -34,6 +34,20 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#004154}
 .fprev img{max-width:142px;max-height:54px;object-fit:contain}
 .nota{margin-top:12px;background:#fdf8ec;border-left:3px solid #d9b262;padding:11px 14px;border-radius:8px;font-size:12px;color:#6b5a30}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#004154;color:#fff;padding:12px 20px;border-radius:9px;z-index:9999;box-shadow:0 8px 24px #0003}.toast.err{background:#a44848}
+
+.pdf-modal{display:none;position:fixed;inset:0;background:#0008;z-index:10000;padding:20px}
+.pdf-modal.open{display:flex;align-items:center;justify-content:center}
+.pdf-modal-box{width:min(1100px,96vw);height:min(92vh,900px);background:#fff;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 50px #0005}
+.pdf-modal-head{background:#004154;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.pdf-close{border:0;background:none;color:#fff;font-size:25px;line-height:1;cursor:pointer}
+.pdf-view{flex:1;background:#525659;min-height:0}
+.pdf-view iframe{width:100%;height:100%;border:0;display:block}
+.pdf-modal-foot{padding:10px 14px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #d7dfdc}
+.foto{cursor:grab}
+.foto.dragging{opacity:.45}
+.foto.dragover{outline:2px solid #004154;outline-offset:-2px}
+.foto-tools{position:absolute;left:5px;bottom:5px;display:flex;gap:4px}
+.foto-tools button{position:static;width:26px;height:26px;border:0;border-radius:50%;background:#004154;color:#fff;cursor:pointer;font-weight:bold}
 @media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}.fotos{grid-template-columns:1fr}}
 </style>
 </head>
@@ -100,7 +114,25 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#004154}
 </div>
 </div></div>
 
-<div class="row"><button class="btn pri" id="btnPDF">Generar PDF</button><button class="btn sec" id="btnExcel">Descargar Excel editable</button></div>
+<div class="row">
+<button class="btn pri" id="btnPDF">Descargar PDF</button>
+<button class="btn sec" id="btnPreview">Visualizar PDF</button>
+<button class="btn sec" id="btnExcel">Descargar Excel editable</button>
+</div>
+
+<div id="pdfModal" class="pdf-modal" aria-hidden="true">
+ <div class="pdf-modal-box" role="dialog" aria-modal="true" aria-labelledby="pdfModalTitle">
+  <div class="pdf-modal-head">
+   <strong id="pdfModalTitle">Vista previa — Flash Report F034</strong>
+   <button type="button" class="pdf-close" id="btnCerrarPreview" aria-label="Cerrar">×</button>
+  </div>
+  <div class="pdf-view"><iframe id="pdfFrame" title="Vista previa del PDF"></iframe></div>
+  <div class="pdf-modal-foot">
+   <button type="button" class="btn sec" id="btnCerrarPreview2">Cerrar</button>
+   <button type="button" class="btn pri" id="btnDescargarDesdePreview">Descargar PDF</button>
+  </div>
+ </div>
+</div>
 </div>
 <script>
 'use strict';
@@ -296,9 +328,83 @@ $('fotoInput').addEventListener('change',()=>{
 
 function pintarFotos(){
  $('fotos').innerHTML=fotos.map((f,i)=>
-  `<div class="foto"><img src="${f.data}"><button data-foto-del="${i}">×</button></div>`
+  `<div class="foto" draggable="true" data-foto-i="${i}">
+    <img src="${f.data}" alt="Evidencia fotográfica ${i+1}">
+    <button data-foto-del="${i}" aria-label="Eliminar foto">×</button>
+    <div class="foto-tools">
+     <button type="button" data-foto-left="${i}" title="Mover a la izquierda" aria-label="Mover a la izquierda">←</button>
+     <button type="button" data-foto-right="${i}" title="Mover a la derecha" aria-label="Mover a la derecha">→</button>
+    </div>
+   </div>`
  ).join('');
 }
+
+let fotoArrastrada=null;
+
+$('fotos').addEventListener('dragstart',e=>{
+ const item=e.target.closest('[data-foto-i]');
+ if(!item)return;
+ fotoArrastrada=+item.dataset.fotoI;
+ item.classList.add('dragging');
+ e.dataTransfer.effectAllowed='move';
+});
+
+$('fotos').addEventListener('dragend',e=>{
+ const item=e.target.closest('[data-foto-i]');
+ if(item)item.classList.remove('dragging');
+ document.querySelectorAll('.foto.dragover').forEach(x=>x.classList.remove('dragover'));
+ fotoArrastrada=null;
+});
+
+$('fotos').addEventListener('dragover',e=>{
+ const item=e.target.closest('[data-foto-i]');
+ if(!item || fotoArrastrada===null)return;
+ e.preventDefault();
+ document.querySelectorAll('.foto.dragover').forEach(x=>x.classList.remove('dragover'));
+ item.classList.add('dragover');
+});
+
+$('fotos').addEventListener('drop',e=>{
+ const item=e.target.closest('[data-foto-i]');
+ if(!item || fotoArrastrada===null)return;
+ e.preventDefault();
+
+ const destino=+item.dataset.fotoI;
+ if(destino===fotoArrastrada)return;
+
+ const [movida]=fotos.splice(fotoArrastrada,1);
+ fotos.splice(destino,0,movida);
+ pintarFotos();
+ toast('Orden de imágenes actualizado');
+});
+
+$('fotos').addEventListener('click',e=>{
+ const del=e.target.closest('[data-foto-del]');
+ if(del){
+  fotos.splice(+del.dataset.fotoDel,1);
+  pintarFotos();
+  return;
+ }
+
+ const left=e.target.closest('[data-foto-left]');
+ if(left){
+  const i=+left.dataset.fotoLeft;
+  if(i>0){
+   [fotos[i-1],fotos[i]]=[fotos[i],fotos[i-1]];
+   pintarFotos();
+  }
+  return;
+ }
+
+ const right=e.target.closest('[data-foto-right]');
+ if(right){
+  const i=+right.dataset.fotoRight;
+  if(i<fotos.length-1){
+   [fotos[i],fotos[i+1]]=[fotos[i+1],fotos[i]];
+   pintarFotos();
+  }
+ }
+});
 
 $('fotos').addEventListener('click',e=>{
  const b=e.target.closest('[data-foto-del]');
@@ -376,7 +482,7 @@ function hora12(v){
  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+' '+ap;
 }
 
-async function generarPDF(){
+async function generarPDF(descargar=true){
  if(!window.jspdf||!window.jspdf.jsPDF){
   toast('No se cargó jsPDF. Revisa tu conexión a Internet.',true);
   return;
@@ -733,9 +839,6 @@ async function generarPDF(){
   for(let i=0;i<fotos.length;i+=maxFotosFila){
    const group=fotos.slice(i,i+maxFotosFila);
    const n=group.length;
-
-   // La fila se adapta a la cantidad real de fotos (1, 2 o 3)
-   // y a su proporción, manteniendo siempre la imagen sin distorsión.
    const cuadroW=(W-separacionFoto*(n-1))/n;
 
    const alturas=group.map(f=>{
@@ -750,14 +853,13 @@ async function generarPDF(){
 
    newPageIf(fh);
 
-   // UN SOLO RECUADRO EXTERIOR POR FILA.
+   // Un solo recuadro exterior por fila.
    pdf.setFillColor(...blanco);
    pdf.setDrawColor(...negro);
    pdf.rect(M,y,W,fh,'FD');
 
    group.forEach((f,j)=>{
     const bx=M+j*(cuadroW+separacionFoto);
-
     const maxW=cuadroW-margenFoto*2;
     const maxH=fh-margenFoto*2;
 
@@ -844,8 +946,16 @@ async function generarPDF(){
   ($('proyecto').value||'PROYECTO').replace(/[\\/:*?"<>|]/g,'_')+
   '.pdf';
 
- pdf.save(nombreArchivo);
- toast('PDF generado correctamente');
+ const pdfBlob=pdf.output('blob');
+ const pdfUrl=URL.createObjectURL(pdfBlob);
+
+ if(descargar){
+  pdf.save(nombreArchivo);
+  setTimeout(()=>URL.revokeObjectURL(pdfUrl),1500);
+  toast('PDF generado correctamente');
+ }
+
+ return {blob:pdfBlob,url:pdfUrl,nombre:nombreArchivo};
 }
 
 
@@ -1107,16 +1217,11 @@ async function generarExcel(){
  for(let g=0;g<photoRows;g++){
   const group=fotos.slice(g*3,g*3+3);
   const n=group.length;
-
   const gap=2;
   const usable=C-gap*(n-1);
   const cw=usable/n;
 
-  // Altura automática aproximada según la proporción de cada foto.
-  const heights=group.map(f=>{
-   return cw/(f.ratio||1);
-  });
-
+  const heights=group.map(f=>cw/(f.ratio||1));
   const fh=Math.max(42,Math.min(78,Math.max(...heights)));
   const start=r;
   const rowCount=Math.max(1,Math.ceil(fh/4));
@@ -1140,10 +1245,8 @@ async function generarExcel(){
      base64:excelPhotoBase64(f.data),
      extension:'jpeg'
     });
-
     const c1=Math.round(1+j*(cw+gap));
     const c2=Math.min(C,Math.round(1+(j+1)*cw+j*gap));
-
     ws.addImage(imageId,{
      tl:{col:c1-1,row:start-1+0.2},
      br:{col:c2,row:end-0.2}
@@ -1209,11 +1312,61 @@ async function generarExcel(){
  toast('Excel editable generado correctamente');
 }
 
+let pdfPreviewUrl=null;
+let pdfPreviewData=null;
+
+function cerrarPreview(){
+ $('pdfModal').classList.remove('open');
+ $('pdfModal').setAttribute('aria-hidden','true');
+ $('pdfFrame').src='about:blank';
+ if(pdfPreviewUrl){
+  URL.revokeObjectURL(pdfPreviewUrl);
+  pdfPreviewUrl=null;
+ }
+}
+
+$('btnPreview').addEventListener('click',async()=>{
+ try{
+  const result=await generarPDF(false);
+  if(pdfPreviewUrl)URL.revokeObjectURL(pdfPreviewUrl);
+  pdfPreviewUrl=result.url;
+  pdfPreviewData=result;
+  $('pdfFrame').src=pdfPreviewUrl;
+  $('pdfModal').classList.add('open');
+  $('pdfModal').setAttribute('aria-hidden','false');
+ }catch(err){
+  console.error(err);
+  toast('No se pudo generar la vista previa del PDF',true);
+ }
+});
+
+$('btnCerrarPreview').addEventListener('click',cerrarPreview);
+$('btnCerrarPreview2').addEventListener('click',cerrarPreview);
+
+$('btnDescargarDesdePreview').addEventListener('click',()=>{
+ if(!pdfPreviewData)return;
+ const a=document.createElement('a');
+ a.href=pdfPreviewData.url;
+ a.download=pdfPreviewData.nombre;
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ toast('PDF descargado correctamente');
+});
+
+$('pdfModal').addEventListener('click',e=>{
+ if(e.target===$('pdfModal'))cerrarPreview();
+});
+
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape' && $('pdfModal').classList.contains('open'))cerrarPreview();
+});
+
 $('btnExcel').addEventListener('click',()=>{
  generarExcel().catch(err=>{console.error(err);toast('No se pudo generar el Excel',true);});
 });
 
-$('btnPDF').addEventListener('click',generarPDF);
+$('btnPDF').addEventListener('click',()=>generarPDF(true));
 </script>
 
 </body>
