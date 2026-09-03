@@ -304,7 +304,7 @@ $('fotoInput').addEventListener('change',()=>{
    img.onload=()=>{
     // Optimización: máximo 1400 px en el lado mayor,
     // conservando proporción y comprimiendo a JPEG de calidad 60%.
-    const maxPx=1400;
+    const maxPx=800;
     const scale=Math.min(1,maxPx/Math.max(img.naturalWidth,img.naturalHeight));
     const c=document.createElement('canvas');
     c.width=Math.max(1,Math.round(img.naturalWidth*scale));
@@ -316,7 +316,7 @@ $('fotoInput').addEventListener('change',()=>{
     ctx.drawImage(img,0,0,c.width,c.height);
 
     fotos.push({
-     data:c.toDataURL('image/jpeg',.60),
+     data:c.toDataURL('image/jpeg',.45),
      ratio:img.naturalWidth/img.naturalHeight
     });
 
