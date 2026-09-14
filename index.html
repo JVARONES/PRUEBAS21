@@ -729,7 +729,7 @@ async function generarPDFInvestigacion(datos){
      * 2 filas de evaluación (8+4=12 c/u) sumen 24, igual que las 3 de Lesión (8 c/u).
      */
     function filaEvaluacion(label, opciones, seleccionado, porque){
-      const wLabel=34, wOpt=63/opciones.length;
+      const wLabel=32, wOpt=65/opciones.length;
       const yBase=y;
       npi(8);
       cellAt(xDer, yBase, wLabel, 8, label, {bg:PL,fg:NE,bold:true,left:true,fs:5});
@@ -744,8 +744,8 @@ async function generarPDFInvestigacion(datos){
 
       const h2=4;
       npi(h2);
-      cellAt(xDer, y, 17, h2, '¿POR QUÉ?', {bg:AZ,fg:BL,bold:true,left:true,fs:5});
-      cellAt(xDer+17, y, 80, h2, porque||'-', {fs:5.3,left:true});
+      cellAt(xDer, y, 20, h2, '¿POR QUÉ?', {bg:AZ,fg:BL,bold:true,left:true,fs:5});
+      cellAt(xDer+17, y, 77, h2, porque||'-', {fs:5.3,left:true});
       y+=h2;
     }
 
