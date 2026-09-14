@@ -723,9 +723,9 @@ async function generarPDFInvestigacion(datos){
       y = yBase+8;
     }
 
-    /*
-     * DERECHA — Label=34(=Directa+Indirecta), Opciones=63. ¿Por qué?
-     * label=17(=Directa/Sin Supervisión), valor=80, altura=4 (para que
+        /*
+     * DERECHA — Label=32, Opciones=65 (32+65=97=MITAD). ¿Por qué?
+     * label=20, valor=77 (20+77=97=MITAD), altura=4 (para que
      * 2 filas de evaluación (8+4=12 c/u) sumen 24, igual que las 3 de Lesión (8 c/u).
      */
     function filaEvaluacion(label, opciones, seleccionado, porque){
@@ -748,24 +748,6 @@ async function generarPDFInvestigacion(datos){
       cellAt(xDer+20, y, 77, h2, porque||'-', {fs:5.3,left:true});
       y+=h2;
     }
-
-    const yInicioBloque = y;
-
-    filaLesion('PARTE DEL CUERPO:', t.parteLesionada, t.parteLesionadaObs);
-    filaLesion('TIPO DE LESIÓN:', t.tipoLesion, t.tipoLesionObs);
-    filaLesion('FUENTE DE LA LESIÓN:', t.fuenteLesion, t.fuenteLesionObs);
-    const yFinIzquierda = y;
-
-    y = yInicioBloque;
-    filaEvaluacion('POTENCIAL DE DAÑO:', ['GRAVE O FATAL','MODERADO','LEVE'],
-      t.potencialDano==='GRAVE_O_FATAL'?'GRAVE O FATAL':t.potencialDano, t.potencialPorque);
-    filaEvaluacion('PROBABILIDAD DE OCURRENCIA:', ['ALTA','MEDIA','BAJA'],
-      t.probabilidad, t.probabilidadPorque);
-    const yFinDerecha = y;
-
-    y = Math.max(yFinIzquierda, yFinDerecha);
-    y+=1;
-  });
 
   /* ============================================================
      BLOQUE 6 — SOBRE EL ACCIDENTE
