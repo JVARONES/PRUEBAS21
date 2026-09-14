@@ -765,9 +765,9 @@ async function generarPDFInvestigacion(datos){
 
     y = yInicioBloque;
     filaEvaluacion('POTENCIAL DE DAÑO:', ['GRAVE O FATAL','MODERADO','LEVE'],
-      t.potencialDano==='GRAVE_O_FATAL'?'GRAVE O FATAL':t.potencialDano, t.potencialPorque, [27,21,20]);
+      t.potencialDano==='GRAVE_O_FATAL'?'GRAVE O FATAL':t.potencialDano, t.potencialPorque, [27,20,21]);
     filaEvaluacion('PROBABILIDAD DE OCURRENCIA:', ['ALTA','MEDIA','BAJA'],
-      t.probabilidad, t.probabilidadPorque, [27,21,20]);
+      t.probabilidad, t.probabilidadPorque, [27,20,21]);
     const yFinDerecha = y;
 
     y = Math.max(yFinIzquierda, yFinDerecha);
