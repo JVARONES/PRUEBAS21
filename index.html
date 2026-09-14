@@ -730,7 +730,7 @@ async function generarPDFInvestigacion(datos){
      * 2 filas de evaluación (8+4=12 c/u) sumen 24, igual que las 3 de Lesión (8 c/u).
      */
     function filaEvaluacion(label, opciones, seleccionado, porque){
-      const wLabel=32, wOpt=65/opciones.length;
+      const wLabel=31, wOpt=66/opciones.length;
       const yBase=y;
       npi(8);
       cellAt(xDer, yBase, wLabel, 8, label, {bg:PL,fg:NE,bold:true,left:true,fs:5});
@@ -778,7 +778,7 @@ async function generarPDFInvestigacion(datos){
      * "TIPO:" (label angosto = ancho de una opción ALTA/MEDIA/BAJA,
      * ~20.67) + su valor, ambos en UNA SOLA fila (no en filas separadas).
      */
-    const wSob=115, wTipo=79, wTipoLabel=62/3, wTipoValor=wTipo-wTipoLabel;
+    const wSob=97, wTipo=97, wTipoLabel=62/3, wTipoValor=wTipo-wTipoLabel;
     const yBase=y;
     npi(8);
     cell(M, wSob, 4, 'SOBRE EL ACCIDENTE', {bg:AZ,fg:BL,bold:true,left:true,fs:6});
