@@ -15,7 +15,7 @@
 <body>
 
 <h2>Sandbox — Diseño de PDF Investigación (F013)</h2>
-<p>Archivo completo. Puedes reemplazar tu HTML actual por este archivo.</p>
+<p>Archivo completo — Bloques 1 a 5 reestructurados según tus proporciones exactas.</p>
 <button onclick="generarPDFInvestigacion(DATOS_PRUEBA)">Generar PDF</button>
 <div id="info"></div>
 
@@ -114,7 +114,7 @@ const DATOS_PRUEBA = {
   porTrabajador: {
     'INV_0001': {
       clasificacion: 'INCAPACITANTE',
-      grado: 'PARCIAL TEMPORAL',
+      grado: 'PARC. TEMP.',
       edad: '34',
       tiempoExperiencia: '3 años',
       horasTrabajadas: '5',
@@ -123,6 +123,8 @@ const DATOS_PRUEBA = {
       tareaEspecifica: 'CAMBIO DE FILTRO DE AIRE',
       tareaTipo: 'RUTINARIA',
       diasDescansoMedico: '10',
+      sexo: 'M',
+      turno: 'D',
       parteLesionada: 'Manos.',
       parteLesionadaObs: 'Dedos de la mano derecha',
       tipoLesion: 'Contusión, aplastamiento (piel intacta).',
@@ -140,7 +142,7 @@ const DATOS_PRUEBA = {
 };
 
 /* =========================================================
-   HELPERS
+   HELPERS GENERALES
    ========================================================= */
 function agregarLogoPDF(pdf, y){
   // Pega aquí LOGO_BASE64 si lo tienes.
@@ -160,15 +162,8 @@ async function generarPDFInvestigacion(datos){
   }
 
   const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF({
-    orientation:'portrait',
-    unit:'mm',
-    format:'a4',
-    compress:true
-  });
-
   const AZ=[0,65,84];
-  const PL=[170,170,159];
+  const PL=[225,224,215]; // gris claro original (el mismo del Flash Report)
   const NE=[0,0,0];
   const BL=[255,255,255];
 
@@ -176,11 +171,16 @@ async function generarPDFInvestigacion(datos){
   const W=194;
   const LIM=289;
 
-  let y=8;
-  let page=1;
+  let pdf, y, page;
+  let TOTAL_PAG=null;
+
+  function crearPdf(){
+    pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
+    y=8; page=1;
+  }
 
   /* =========================================================
-     HEADER
+     HEADER — 4 líneas
      ========================================================= */
   function header(){
     agregarLogoPDF(pdf,y);
@@ -190,7 +190,7 @@ async function generarPDFInvestigacion(datos){
     pdf.setFontSize(10);
 
     pdf.text(
-      'INVESTIGACIÓN DE ACCIDENTE DE TRABAJO',
+      'REGISTRO DE INVESTIGACIÓN DE ACCIDENTES DE TRABAJO',
       105,
       y+5,
       {align:'center'}
@@ -199,12 +199,12 @@ async function generarPDFInvestigacion(datos){
     pdf.setFont('helvetica','normal');
     pdf.setFontSize(5.5);
 
-    // Los metadatos quedan alineados y sin superposición.
     pdf.text('CÓDIGO: SGSST_INDRAGROUP_F 013',202,y+2,{align:'right'});
     pdf.text('VERSIÓN: 02',202,y+4.5,{align:'right'});
     pdf.text('FECHA: 2026-09-23',202,y+7,{align:'right'});
+    pdf.text('PÁGINA: '+page+(TOTAL_PAG?(' DE '+TOTAL_PAG):''),202,y+9.5,{align:'right'});
 
-    y+=14;
+    y+=15;
   }
 
   function npi(h){
@@ -218,17 +218,34 @@ async function generarPDFInvestigacion(datos){
 
   function band(s){
     npi(5);
-
-    pdf.setFillColor(...AZ);
-    pdf.setDrawColor(...NE);
+    pdf.setFillColor(...AZ); pdf.setDrawColor(...NE);
     pdf.rect(M,y,W,5,'FD');
-
-    pdf.setTextColor(...BL);
-    pdf.setFont('helvetica','bold');
-    pdf.setFontSize(7);
-
+    pdf.setTextColor(...BL); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
     pdf.text(s,M+2,y+3.2);
+    y+=5;
+  }
 
+  /* Banda plomo oscuro de instrucción — SIEMPRE alto 4 */
+  function bandaInstruccion(s, centrado){
+    npi(4);
+    pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
+    pdf.rect(M,y,W,4,'FD');
+    pdf.setTextColor(...NE); pdf.setFont('helvetica','italic'); pdf.setFontSize(5);
+    pdf.text(s, centrado?(M+W/2):(M+2), y+2.7, centrado?{align:'center'}:{});
+    y+=4;
+  }
+
+  /* Banda de 2 líneas en una sola fila de alto 5 (título + instrucción) */
+  function bandaDoble(azul, linea1, linea2){
+    npi(5);
+    pdf.setFillColor(...azul); pdf.setDrawColor(...NE);
+    pdf.rect(M,y,W,5,'FD');
+    pdf.setTextColor(...BL);
+    const lh=2.4, sy=y+5/2-lh/2;
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(5.3);
+    pdf.text(linea1,M+2,sy,{baseline:'middle'});
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(4.3);
+    pdf.text(linea2,M+2,sy+lh,{baseline:'middle'});
     y+=5;
   }
 
@@ -239,30 +256,43 @@ async function generarPDFInvestigacion(datos){
 
     pdf.setTextColor(...(o.fg||NE));
     pdf.setFont('helvetica',o.bold?'bold':'normal');
-    pdf.setFontSize(o.fs||6);
+    pdf.setFontSize(5);
 
     const s=String(txt??'');
     if(!s) return;
 
-    const lines=pdf.splitTextToSize(
-      s,
-      Math.max(3,w-2.5)
-    );
-
+    const lines=pdf.splitTextToSize(s, Math.max(3,w-2.5));
     const lh=o.lh||2.5;
     const tot=(lines.length-1)*lh;
     const sy=y+h/2-tot/2;
 
     lines.forEach((l,i)=>{
-      pdf.text(
-        l,
-        o.left?x+1.5:x+w/2,
-        sy+i*lh,
-        {
-          align:o.left?'left':'center',
-          baseline:'middle'
-        }
-      );
+      pdf.text(l, o.left?x+1.5:x+w/2, sy+i*lh,
+        {align:o.left?'left':'center', baseline:'middle'});
+    });
+  }
+
+  /* Dibuja una celda EN UNA COORDENADA Y ESPECÍFICA (no la global `y`) */
+  function cellAt(x,yy,w,h,txt,o={}){
+    pdf.setFillColor(...(o.bg||BL));
+    pdf.setDrawColor(...NE);
+    pdf.rect(x,yy,w,h,'FD');
+
+    pdf.setTextColor(...(o.fg||NE));
+    pdf.setFont('helvetica',o.bold?'bold':'normal');
+    pdf.setFontSize(5);
+
+    const s=String(txt??'');
+    if(!s) return;
+
+    const lines=pdf.splitTextToSize(s, Math.max(3,w-2.5));
+    const lh=o.lh||2.3;
+    const tot=(lines.length-1)*lh;
+    const sy=yy+h/2-tot/2;
+
+    lines.forEach((l,i)=>{
+      pdf.text(l, o.left?x+1.5:x+w/2, sy+i*lh,
+        {align:o.left?'left':'center', baseline:'middle'});
     });
   }
 
@@ -270,198 +300,102 @@ async function generarPDFInvestigacion(datos){
     lw=lw||48.5;
     const vw=W-lw;
     const h=5;
-
     npi(h);
-
-    cell(M,lw,h,lbl,{
-      bg:AZ,
-      fg:BL,
-      bold:true,
-      left:true,
-      fs:6
-    });
-
+    cell(M,lw,h,lbl,{bg:AZ,fg:BL,bold:true,left:true,fs:6});
     cell(M+lw,vw,h,val||'-',{fs:6});
-
     y+=h;
   }
 
   function filaOpciones(opciones, seleccionado, alto){
-    alto=alto||6;
-
+    alto=alto||5;
     const n=opciones.length;
     const w=W/n;
-
     npi(alto);
-
     opciones.forEach((op,i)=>{
-      const marcado=seleccionado &&
-        accTextoIgual_(seleccionado,op);
-
-      cell(
-        M+i*w,
-        w,
-        alto,
-        (marcado?'[X] ':'[ ] ')+op,
-        {
-          fs:6,
-          bold:marcado
-        }
-      );
+      const marcado=seleccionado && accTextoIgual_(seleccionado,op);
+      cell(M+i*w, w, alto, (marcado?'[X] ':'[ ] ')+op, {fs:6, bold:marcado});
     });
-
     y+=alto;
   }
 
   function accTextoIgual_(a,b){
-    return String(a||'').trim().toUpperCase() ===
-           String(b||'').trim().toUpperCase();
+    return String(a||'').trim().toUpperCase() === String(b||'').trim().toUpperCase();
   }
+
+  function catsCount_(c){
+    const cats=['actos','condiciones','factoresPersonales','factoresTrabajo'];
+    return cats.reduce((n,k)=>n+(c.scat[k]||[]).filter(item=>c.analisisCausaRaiz&&c.analisisCausaRaiz[item.id]).length,0);
+  }
+
+  /* Dos líneas centradas como bloque único (mismo criterio que cell()) */
+  function cellDosLineas(x,w,h,l1,l2,o={}){
+    pdf.setFillColor(...(o.bg||BL)); pdf.setDrawColor(...NE);
+    pdf.rect(x,y,w,h,'FD');
+    pdf.setTextColor(...(o.fg||NE));
+    const lh=2.4;
+    const sy=y+h/2-lh/2;
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(5);
+    pdf.text(l1, x+w/2, sy, {align:'center',baseline:'middle'});
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(5);
+    pdf.text(l2, x+w/2, sy+lh, {align:'center',baseline:'middle'});
+  }
+
+  function construirContenido(){
 
   header();
 
   /* ============================================================
      BLOQUE 1 — DATOS DEL EMPLEADOR
      ============================================================ */
-
   const c=datos.compartido;
 
-  // IMPORTANTE: "DATOS DEL EMPLEADOR" es PLOMO (#AAAA9F),
-  // no una banda azul.
-  npi(5);
-  pdf.setFillColor(...PL);
-  pdf.setDrawColor(...NE);
-  pdf.rect(M,y,W,5,'FD');
-  pdf.setTextColor(...NE);
-  pdf.setFont('helvetica','bold');
-  pdf.setFontSize(7);
-  pdf.text('DATOS DEL EMPLEADOR',M+2,y+3.2);
-  y+=5;
-
-
-  /* ------------------------------------------------------------
-     EMPLEADOR PRINCIPAL — título azul
-     ------------------------------------------------------------ */
+  npi(4);
+  pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
+  pdf.rect(M,y,W,4,'FD');
+  pdf.setTextColor(...NE); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
+  pdf.text('DATOS DEL EMPLEADOR',M+2,y+2.7);
+  y+=4;
 
   npi(5);
-  pdf.setFillColor(...AZ);
-  pdf.setDrawColor(...NE);
+  pdf.setFillColor(...AZ); pdf.setDrawColor(...NE);
   pdf.rect(M,y,W,5,'FD');
-  pdf.setTextColor(...BL);
-  pdf.setFont('helvetica','bold');
-  pdf.setFontSize(7);
+  pdf.setTextColor(...BL); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
   pdf.text('DATOS DEL EMPLEADOR PRINCIPAL',M+2,y+3.2);
   y+=5;
 
-
-  /* ------------------------------------------------------------
-     RAZÓN SOCIAL / RUC / DOMICILIO / ACTIVIDAD / N° TRABAJADORES
-     Encabezado en PLOMO.
-     ------------------------------------------------------------ */
-
   {
-    const w=[42,18,46,38,50];
-
-    const x=[
-      M,
-      M+w[0],
-      M+w[0]+w[1],
-      M+w[0]+w[1]+w[2],
-      M+w[0]+w[1]+w[2]+w[3]
-    ];
-
+    const w=[32,32,66,32,32];
+    const x=[M, M+w[0], M+w[0]+w[1], M+w[0]+w[1]+w[2], M+w[0]+w[1]+w[2]+w[3]];
     const h=5;
-
     npi(h);
-
-    [
-      'RAZÓN SOCIAL',
-      'RUC',
-      'DOMICILIO (Dirección, Distrito, Departamento, Provincia)',
-      'ACTIVIDAD ECONÓMICA',
-      'N° TRABAJADORES EN EL CENTRO LABORAL'
-    ].forEach((txt,i)=>{
-      cell(x[i],w[i],h,txt,{
-        bg:PL,
-        fg:NE,
-        bold:true,
-        fs:5.2
-      });
+    ['RAZÓN SOCIAL','RUC','DOMICILIO (Dirección, Distrito, Departamento, Provincia)','ACTIVIDAD ECONÓMICA','N° TRABAJADORES EN EL CENTRO LABORAL'].forEach((txt,i)=>{
+      cell(x[i],w[i],h,txt,{bg:PL,fg:NE,bold:true,fs:5.2});
     });
-
     y+=h;
-
     npi(h);
-
     [
-      datos.caso.sociedad||'-',
-      datos.caso.ruc||'-',
-      c.domicilioEmpleador ||
-        'AV. JORGE BASADRE NRO. 233 INT. 901, SAN ISIDRO',
-      c.actividadEconomicaEmpleador ||
-        'ACTIVIDADES DE CONSULTORÍA DE GESTIÓN',
+      datos.caso.sociedad||'-', datos.caso.ruc||'-',
+      c.domicilioEmpleador || 'AV. JORGE BASADRE NRO. 233 INT. 901, SAN ISIDRO',
+      c.actividadEconomicaEmpleador || 'ACTIVIDADES DE CONSULTORÍA DE GESTIÓN',
       c.numTrabajadores||'-'
     ].forEach((txt,i)=>{
       cell(x[i],w[i],h,txt,{fs:5.8});
     });
-
     y+=h;
   }
 
-
-  /* ------------------------------------------------------------
-     ALTO RIESGO — texto PLOMO #AAAA9F
-     ------------------------------------------------------------ */
-
-  npi(5);
-  pdf.setFillColor(...PL);
-  pdf.setDrawColor(...NE);
-  pdf.rect(M,y,W,5,'FD');
-  pdf.setTextColor(...NE);
-  pdf.setFont('helvetica','italic');
-  pdf.setFontSize(5.3);
-  pdf.text(
-    'COMPLETAR SÓLO EN CASO QUE LAS ACTIVIDADES DEL EMPLEADOR SEAN CONSIDERADAS DE ALTO RIESGO',
-    M+2,
-    y+3.2
-  );
-  y+=5;
-
-
-  /* ------------------------------------------------------------
-     SCTR — SIEMPRE 3 COLUMNAS IGUALES
-     ------------------------------------------------------------ */
+  bandaInstruccion('COMPLETAR SÓLO EN CASO QUE LAS ACTIVIDADES DEL EMPLEADOR SEAN CONSIDERADAS DE ALTO RIESGO');
 
   {
-    const w=[W/3,W/3,W/3];
-
-    const x=[
-      M,
-      M+w[0],
-      M+w[0]+w[1]
-    ];
-
-    const h=5;
-
+    const w=[64,66,64];
+    const x=[M, M+w[0], M+w[0]+w[1]];
+    const h=4;
     npi(h);
-
-    [
-      'N° TRABAJADORES AFILIADOS AL SCTR',
-      'N° TRABAJADORES NO AFILIADOS AL SCTR',
-      'NOMBRE DE LA ASEGURADORA'
-    ].forEach((txt,i)=>{
-      cell(x[i],w[i],h,txt,{
-        bg:PL,
-        fg:NE,
-        bold:true,
-        fs:5.2
-      });
+    ['N° TRABAJADORES AFILIADOS AL SCTR','N° TRABAJADORES NO AFILIADOS AL SCTR','NOMBRE DE LA ASEGURADORA'].forEach((txt,i)=>{
+      cell(x[i],w[i],h,txt,{bg:PL,fg:NE,bold:true,fs:5.2});
     });
-
     y+=h;
-
     npi(h);
-
     [
       c.altoRiesgo==='SI'?(c.sctrAfiliados||'-'):'-',
       c.altoRiesgo==='SI'?(c.sctrNoAfiliados||'-'):'-',
@@ -469,74 +403,33 @@ async function generarPDFInvestigacion(datos){
     ].forEach((txt,i)=>{
       cell(x[i],w[i],h,txt,{fs:6});
     });
-
     y+=h;
   }
-
   y+=2;
 
-
-  /* ------------------------------------------------------------
-     INTERMEDIACIÓN / CONTRATISTA — título PLOMO
-     ------------------------------------------------------------ */
-
-  npi(5);
-  pdf.setFillColor(...PL);
-  pdf.setDrawColor(...NE);
-  pdf.rect(M,y,W,5,'FD');
-  pdf.setTextColor(...NE);
-  pdf.setFont('helvetica','bold');
-  pdf.setFontSize(6.3);
-  pdf.text(
-    'DATOS DEL EMPLEADOR DE INTERMEDIACION, TERCERIZACION, CONTRATISTA, SUBCONTRATISTA, OTROS',
-    M+2,
-    y+3.2
-  );
-  y+=5;
+  npi(4);
+  pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
+  pdf.rect(M,y,W,4,'FD');
+  pdf.setTextColor(...NE); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
+  pdf.text('DATOS DEL EMPLEADOR DE INTERMEDIACION, TERCERIZACION, CONTRATISTA, SUBCONTRATISTA, OTROS',M+2,y+2.7);
+  y+=4;
 
   const contAplica=c.contratistaAplica==='SI';
 
-
-  /* ------------------------------------------------------------
-     CONTRATISTA — incluye N° TRABAJADORES
-     ------------------------------------------------------------ */
-
+  /*
+   * ¿APLICA? = 1/6 del tercio de referencia (65/6≈11).
+   * RUC sin cambios (21). RAZÓN SOCIAL absorbe lo liberado (33).
+   */
   {
-    const w=[15,43,18,43,42,33];
-
-    const x=[
-      M,
-      M+w[0],
-      M+w[0]+w[1],
-      M+w[0]+w[1]+w[2],
-      M+w[0]+w[1]+w[2]+w[3],
-      M+w[0]+w[1]+w[2]+w[3]+w[4]
-    ];
-
+    const w=[12,33,19,66,32,32];
+    const x=[]; let acc=M; w.forEach(v=>{x.push(acc); acc+=v;});
     const h=5;
-
     npi(h);
-
-    [
-      '¿APLICA?',
-      'RAZÓN SOCIAL O DENOMINACIÓN SOCIAL',
-      'RUC',
-      'DOMICILIO (Dirección, Distrito, Departamento, Provincia)',
-      'ACTIVIDAD ECONÓMICA',
-      'N° TRABAJADORES EN EL CENTRO LABORAL'
-    ].forEach((txt,i)=>{
-      cell(x[i],w[i],h,txt,{
-        bg:PL,
-        fg:NE,
-        bold:true,
-        fs:4.9
-      });
+    ['¿APLICA?','RAZÓN SOCIAL O DENOMINACIÓN SOCIAL','RUC','DOMICILIO (Dirección, Distrito, Departamento, Provincia)','ACTIVIDAD ECONÓMICA','N° TRABAJADORES EN EL CENTRO LABORAL'].forEach((txt,i)=>{
+      cell(x[i],w[i],h,txt,{bg:PL,fg:NE,bold:true,fs:4.8});
     });
-
     y+=h;
-
     npi(h);
-
     [
       contAplica?'SI':'NO',
       contAplica?(c.contratistaRazonSocial||'-'):'-',
@@ -547,1248 +440,756 @@ async function generarPDFInvestigacion(datos){
     ].forEach((txt,i)=>{
       cell(x[i],w[i],h,txt,{fs:5.5});
     });
-
     y+=h;
   }
 
-
-  /* ------------------------------------------------------------
-     ALTO RIESGO — CONTRATISTA
-     ------------------------------------------------------------ */
-
-  npi(5);
-  pdf.setFillColor(...PL);
-  pdf.setDrawColor(...NE);
-  pdf.rect(M,y,W,5,'FD');
-  pdf.setTextColor(...NE);
-  pdf.setFont('helvetica','italic');
-  pdf.setFontSize(5.3);
-  pdf.text(
-    'COMPLETAR SÓLO EN CASO QUE LAS ACTIVIDADES DEL EMPLEADOR SEAN CONSIDERADAS DE ALTO RIESGO',
-    M+2,
-    y+3.2
-  );
-  y+=5;
-
+  bandaInstruccion('COMPLETAR SÓLO EN CASO QUE LAS ACTIVIDADES DEL EMPLEADOR SEAN CONSIDERADAS DE ALTO RIESGO');
 
   {
-    const w=[W/3,W/3,W/3];
-
-    const x=[
-      M,
-      M+w[0],
-      M+w[0]+w[1]
-    ];
-
-    const h=5;
-
+    const w=[64,66,64];
+    const x=[M, M+w[0], M+w[0]+w[1]];
+    const h=4;
     npi(h);
-
-    [
-      'N° TRABAJADORES AFILIADOS AL SCTR',
-      'N° TRABAJADORES NO AFILIADOS AL SCTR',
-      'NOMBRE DE LA ASEGURADORA'
-    ].forEach((txt,i)=>{
-      cell(x[i],w[i],h,txt,{
-        bg:PL,
-        fg:NE,
-        bold:true,
-        fs:5.2
-      });
+    ['N° TRABAJADORES AFILIADOS AL SCTR','N° TRABAJADORES NO AFILIADOS AL SCTR','NOMBRE DE LA ASEGURADORA'].forEach((txt,i)=>{
+      cell(x[i],w[i],h,txt,{bg:PL,fg:NE,bold:true,fs:5.2});
     });
-
     y+=h;
-
     npi(h);
-
     [
-      (contAplica&&c.contratistaAltoRiesgo==='SI')
-        ?(c.contratistaSctrAfiliados||'-')
-        :'-',
-
-      (contAplica&&c.contratistaAltoRiesgo==='SI')
-        ?(c.contratistaSctrNoAfiliados||'-')
-        :'-',
-
-      (contAplica&&c.contratistaAltoRiesgo==='SI')
-        ?(c.contratistaAseguradora||'-')
-        :'-'
+      (contAplica&&c.contratistaAltoRiesgo==='SI')?(c.contratistaSctrAfiliados||'-'):'-',
+      (contAplica&&c.contratistaAltoRiesgo==='SI')?(c.contratistaSctrNoAfiliados||'-'):'-',
+      (contAplica&&c.contratistaAltoRiesgo==='SI')?(c.contratistaAseguradora||'-'):'-'
     ].forEach((txt,i)=>{
       cell(x[i],w[i],h,txt,{fs:6});
     });
-
     y+=h;
   }
-
   y+=3;
 
   /* ============================================================
      BLOQUE 2 — DATOS DEL TRABAJADOR
      ============================================================ */
-
-  // Encabezado de sección en azul.
   band('DATOS DEL TRABAJADOR');
 
   const trabajadores=datos.caso.involucrados||[];
 
   trabajadores.forEach(p=>{
-
     const t=datos.porTrabajador[p.idInvolucrado]||{};
 
-
-    /* ----------------------------------------------------------
-       FILA 1:
-       NOMBRES Y APELLIDOS | DNI | EDAD
-       ---------------------------------------------------------- */
-
+    /*
+     * FILA 1 — Nombre(130) + DNI(32,=Actividad Económica) + Edad(32,=NTrabajadores)
+     */
     {
-      const w=[118,45,31];
-
-      const x=[
-        M,
-        M+w[0],
-        M+w[0]+w[1]
-      ];
-
-      const h=5;
-
+      const w=[38,92,10,22,10,22];
+      const x=[]; let acc=M; w.forEach(v=>{x.push(acc); acc+=v;});
+      const h=4;
       npi(h);
-
-      [
-        'NOMBRES Y APELLIDOS:',
-        'DNI:',
-        'EDAD:'
-      ].forEach((txt,i)=>{
-        cell(x[i],w[i],h,txt,{
-          bg:PL,
-          fg:NE,
-          bold:true,
-          left:true,
-          fs:6
-        });
-      });
-
-      y+=h;
-
-      npi(h);
-
-      [
-        p.nombre||'-',
-        p.dni||'-',
-        t.edad||'-'
-      ].forEach((txt,i)=>{
-        cell(x[i],w[i],h,txt,{fs:6});
-      });
-
+      cell(x[0],w[0],h,'NOMBRES Y APELLIDOS:',{bg:AZ,fg:BL,bold:true,left:true,fs:5.8});
+      cell(x[1],w[1],h,p.nombre||'-',{fs:6,left:true});
+      cell(x[2],w[2],h,'DNI:',{bg:AZ,fg:BL,bold:true,fs:5.6});
+      cell(x[3],w[3],h,p.dni||'-',{fs:6});
+      cell(x[4],w[4],h,'EDAD:',{bg:AZ,fg:BL,bold:true,fs:5.3});
+      cell(x[5],w[5],h,t.edad||'-',{fs:6});
       y+=h;
     }
 
-
-    /* ----------------------------------------------------------
-       FILA 2 — ENCABEZADOS DE DATOS LABORALES
-       ---------------------------------------------------------- */
-
+    /*
+     * FILA 2 — SEXO y TURNO con encabezado de 2 líneas (SEXO / F-M, TURNO / D-T-N)
+     */
     {
-      const w=[
-        24, // Proyecto
-        22, // Área
-        27, // Puesto
-        25, // Antigüedad
-        15, // Sexo
-        15, // Turno
-        19, // Contrato
-        25, // Experiencia
-        22  // Horas
-      ];
-
-      const x=[];
-      let ax=M;
-      w.forEach(v=>{
-        x.push(ax);
-        ax+=v;
-      });
-
-      const h=5;
+      /*
+       * Puesto termina donde termina la 1ª columna del SCTR (65).
+       * Contrato termina donde empieza "Nombre de la aseguradora" (129).
+       * Experiencia sigue alineada con el inicio de DNI/Edad.
+       */
+      const w=[18,19,27,23,9,13,21,32,32];
+      const x=[]; let ax=M; w.forEach(v=>{x.push(ax); ax+=v;});
+      const h=4;
 
       npi(h);
-
-      [
-        'PROYECTO',
-        'ÁREA',
-        'PUESTO DE TRABAJO',
-        'ANTIGÜEDAD EN EL EMPLEO',
-        'SEXO F/M',
-        'TURNO D/T/N',
-        'TIPO DE CONTRATO',
-        'TIEMPO DE EXPERIENCIA EN EL PUESTO DE TRABAJO',
-        'N° HORAS TRABAJADAS (Antes del Accidente)'
-      ].forEach((txt,i)=>{
-        cell(x[i],w[i],h,txt,{
-          bg:PL,
-          fg:NE,
-          bold:true,
-          fs:4.7
-        });
-      });
-
+      cell(x[0],w[0],h,'PROYECTO',{bg:PL,fg:NE,bold:true,fs:4.4});
+      cell(x[1],w[1],h,'ÁREA',{bg:PL,fg:NE,bold:true,fs:4.4});
+      cell(x[2],w[2],h,'PUESTO DE TRABAJO',{bg:PL,fg:NE,bold:true,fs:4.4});
+      cell(x[3],w[3],h,'ANTIGÜEDAD EN EL EMPLEO',{bg:PL,fg:NE,bold:true,fs:4.4});
+      cellDosLineas(x[4],w[4],h,'SEXO','F/M',{bg:PL,fg:NE});
+      cellDosLineas(x[5],w[5],h,'TURNO','D/T/N',{bg:PL,fg:NE});
+      cell(x[6],w[6],h,'TIPO DE CONTRATO',{bg:PL,fg:NE,bold:true,fs:4.4});
+      cell(x[7],w[7],h,'TIEMPO DE EXPERIENCIA EN EL PUESTO DE TRABAJO',{bg:PL,fg:NE,bold:true,fs:4.4});
+      cell(x[8],w[8],h,'N° HORAS TRABAJADAS (Antes del Accidente)',{bg:PL,fg:NE,bold:true,fs:4.4});
       y+=h;
 
       npi(h);
-
       [
-        p.proyecto||'-',
-        p.area||t.area||'-',
-        p.cargo||'-',
-        t.antiguedad||'-',
-        t.sexo||'-',
-        t.turno||'-',
-        t.tipoContrato||'-',
-        t.tiempoExperiencia||'-',
-        t.horasTrabajadas||'-'
+        p.proyecto||'-', p.area||t.area||'-', p.cargo||'-', t.antiguedad||'-',
+        t.sexo||'-', t.turno||'-', t.tipoContrato||'-', t.tiempoExperiencia||'-', t.horasTrabajadas||'-'
       ].forEach((txt,i)=>{
         cell(x[i],w[i],h,txt,{fs:5.2});
       });
-
       y+=h;
     }
 
-
-    /* ----------------------------------------------------------
-       FILA 3 — ACTIVIDAD / TAREA ESPECÍFICA
-       ---------------------------------------------------------- */
-
+    /*
+     * FILA 3 — Actividad/Tarea (sin cambios respecto a la ronda anterior)
+     */
     {
-      const w=[55,62,77];
+      const w=[64,66,64];
+      const x=[M, M+w[0], M+w[0]+w[1]];
+      const yBase=y;
 
-      const x=[
-        M,
-        M+w[0],
-        M+w[0]+w[1]
-      ];
+      npi(8);
+      cell(x[0],w[0],8,'ACTIVIDAD',{bg:PL,fg:NE,bold:true,fs:6});
+      cell(x[1],w[1],8,'TAREA ESPECÍFICA',{bg:PL,fg:NE,bold:true,fs:6});
+      cell(x[2],w[2],4,'(marcar con una X la opción que aplique)',{bg:PL,fg:NE,fs:4.6});
 
-      const h=5;
-
-      npi(h);
-
-      cell(x[0],w[0],h,'ACTIVIDAD',{
-        bg:PL,
-        fg:NE,
-        bold:true,
-        left:true,
-        fs:6
+      y=yBase+4;
+      const wOpts=[20,20,24];
+      ['TAREA RUTINARIA','TAREA NO RUTINARIA','SITUACIÓN EMERGENCIA'].forEach((op,i)=>{
+        const off=i===0?0:i===1?20:40; cell(x[2]+off,wOpts[i],4,op,{bg:PL,fg:NE,bold:true,fs:4.2});
       });
 
-      cell(x[1],w[1],h,'TAREA ESPECÍFICA',{
-        bg:PL,
-        fg:NE,
-        bold:true,
-        left:true,
-        fs:6
+      y=yBase+8;
+      const h2=5;
+      npi(h2);
+      cell(x[0],w[0],h2,c.actividad||'-',{fs:5.8});
+      cell(x[1],w[1],h2,t.tareaEspecifica||c.tareaEspecifica||'-',{fs:5.8});
+
+      const opActual=t.tareaTipo||c.tareaTipo||'';
+      const codigos=['RUTINARIA','NO_RUTINARIA','EMERGENCIA'];
+      codigos.forEach((cod,i)=>{
+        const off=i===0?0:i===1?20:40; cell(x[2]+off,wOpts[i],h2, opActual===cod?'X':'', {fs:6,bold:true});
       });
-
-      cell(x[2],w[2],h,'(marcar con una X la opción que aplique)',{
-        bg:PL,
-        fg:NE,
-        bold:false,
-        fs:5.2
-      });
-
-      y+=h;
-
-      npi(h);
-
-      cell(
-        x[0],w[0],h,
-        c.actividad||'-',
-        {fs:5.8}
-      );
-
-      cell(
-        x[1],w[1],h,
-        t.tareaEspecifica||c.tareaEspecifica||'-',
-        {fs:5.8}
-      );
-
-      const opRut=t.tareaTipo||c.tareaTipo||'';
-
-      cell(
-        x[2],w[2],h,
-        [
-          opRut==='RUTINARIA'?'[X] TAREA RUTINARIA':'[ ] TAREA RUTINARIA',
-          opRut==='NO_RUTINARIA'?'[X] TAREA NO RUTINARIA':'[ ] TAREA NO RUTINARIA',
-          opRut==='EMERGENCIA'?'[X] SITUACIÓN DE EMERGENCIA':'[ ] SITUACIÓN DE EMERGENCIA'
-        ].join('  '),
-        {
-          fs:4.8,
-          left:true
-        }
-      );
-
-      y+=h;
+      y+=h2;
     }
 
     y+=2;
   });
 
-
-  /* ------------------------------------------------------------
-     SUPERVISIÓN — estructura según Excel
-     ------------------------------------------------------------ */
-
-  npi(5);
-  pdf.setFillColor(...PL);
-  pdf.setDrawColor(...NE);
-  pdf.rect(M,y,W,5,'FD');
-  pdf.setTextColor(...NE);
-  pdf.setFont('helvetica','bold');
-  pdf.setFontSize(6.5);
-  pdf.text(
+  bandaDoble(AZ,
     'SUPERVISIÓN DURANTE EL ACCIDENTE',
-    M+W/2,
-    y+3.2,
-    {align:'center'}
+    'Marcar con una (X) si hubo supervisión directa, indirecta, o si no hubo supervisión.'
   );
-  y+=5;
 
-
-  // Instrucción.
-  npi(5);
-  pdf.setFillColor(...PL);
-  pdf.setDrawColor(...NE);
-  pdf.rect(M,y,W,5,'FD');
-  pdf.setTextColor(...NE);
-  pdf.setFont('helvetica','normal');
-  pdf.setFontSize(5.2);
-  pdf.text(
-    'Marcar con una (X) si hubo supervisión directa, indirecta, o si no hubo supervisión.',
-    M+W/2,
-    y+3.2,
-    {align:'center'}
-  );
-  y+=5;
-
-
-  // Encabezados de supervisión.
   {
-    const w=[80,40,40,34];
-    const x=[
-      M,
-      M+w[0],
-      M+w[0]+w[1],
-      M+w[0]+w[1]+w[2]
-    ];
+    const w=[96,17,17,64];
+    const x=[M, M+w[0], M+w[0]+w[1], M+w[0]+w[1]+w[2]];
     const h=5;
-
     npi(h);
-
-    [
-      'DETALLAR EL TRABAJO REALIZADO:',
-      'DIRECTA',
-      'INDIRECTA',
-      '¿POR QUIÉN?'
-    ].forEach((txt,i)=>{
-      cell(x[i],w[i],h,txt,{
-        bg:PL,
-        fg:NE,
-        bold:true,
-        fs:5.2
-      });
+    ['DETALLAR EL TRABAJO REALIZADO:','DIRECTA','INDIRECTA','¿POR QUIÉN?'].forEach((txt,i)=>{
+      cell(x[i],w[i],h,txt,{bg:PL,fg:NE,bold:true,fs:5.2});
     });
-
     y+=h;
-
-
-    // Valores.
     npi(h);
-
     const tipo=c.supervisionTipo||'';
-
-    cell(
-      x[0],w[0],h,
-      c.supervisionDetalle||'-',
-      {fs:5.5}
-    );
-
-    cell(
-      x[1],w[1],h,
-      tipo==='DIRECTA'?'X':'',
-      {fs:6,bold:true}
-    );
-
-    cell(
-      x[2],w[2],h,
-      tipo==='INDIRECTA'?'X':'',
-      {fs:6,bold:true}
-    );
-
-    cell(
-      x[3],w[3],h,
-      tipo==='SIN_SUPERVISION'
-        ?'-'
-        :(c.supervisionPorQuien&&c.supervisionPorQuien.nombre)||'-',
-      {fs:5.2}
-    );
-
+    cell(x[0],w[0],h,c.supervisionDetalle||'-',{fs:5.5});
+    cell(x[1],w[1],h,tipo==='DIRECTA'?'X':'',{fs:6,bold:true});
+    cell(x[2],w[2],h,tipo==='INDIRECTA'?'X':'',{fs:6,bold:true});
+    cell(x[3],w[3],h, tipo==='SIN_SUPERVISION'?'-':((c.supervisionPorQuien&&c.supervisionPorQuien.nombre)||'-'),{fs:5.2});
     y+=h;
   }
 
-
-  // Segunda fila: trabajo ordenado + sin supervisión + por qué.
   {
-    const w=[80,40,40,34];
-    const x=[
-      M,
-      M+w[0],
-      M+w[0]+w[1],
-      M+w[0]+w[1]+w[2]
-    ];
+    const w=[96,17,81];
+    const x=[M, M+w[0], M+w[0]+w[1]];
     const h=5;
-
     npi(h);
-
-    [
-      'TRABAJO ORDENADO POR:',
-      'SIN SUPERVISIÓN',
-      '',
-      '¿POR QUÉ?'
-    ].forEach((txt,i)=>{
-      cell(x[i],w[i],h,txt,{
-        bg:PL,
-        fg:NE,
-        bold:true,
-        fs:5.2
-      });
+    ['TRABAJO ORDENADO POR:','SIN SUPERVISIÓN','¿POR QUÉ?'].forEach((txt,i)=>{
+      cell(x[i],w[i],h,txt,{bg:PL,fg:NE,bold:true,fs:5.2});
     });
-
     y+=h;
-
     npi(h);
-
-    cell(
-      x[0],w[0],h,
-      (c.supervisionOrdenadoPor&&c.supervisionOrdenadoPor.nombre)||'-',
-      {fs:5.5}
-    );
-
-    cell(
-      x[1],w[1],h,
-      c.supervisionTipo==='SIN_SUPERVISION'?'X':'',
-      {fs:6,bold:true}
-    );
-
-    cell(x[2],w[2],h,'',{fs:6});
-
-    cell(
-      x[3],w[3],h,
-      c.supervisionTipo==='SIN_SUPERVISION'
-        ?(c.supervisionPorQue||'-')
-        :'-',
-      {fs:5.2}
-    );
-
+    cell(x[0],w[0],h,(c.supervisionOrdenadoPor&&c.supervisionOrdenadoPor.nombre)||'-',{fs:5.5});
+    cell(x[1],w[1],h,c.supervisionTipo==='SIN_SUPERVISION'?'X':'',{fs:6,bold:true});
+    cell(x[2],w[2],h,c.supervisionTipo==='SIN_SUPERVISION'?(c.supervisionPorQue||'-'):'-',{fs:5.2});
     y+=h;
   }
-
-  y+=3;
-
-  /* ============================================================
-     BLOQUE 3 — CIRCUNSTANCIAS DEL TRABAJO
-     La actividad/tarea y la supervisión se imprimen en el bloque
-     de trabajador, siguiendo la distribución solicitada.
-     ============================================================ */
-
-  // Se deja la sección como separador para mantener el expediente
-  // y evitar duplicar los campos ya impresos en BLOQUE 2.
-  band('CIRCUNSTANCIAS DEL TRABAJO');
-
-  row('ACTIVIDAD:',c.actividad);
-  row(
-    'TAREA ESPECÍFICA:',
-    c.tareaEspecifica
-  );
-
-  filaOpciones(
-    ['TAREA RUTINARIA','TAREA NO RUTINARIA','SITUACIÓN DE EMERGENCIA'],
-    c.tareaTipo==='RUTINARIA'
-      ?'TAREA RUTINARIA'
-      :c.tareaTipo==='NO_RUTINARIA'
-        ?'TAREA NO RUTINARIA'
-        :c.tareaTipo==='EMERGENCIA'
-          ?'SITUACIÓN DE EMERGENCIA'
-          :''
-  );
-
   y+=3;
 
   /* ============================================================
      BLOQUE 4 — INVESTIGACIÓN DEL ACCIDENTE
+     Fecha ocurrencia + Hora + Fecha inicio investigación = 3
+     partes iguales de 22 (≈1/3 de 194). Días/N°Trab = 3/4 de
+     "situación de emergencia" (25.67 → 19).
      ============================================================ */
-
   band('INVESTIGACIÓN DEL ACCIDENTE');
 
   {
     const e=datos.caso.evento||{};
+    const t0 = trabajadores[0] ? (datos.porTrabajador[trabajadores[0].idInvolucrado]||{}) : {};
 
-    row(
-      'FECHA Y HORA DE OCURRENCIA:',
-      (e.fecha||'-')+' '+(e.hora||'')
-    );
+    /* día/mes/año, hora y fecha de inicio = ancho de "PROYECTO" (18).
+       El espacio liberado (12mm) se suma a Lugar Exacto. */
+    const wFecOc=18, wHora=10, wFI=26, wLu=36, wGrav=32, wGravOpt=wGrav/3, wGra=34, wGraOpt=wGra/4, wDias=19, wNTrab=19;
 
-    row(
-      'FECHA DE INICIO DE LA INVESTIGACIÓN:',
-      c.fechaInicioInvestigacion
-    );
+    const xFecOc=M;
+    const xHora=xFecOc+wFecOc;
+    const xFI=xHora+wHora;
+    const xLu=xFI+wFI;
+    const xGrav=xLu+wLu;
+    const xGra=xGrav+wGrav;
+    const xDias=xGra+wGra;
+    const xNTrab=xDias+wDias;
 
-    row(
-      'LUGAR EXACTO DONDE OCURRIÓ EL ACCIDENTE:',
-      e.lugar
-    );
+    const yBase=y;
+    npi(10);
 
-    row(
-      'N° TRABAJADORES AFECTADOS:',
-      String(trabajadores.length)
-    );
+    cell(xFecOc, wFecOc+wHora, 5, 'FECHA Y HORA DE OCURRENCIA DEL ACC.', {bg:PL,fg:NE,bold:true,fs:4.6});
+    cell(xFI, wFI, 5, 'FECHA DE INICIO DE LA INVESTIGACIÓN', {bg:PL,fg:NE,bold:true,fs:4.6});
+    cellAt(xLu, yBase, wLu, 10, 'LUGAR EXACTO DONDE OCURRIÓ EL ACCIDENTE', {bg:PL,fg:NE,bold:true,fs:4.6});
+    cell(xGrav, wGrav, 5, 'MARCAR (X) GRAVEDAD', {bg:PL,fg:NE,bold:true,fs:4.6});
+    cell(xGra, wGra, 5, 'MARCAR (X) GRADO ACC. INCAPACITANTE', {bg:PL,fg:NE,bold:true,fs:4.2});
+    cellAt(xDias, yBase, wDias, 10, 'DÍAS DESCANSO MÉDICO', {bg:PL,fg:NE,bold:true,fs:4.6});
+    cellAt(xNTrab, yBase, wNTrab, 10, 'N°TRAB. AFECTADOS', {bg:PL,fg:NE,bold:true,fs:4.2});
+
+    y = yBase+5;
+    cell(xFecOc, wFecOc, 5, 'DD/MM/YYYY', {bg:PL,fg:NE,fs:4.6});
+    cell(xHora, wHora, 5, 'Hora', {bg:PL,fg:NE,fs:4.6});
+    cell(xFI, wFI, 5, 'DD/MM/YYYY', {bg:PL,fg:NE,fs:4.6});
+    ['LEVE','INCAPACITANTE','MORTAL'].forEach((op,i)=>{
+      cell(xGrav+i*wGravOpt, wGravOpt, 5, op, {bg:PL,fg:NE,bold:true,fs:4.6});
+    });
+    ['TOTAL TEMP.','PARC. TEMP.','PARC. PERM.','TOTAL PERM.'].forEach((op,i)=>{
+      cell(xGra+i*wGraOpt, wGraOpt, 5, op, {bg:PL,fg:NE,bold:true,fs:4.6});
+    });
+
+    y = yBase+10;
+    const h3=5;
+    npi(h3);
+    cell(xFecOc, wFecOc, h3, e.fecha||'-', {fs:5});
+    cell(xHora, wHora, h3, e.hora||'-', {fs:5});
+    cell(xFI, wFI, h3, c.fechaInicioInvestigacion||'-', {fs:5});
+    cell(xLu, wLu, h3, e.lugar||'-', {fs:4.8});
+
+    const gravSel = t0.clasificacion||'';
+    ['LEVE','INCAPACITANTE','MORTAL'].forEach((op,i)=>{
+      cell(xGrav+i*wGravOpt, wGravOpt, h3, accTextoIgual_(gravSel,op)?'X':'', {fs:6,bold:true});
+    });
+    const gradoSel = t0.grado||'';
+    ['TOTAL TEMP.','PARC. TEMP.','PARC. PERM.','TOTAL PERM.'].forEach((op,i)=>{
+      cell(xGra+i*wGraOpt, wGraOpt, h3, accTextoIgual_(gradoSel,op)?'X':'', {fs:6,bold:true});
+    });
+
+    cell(xDias, wDias, h3, t0.diasDescansoMedico||'-', {fs:5.5});
+    cell(xNTrab, wNTrab, h3, String(trabajadores.length), {fs:5.5});
+
+    y+=h3;
   }
-
-  {
-    const wG=[50,32,32,30,25,25];
-    const xG=[];
-    let acc2=M;
-
-    wG.forEach(w=>{
-      xG.push(acc2);
-      acc2+=w;
-    });
-
-    const h=5;
-
-    npi(h);
-
-    [
-      'TRABAJADOR',
-      'GRAVEDAD',
-      'GRADO',
-      'DÍAS DESC. MÉDICO',
-      '',
-      ''
-    ].forEach((s,i)=>{
-      cell(xG[i],wG[i],h,s,{
-        bg:PL,
-        bold:true,
-        fs:5.5
-      });
-    });
-
-    y+=h;
-
-    trabajadores.forEach(p=>{
-      const t=datos.porTrabajador[p.idInvolucrado]||{};
-
-      npi(h);
-
-      [
-        p.nombre||'-',
-        t.clasificacion||'-',
-        t.grado||'-',
-        t.diasDescansoMedico||'',
-        '',
-        ''
-      ].forEach((s,i)=>{
-        cell(xG[i],wG[i],h,s,{fs:5.5});
-      });
-
-      y+=h;
-    });
-  }
-
   y+=3;
 
   /* ============================================================
-     BLOQUE 5 — LESIÓN Y EVALUACIÓN
+     BLOQUE 5 — LESIÓN (Cuadro I) Y EVALUACIÓN DE LA OCURRENCIA
      ============================================================ */
+  const MITAD = W/2;
 
-  band('LESIÓN Y EVALUACIÓN DE LA OCURRENCIA');
+  npi(5);
+  pdf.setFillColor(...AZ); pdf.setDrawColor(...NE);
+  pdf.rect(M,y,MITAD,5,'FD');
+  pdf.rect(M+MITAD,y,MITAD,5,'FD');
+  pdf.setTextColor(...BL);
+  {
+    const lh=2.4, sy=y+5/2-lh/2;
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(5.3);
+    pdf.text('LESIÓN (Cuadro I)',M+2,sy,{baseline:'middle'});
+    pdf.text('EVALUACIÓN DE LA OCURRENCIA',M+MITAD+2,sy,{baseline:'middle'});
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(4);
+    pdf.text('Seleccionar una opción de la lista y describir en Obs.',M+2,sy+lh,{baseline:'middle'});
+    pdf.text('(marcar con X la opción que aplique)',M+MITAD+2,sy+lh,{baseline:'middle'});
+  }
+  y+=5;
 
   trabajadores.forEach(p=>{
     const t=datos.porTrabajador[p.idInvolucrado]||{};
+    const xIzq = M;
+    const xDer = M + MITAD;
 
-    npi(5);
+    /*
+     * IZQUIERDA — Label=22(=día/mes/año), Valor=75.
+     * Fila superior(4): valor de la selección. Fila inferior(4):
+     * "Obs:"(22, gris) + valor de la observación(53).
+     */
+    /*
+     * Label = 22 (=día/mes/año del Bloque 4). Obs = mitad de lo que
+     * medía antes (22->11), gris. El resto se une al valor principal.
+     */
+    function filaLesion(label, valor, obs){
+      const wLabel=18, wValor=79, wObsLabel=10, wObsValor=69;
+      const yBase=y;
+      npi(8);
+      cellAt(xIzq, yBase, wLabel, 8, label, {bg:PL,fg:NE,bold:true,left:true,fs:5});
+      cellAt(xIzq+wLabel, yBase, wValor, 4, valor||'-', {fs:5.2});
+      cellAt(xIzq+wLabel, yBase+4, wObsLabel, 4, 'Obs:', {bg:PL,fg:NE,bold:true,fs:4.6});
+      cellAt(xIzq+wLabel+wObsLabel, yBase+4, wObsValor, 4, obs||'-', {fs:4.6,left:true});
+      y = yBase+8;
+    }
 
-    pdf.setFillColor(...PL);
-    pdf.setDrawColor(...NE);
-    pdf.rect(M,y,W,5,'FD');
+    /*
+     * DERECHA — Label=35, Opciones=62. ¿Por qué? label=18(mitad de 35),
+     * valor=79 (62 + los 17 liberados de la mitad del label).
+     */
+    function filaEvaluacion(label, opciones, seleccionado, porque){
+      const wLabel=35, wOpt=62/opciones.length;
+      const yBase=y;
+      npi(8);
+      cellAt(xDer, yBase, wLabel, 8, label, {bg:PL,fg:NE,bold:true,left:true,fs:5});
+      opciones.forEach((op,i)=>{
+        cellAt(xDer+wLabel+i*wOpt, yBase, wOpt, 4, op, {bg:PL,fg:NE,bold:true,fs:4.6});
+      });
+      opciones.forEach((op,i)=>{
+        const on = accTextoIgual_(seleccionado, op);
+        cellAt(xDer+wLabel+i*wOpt, yBase+4, wOpt, 4, on?'X':'', {fs:6,bold:true});
+      });
+      y = yBase+8;
 
-    pdf.setTextColor(...NE);
-    pdf.setFont('helvetica','bold');
-    pdf.setFontSize(6);
+      const h2=5;
+      npi(h2);
+      cellAt(xDer, y, 18, h2, '¿POR QUÉ?', {bg:AZ,fg:BL,bold:true,left:true,fs:5});
+      cellAt(xDer+18, y, 79, h2, porque||'-', {fs:5.3,left:true});
+      y+=h2;
+    }
 
-    pdf.text(
-      String(p.nombre||'').toUpperCase(),
-      M+2,
-      y+3.2
-    );
+    const yInicioBloque = y;
 
-    y+=5;
+    filaLesion('PARTE DEL CUERPO:', t.parteLesionada, t.parteLesionadaObs);
+    filaLesion('TIPO DE LESIÓN:', t.tipoLesion, t.tipoLesionObs);
+    filaLesion('FUENTE DE LA LESIÓN:', t.fuenteLesion, t.fuenteLesionObs);
+    const yFinIzquierda = y;
 
-    row(
-      'PARTE DEL CUERPO:',
-      (t.parteLesionada||'-')+
-      (t.parteLesionadaObs
-        ?' — Obs: '+t.parteLesionadaObs
-        :'')
-    );
+    y = yInicioBloque;
+    filaEvaluacion('POTENCIAL DE DAÑO:', ['GRAVE O FATAL','MODERADO','LEVE'],
+      t.potencialDano==='GRAVE_O_FATAL'?'GRAVE O FATAL':t.potencialDano, t.potencialPorque);
+    filaEvaluacion('PROBABILIDAD DE OCURRENCIA:', ['ALTA','MEDIA','BAJA'],
+      t.probabilidad, t.probabilidadPorque);
+    const yFinDerecha = y;
 
-    row(
-      'TIPO DE LESIÓN:',
-      (t.tipoLesion||'-')+
-      (t.tipoLesionObs
-        ?' — Obs: '+t.tipoLesionObs
-        :'')
-    );
-
-    row(
-      'FUENTE DE LA LESIÓN:',
-      (t.fuenteLesion||'-')+
-      (t.fuenteLesionObs
-        ?' — Obs: '+t.fuenteLesionObs
-        :'')
-    );
-
-    filaOpciones(
-      ['GRAVE O FATAL','MODERADO','LEVE'],
-      t.potencialDano==='GRAVE_O_FATAL'
-        ?'GRAVE O FATAL'
-        :t.potencialDano
-    );
-
-    row(
-      '¿POR QUÉ? (potencial):',
-      t.potencialPorque
-    );
-
-    filaOpciones(
-      ['ALTA','MEDIA','BAJA'],
-      t.probabilidad
-    );
-
-    row(
-      '¿POR QUÉ? (probabilidad):',
-      t.probabilidadPorque
-    );
-
-    const tipoAcc=
-      t.tipoAccidente==='Otros.'
-        ?'Otros: '+(t.tipoAccidenteOtro||'')
-        :t.tipoAccidente;
-
-    row(
-      'TIPO DE ACCIDENTE (Cuadro II):',
-      tipoAcc
-    );
-
-    y+=2;
+    y = Math.max(yFinIzquierda, yFinDerecha);
+    y+=1;
   });
 
   /* ============================================================
      BLOQUE 6 — SOBRE EL ACCIDENTE
+     "SOBRE EL ACCIDENTE"=115 (hasta donde termina el label de
+     ¿POR QUÉ?, 97+18) | "TIPO DE ACCIDENTE"=79 (=valor de ¿por qué?)
      ============================================================ */
-
-  band('SOBRE EL ACCIDENTE');
-
-  npi(5);
-  cell(
-    M,W,5,
-    'DESCRIPCIÓN DEL ACCIDENTE DE TRABAJO',
-    {
-      bg:AZ,
-      fg:BL,
-      bold:true,
-      left:true,
-      fs:6
-    }
-  );
-  y+=5;
-
   {
-    pdf.setFont('helvetica','normal');
-    pdf.setFontSize(6.5);
+    /*
+     * "TIPO:" (label angosto = ancho de una opción ALTA/MEDIA/BAJA,
+     * ~20.67) + su valor, ambos en UNA SOLA fila (no en filas separadas).
+     */
+    const wSob=115, wTipo=79, wTipoLabel=62/3, wTipoValor=wTipo-wTipoLabel;
+    const yBase=y;
+    npi(8);
+    cell(M, wSob, 4, 'SOBRE EL ACCIDENTE', {bg:AZ,fg:BL,bold:true,left:true,fs:6});
+    cell(M+wSob, wTipo, 4, 'TIPO DE ACCIDENTE (Cuadro II) — Seleccionar una opción de la lista', {bg:AZ,fg:BL,bold:true,left:true,fs:4});
 
-    const dlines=pdf.splitTextToSize(
-      c.descripcionAccidente||'-',
-      W-5
-    );
+    y=yBase+4;
+    const trab0 = trabajadores[0] ? (datos.porTrabajador[trabajadores[0].idInvolucrado]||{}) : {};
+    const tipoAccVal = trab0.tipoAccidente==='Otros.' ? ('Otros: '+(trab0.tipoAccidenteOtro||'')) : (trab0.tipoAccidente||'-');
+    cell(M, wSob, 4, '', {bg:BL});
+    cell(M+wSob, wTipoLabel, 4, 'TIPO:', {bg:PL,fg:NE,bold:true,fs:5});
+    cell(M+wSob+wTipoLabel, wTipoValor, 4, tipoAccVal, {fs:5,left:true});
 
-    const h=dlines.length*3.4+4;
-
-    npi(h);
-
-    pdf.setFillColor(...BL);
-    pdf.setDrawColor(...NE);
-    pdf.rect(M,y,W,h,'FD');
-
-    pdf.setTextColor(...NE);
-
-    dlines.forEach((l,i)=>{
-      pdf.text(l,M+2.5,y+4+i*3.4);
-    });
-
-    y+=h;
+    y=yBase+8;
   }
 
+  npi(5); cell(M,W,5,'DESCRIPCIÓN DEL ACCIDENTE DE TRABAJO',{bg:AZ,fg:BL,bold:true,left:true,fs:6}); y+=5;
+  {
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5);
+    const dlines=pdf.splitTextToSize(c.descripcionAccidente||'-', W-5);
+    const h=dlines.length*3.4+4;
+    npi(h);
+    pdf.setFillColor(...BL); pdf.setDrawColor(...NE);
+    pdf.rect(M,y,W,h,'FD');
+    pdf.setTextColor(...NE);
+    dlines.forEach((l,i)=>pdf.text(l,M+2.5,y+4+i*3.4));
+    y+=h;
+  }
   y+=2;
 
-  npi(5);
-  cell(
-    M,W,5,
-    'CORRECCIÓN O ACCIONES INMEDIATAS',
-    {
-      bg:AZ,
-      fg:BL,
-      bold:true,
-      left:true,
-      fs:6
-    }
-  );
-  y+=5;
-
+  npi(5); cell(M,W,5,'CORRECCIÓN O ACCIONES INMEDIATAS',{bg:AZ,fg:BL,bold:true,left:true,fs:6}); y+=5;
   {
-    const wA=[90,40,30,34];
-    const xA=[];
-    let acc3=M;
-
-    wA.forEach(w=>{
-      xA.push(acc3);
-      acc3+=w;
-    });
-
-    const h=7;
-
+    /*
+     * Responsable=35 (=label "POTENCIAL DE DAÑO"), Fecha=26 y
+     * Estado=26 (=ancho de "SITUACIÓN DE EMERGENCIA", 77/3).
+     * Descripción absorbe el resto.
+     */
+    const wA=[107,35,26,26];
+    const xA=[]; let acc3=M; wA.forEach(w=>{xA.push(acc3); acc3+=w;});
+    const h=5;
     npi(h);
-
-    [
-      'DESCRIPCIÓN',
-      'RESPONSABLE',
-      'FECHA',
-      'ESTADO'
-    ].forEach((s,i)=>{
-      cell(xA[i],wA[i],h,s,{
-        bg:PL,
-        bold:true,
-        fs:5.5
-      });
+    ['DESCRIPCIÓN','RESP.','FECHA','ESTADO'].forEach((s,i)=>{
+      cell(xA[i],wA[i],h,s,{bg:PL,bold:true,fs:5.5});
     });
-
     y+=h;
-
     (c.accionesInmediatas||[]).forEach(a=>{
       npi(h);
-
       [
         a.descripcion||'-',
         (a.responsable&&a.responsable.nombre)||a.responsable||'-',
         a.fechaEjecucion||'-',
         a.estado||'-'
       ].forEach((s,i)=>{
-        cell(xA[i],wA[i],h,s,{fs:5.5});
+        cell(xA[i],wA[i],h,s,{fs:5.3});
       });
-
       y+=h;
     });
   }
-
   y+=3;
 
   /* ============================================================
      BLOQUE 7 — RELACIÓN CON EL IPERC
      ============================================================ */
-
+  /* Mantener todo el módulo IPERC en una sola página. */
+  npi(5+8+(5*5)+3);
   band('RELACIÓN CON EL IPERC');
-
-  row('CÓDIGO DEL IPERC APLICABLE:',c.ipercCodigo);
-  filaOpciones(['SI','NO','PARCIALMENTE'],c.ipercIdentificado);
-  row(
-    '¿GENERA NECESIDAD DE ACTUALIZACIÓN DEL IPERC?',
-    c.ipercActualizacion
-  );
-  row('JUSTIFICACIÓN:',c.ipercJustificacion);
-
   {
-    const jer=[
-      {k:'eliminacion',t:'Eliminación'},
-      {k:'sustitucion',t:'Sustitución'},
-      {k:'ingenieria',t:'Ingeniería'},
-      {k:'administrativo',t:'Administrativo'},
-      {k:'epp',t:'EPP'}
-    ];
+    const wCol1=80, wCol2=50, wCol3=64;
+    const xCol1=M, xCol2=M+wCol1, xCol3=xCol2+wCol2;
+    const yBase7=y;
 
-    const wC=[28,66,20,20,20,20,20];
-    const xC=[];
-    let acc4=M;
+    npi(8);
+    cell(xCol1,wCol1,4,'¿PELIGRO IDENTIFICADO EN EL IPERC VIGENTE APLICABLE?',{bg:PL,bold:true,fs:4.2});
+    /* Col2 = bloque alto de 8mm (fila1+fila2), combinado con la celda de abajo */
+    cellAt(xCol2, yBase7, wCol2, 8, 'EVALUACIÓN DE CONTROLES DEL IPERC VIGENTE — Describir el control existente', {bg:PL,bold:true,fs:4.2,left:true});
 
-    wC.forEach(w=>{
-      xC.push(acc4);
-      acc4+=w;
-    });
-
-    const h=5;
-
-    npi(h);
-
-    [
-      '',
-      'Descripción del control',
-      'Existía',
-      'Implementado',
-      'Se cumplía',
-      'Fue eficaz',
-      'No aplica'
-    ].forEach((s,i)=>{
-      cell(xC[i],wC[i],h,s,{
-        bg:PL,
-        bold:true,
-        fs:5
+    /* SI [ ] | NO [ ] | PARCIALMENTE [ ] — 6 celdas, una sola fila */
+    y = yBase7+4;
+    {
+      const wLab=16, wMark=wCol1/3-wLab;
+      const opciones=[['SI','SI'],['NO','NO'],['PARCIALMENTE','PARCIALMENTE']];
+      opciones.forEach((op,i)=>{
+        const xBase=xCol1+i*(wLab+wMark);
+        const on = accTextoIgual_(c.ipercIdentificado, op[1]);
+        cellAt(xBase, y, wLab, 4, op[0], {bg:PL,fg:NE,bold:true,fs:4.6});
+        cellAt(xBase+wLab, y, wMark, 4, on?'X':'', {fs:6,bold:true});
       });
+    }
+    const wMarca=wCol3/5;
+    ['Existía','Implement.','Cumplía','Eficaz','No aplica'].forEach((s,i)=>{
+      cellAt(xCol3+i*wMarca, y, wMarca, 4, s, {bg:PL,fg:NE,bold:true,fs:4});
     });
+    y = yBase7+8;
 
-    y+=h;
-
+    const jer=[
+      {k:'eliminacion',t:'ELI:'},
+      {k:'sustitucion',t:'SUS:'},
+      {k:'ingenieria',t:'ING:'},
+      {k:'administrativo',t:'ADM:'},
+      {k:'epp',t:'EPP:'}
+    ];
+    /* Etiqueta corta (gris, tipo "Obs:") + descripción, igual que en Lesión */
+    const wCol2Label=8, wCol2Valor=wCol2-wCol2Label;
     jer.forEach(j=>{
       const ctrl=c.ipercControles[j.k]||{};
-
+      const h=5;
       npi(h);
+      if(j.k==='eliminacion'){
+        cellAt(xCol1, y, wCol1, h, '¿GENERA NECESIDAD DE ACTUALIZACIÓN DEL IPERC?', {bg:PL,bold:true,fs:4});
+      } else if(j.k==='sustitucion'){
+        /* SI/NO + CÓDIGO IPERC, todo en una sola fila */
+        const wSiNo=12, wSiNoMark=8;
+        cellAt(xCol1, y, wSiNo, h, 'SI', {fs:4.6});
+        cellAt(xCol1+wSiNo, y, wSiNoMark, h, c.ipercActualizacion==='SI'?'X':'', {fs:5.5,bold:true});
+        cellAt(xCol1+wSiNo+wSiNoMark, y, wSiNo, h, 'NO', {fs:4.6});
+        cellAt(xCol1+2*wSiNo+wSiNoMark, y, wSiNoMark, h, c.ipercActualizacion==='NO'?'X':'', {fs:5.5,bold:true});
+        const xCod=xCol1+2*wSiNo+2*wSiNoMark;
+        cellAt(xCod, y, 16, h, 'CÓD. IPERC:', {bg:AZ,fg:BL,bold:true,left:true,fs:4.2});
+        cellAt(xCod+16, y, wCol1-(xCod-xCol1)-16, h, c.ipercCodigo||'-', {fs:4.4,left:true});
+      } else if(j.k==='ingenieria'){
+        cellAt(xCol1, y, wCol1, h, 'JUSTIFICACIÓN:', {bg:PL,bold:true,left:true,fs:4.6});
+      } else if(j.k==='administrativo'){
+        cellAt(xCol1, y, wCol1, h, c.ipercJustificacion||'-', {fs:4.6,left:true});
+      } else {
+        cellAt(xCol1, y, wCol1, h, '', {bg:BL});
+      }
 
-      [
-        j.t,
-        ctrl.descripcion||'-',
-        ctrl.existia?'X':'',
-        ctrl.implementado?'X':'',
-        ctrl.cumplia?'X':'',
-        ctrl.eficaz?'X':'',
-        ctrl.noAplica?'X':''
-      ].forEach((s,i)=>{
-        cell(xC[i],wC[i],h,s,{
-          fs:5.5,
-          bold:i>1
-        });
+      cellAt(xCol2, y, wCol2Label, h, j.t, {bg:PL,fg:NE,bold:true,fs:4.4});
+      cellAt(xCol2+wCol2Label, y, wCol2Valor, h, ctrl.descripcion||'-', {fs:4.6,left:true});
+
+      const marks=[ctrl.existia,ctrl.implementado,ctrl.cumplia,ctrl.eficaz,ctrl.noAplica];
+      marks.forEach((m,i)=>{
+        cellAt(xCol3+i*wMarca, y, wMarca, h, m?'X':'', {fs:5.5,bold:true});
       });
-
       y+=h;
     });
   }
-
   y+=3;
 
   /* ============================================================
-     BLOQUE 8 — CAUSAS SCAT
+     BLOQUE 8 — CAUSAS SCAT (Cuadro III)
+     Mitad izquierda: causas inmediatas (Actos+Condiciones).
+     Mitad derecha: causas básicas (Fact. Personales+Trabajo).
      ============================================================ */
-
   band('CAUSAS DEL ACCIDENTE (Cuadro III — Metodología SCAT)');
-
   {
-    const cats=[
-      {k:'actos',t:'ACTOS SUBESTÁNDAR (AS)'},
-      {k:'condiciones',t:'CONDICIONES SUBESTÁNDAR (CS)'},
-      {k:'factoresPersonales',t:'FACTORES PERSONALES (FP)'},
-      {k:'factoresTrabajo',t:'FACTORES DEL TRABAJO (FT)'}
-    ];
+    const wOpcion=35, wDesc=62; // dentro de cada mitad de 97
 
-    cats.forEach(cat=>{
-      const lista=c.scat[cat.k]||[];
+    function bandaMitad(xBase, titulo){
+      pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
+      pdf.rect(xBase,y,MITAD,5,'FD');
+      pdf.setTextColor(...NE); pdf.setFont('helvetica','bold'); pdf.setFontSize(5.5);
+      pdf.text(titulo,xBase+2,y+3.2);
+    }
 
-      if(!lista.length) return;
+    /*
+     * Dibuja una fila de causa con su numeral (AS01, CS01, FP01, FT01...).
+     * Si el ítem no existe (la categoría tiene menos causas que su par),
+     * se dibuja igual con guion, para que ambas columnas coincidan en alto.
+     */
+    function filaCausa(xBase, abrev, indice, item){
+      const h=5;
+      npi(h);
+      const numeral = abrev+String(indice+1).padStart(2,'0');
+      const opcionTxt = numeral;
+      const descTxt = item ? (item.descripcion||'') : '';
+      cellAt(xBase, y, wOpcion, h, opcionTxt, {bold:true});
+      cellAt(xBase+wOpcion, y, wDesc, h, descTxt, {left:true});
+    }
 
-      npi(5);
+    /* Título de cada mitad */
+    npi(5);
+    bandaMitad(M, 'CAUSAS INMEDIATAS');
+    bandaMitad(M+MITAD, 'CAUSAS BÁSICAS');
+    y+=5;
 
-      pdf.setFillColor(...PL);
-      pdf.setDrawColor(...NE);
-      pdf.rect(M,y,W,5,'FD');
+    /* Encabezado "Seleccionar opción / Descripción" — UNA SOLA VEZ por mitad */
+    npi(5);
+    cellAt(M, y, wOpcion, 5, 'Seleccionar la opción', {bg:PL,bold:true,fs:4.4});
+    cellAt(M+wOpcion, y, wDesc, 5, 'Descripción de la desviación', {bg:PL,bold:true,fs:4.4});
+    cellAt(M+MITAD, y, wOpcion, 5, 'Seleccionar la opción', {bg:PL,bold:true,fs:4.4});
+    cellAt(M+MITAD+wOpcion, y, wDesc, 5, 'Descripción de la desviación', {bg:PL,bold:true,fs:4.4});
+    y+=5;
 
-      pdf.setTextColor(...NE);
-      pdf.setFont('helvetica','bold');
-      pdf.setFontSize(6);
+    /*
+     * Por cada par (Actos<->Factores Personales, Condiciones<->Factores
+     * de Trabajo): mismo número de filas en ambos lados, rellenando con
+     * guion el lado que tenga menos causas.
+     */
+    function bloquePar(catIzq, tituloIzq, abrevIzq, catDer, tituloDer, abrevDer){
+      npi(4);
+      cellAt(M,y,MITAD,4,tituloIzq,{bg:AZ,fg:BL,bold:true,left:true,fs:4.4});
+      cellAt(M+MITAD,y,MITAD,4,tituloDer,{bg:AZ,fg:BL,bold:true,left:true,fs:4.4});
+      y+=4;
 
-      pdf.text(cat.t,M+2,y+3.2);
-      y+=5;
+      const listaIzq = c.scat[catIzq]||[];
+      const listaDer = c.scat[catDer]||[];
+      const filas = Math.max(listaIzq.length, listaDer.length, 1);
 
-      const wS=[70,124];
-      const xS=[M,M+wS[0]];
-
-      lista.forEach(item=>{
+      for(let i=0;i<filas;i++){
         const h=5;
-
         npi(h);
-
-        cell(
-          xS[0],
-          wS[0],
-          h,
-          item.opcion||'-',
-          {fs:5.5}
-        );
-
-        cell(
-          xS[1],
-          wS[1],
-          h,
-          item.descripcion||'-',
-          {fs:5.5,left:true}
-        );
-
+        filaCausa(M, abrevIzq, i, listaIzq[i]||null);
+        filaCausa(M+MITAD, abrevDer, i, listaDer[i]||null);
         y+=h;
-      });
-    });
+      }
+    }
+
+    bloquePar('actos','ACTOS SUBESTÁNDAR','AS', 'factoresPersonales','FACTORES PERSONALES','FP');
+    bloquePar('condiciones','CONDICIONES SUBESTÁNDAR','CS', 'factoresTrabajo','FACTORES DEL TRABAJO','FT');
   }
-
-  y+=3;
-
-  /* ============================================================
-     ANEXO 04 — ANÁLISIS DE CAUSA RAÍZ
-     ============================================================ */
-
-  band('Anexo 04. ANÁLISIS DE CAUSA RAÍZ');
-
-  {
-    const catsRef=[
-      {k:'actos',abrev:'AS'},
-      {k:'condiciones',abrev:'CS'},
-      {k:'factoresPersonales',abrev:'FP'},
-      {k:'factoresTrabajo',abrev:'FT'}
-    ];
-
-    catsRef.forEach(cat=>{
-      (c.scat[cat.k]||[]).forEach((item,i)=>{
-        const analisis=c.analisisCausaRaiz[item.id];
-
-        if(!analisis) return;
-
-        const etiqueta=
-          cat.abrev+' '+
-          String(i+1).padStart(2,'0')+
-          ' — '+
-          (item.descripcion||'');
-
-        npi(6);
-
-        cell(
-          M,W,6,
-          'CAUSA IDENTIFICADA: '+etiqueta,
-          {
-            bg:AZ,
-            fg:BL,
-            bold:true,
-            left:true,
-            fs:6
-          }
-        );
-
-        y+=6;
-
-        analisis.porques.forEach((p,pi)=>{
-          const h=5;
-          const esRaiz=p.esRaiz===true;
-
-          npi(h);
-
-          cell(
-            M,
-            25,
-            h,
-            'POR QUÉ '+(pi+1)+':',
-            {
-              bg:esRaiz?[228,242,236]:PL,
-              bold:true,
-              fs:5.5
-            }
-          );
-
-          cell(
-            M+25,
-            W-25,
-            h,
-            p.texto||'-',
-            {
-              fs:5.5,
-              left:true,
-              bold:esRaiz
-            }
-          );
-
-          y+=h;
-        });
-
-        y+=2;
-      });
-    });
-  }
-
   y+=3;
 
   /* ============================================================
      MEDIDAS CORRECTIVAS
      ============================================================ */
-
   band('MEDIDAS CORRECTIVAS');
-
   {
-    const wM=[54,54,32,20,18,16];
-    const xM=[];
-    let acc5=M;
-
-    wM.forEach(w=>{
-      xM.push(acc5);
-      acc5+=w;
-    });
-
+    /* Fecha y Estado reducidos; el espacio liberado va a Evidencia (texto largo). */
+    /* Responsable y Evidencia ensanchados; Causa raíz/Descripción se ajustan. */
+    const wM=[44,52,28,16,16,38];
+    const xM=[]; let acc5=M; wM.forEach(w=>{xM.push(acc5); acc5+=w;});
     const h=5;
 
     npi(h);
-
-    [
-      'CAUSA RAÍZ IDENTIFICADA',
-      'DESCRIPCIÓN ACCIÓN CORRECTIVA',
-      'RESPONSABLE',
-      'FECHA',
-      'ESTADO',
-      'EVIDENCIA'
-    ].forEach((s,i)=>{
-      cell(xM[i],wM[i],h,s,{
-        bg:PL,
-        bold:true,
-        fs:5
-      });
+    ['CAUSA RAÍZ (Anexo 04)','DESCRIPCIÓN ACCIÓN CORRECTIVA','RESP.','FECHA','ESTADO','EVIDENCIA'].forEach((s,i)=>{
+      cell(xM[i],wM[i],h,s,{bg:PL,bold:true,fs:4.6});
     });
-
     y+=h;
 
     (c.medidasCorrectivas||[]).forEach(m=>{
       npi(h);
-
       [
-        m.causaRaizTexto||'-',
-        m.descripcion||'-',
-        (m.responsable&&m.responsable.nombre)||'-',
-        m.fecha||'-',
-        m.estado||'-',
-        m.evidencia||'-'
+        m.causaRaizTexto||'-', m.descripcion||'-', (m.responsable&&m.responsable.nombre)||'-',
+        m.fecha||'-', m.estado||'-', m.evidencia||'-'
       ].forEach((s,i)=>{
-        cell(xM[i],wM[i],h,s,{fs:5.2});
+        cell(xM[i],wM[i],h,s,{fs:4.8});
       });
-
       y+=h;
     });
   }
-
   y+=3;
 
   /* ============================================================
-     RESPONSABLES
+     RESPONSABLES — una sola fila de 194 por cada uno
      ============================================================ */
-
   band('RESPONSABLES');
+  {
+    /* Mismas proporciones que la tabla de responsable del Flash Report */
+    const wR=[62,48,42,42];
+    const xR=[]; let acc6=M; wR.forEach(w=>{xR.push(acc6); acc6+=w;});
 
-  npi(5);
+    npi(4); cell(M,W,4,'RESPONSABLE DEL REGISTRO',{bg:PL,bold:true,left:true,fs:5}); y+=4;
+    npi(5);
+    ['NOMBRE','CARGO','FECHA','FIRMA'].forEach((s,i)=>{
+      cell(xR[i],wR[i],5,s,{bg:AZ,fg:BL,bold:true,fs:5.5});
+    });
+    y+=5;
+    npi(14);
+    cell(xR[0],wR[0],14,(c.responsableRegistro&&c.responsableRegistro.nombre)||'-',{fs:5.5});
+    cell(xR[1],wR[1],14,'-',{fs:5.5});
+    cell(xR[2],wR[2],14,'-',{fs:5.5});
+    cell(xR[3],wR[3],14,'',{fs:5.5});
+    y+=14;
+    y+=2;
 
-  cell(
-    M,W,5,
-    'RESPONSABLE DEL REGISTRO',
-    {
-      bg:PL,
-      bold:true,
-      left:true,
-      fs:6
+    npi(4); cell(M,W,4,'RESPONSABLE(S) DE LA INVESTIGACIÓN',{bg:PL,bold:true,left:true,fs:5}); y+=4;
+    npi(5);
+    ['NOMBRE','CARGO','FECHA','FIRMA'].forEach((s,i)=>{
+      cell(xR[i],wR[i],5,s,{bg:AZ,fg:BL,bold:true,fs:5.5});
+    });
+    y+=5;
+
+    /* Mínimo 3 filas visibles, aunque estén vacías */
+    const listaResp = c.responsablesInvestigacion||[];
+    const filasAMostrar = Math.max(3, listaResp.length);
+    for(let i=0;i<filasAMostrar;i++){
+      const r = listaResp[i];
+      const h=14;
+      npi(h);
+      cell(xR[0],wR[0],h,(r&&r.persona&&r.persona.nombre)||'-',{fs:5.5});
+      cell(xR[1],wR[1],h,'-',{fs:5.5});
+      cell(xR[2],wR[2],h,'-',{fs:5.5});
+      pdf.setFillColor(...BL); pdf.setDrawColor(...NE);
+      pdf.rect(xR[3],y,wR[3],h,'FD');
+      if(r&&r.firmaUrl){
+        pdf.setFontSize(4.5); pdf.setTextColor(150,150,150);
+        pdf.text('[firma en Drive]', xR[3]+wR[3]/2, y+h/2, {align:'center',baseline:'middle'});
+      }
+      y+=h;
     }
-  );
-
-  y+=5;
-
-  row(
-    'NOMBRE:',
-    (c.responsableRegistro&&c.responsableRegistro.nombre)||'-'
-  );
-
-  npi(5);
-
-  cell(
-    M,W,5,
-    'RESPONSABLE(S) DE LA INVESTIGACIÓN',
-    {
-      bg:PL,
-      bold:true,
-      left:true,
-      fs:6
-    }
-  );
-
-  y+=5;
-
-  (c.responsablesInvestigacion||[]).forEach(r=>{
-    const h=16;
-    const wR=[130,64];
-
-    npi(h);
-
-    cell(
-      M,
-      wR[0],
-      h,
-      (r.persona&&r.persona.nombre)||'-',
-      {fs:6}
-    );
-
-    pdf.setFillColor(...BL);
-    pdf.setDrawColor(...NE);
-    pdf.rect(M+wR[0],y,wR[1],h,'FD');
-
-    if(r.firmaUrl){
-      pdf.setFontSize(5);
-      pdf.setTextColor(150,150,150);
-
-      pdf.text(
-        '[firma adjunta en Drive]',
-        M+wR[0]+wR[1]/2,
-        y+h/2,
-        {
-          align:'center',
-          baseline:'middle'
-        }
-      );
-    }
-
-    y+=h;
-  });
-
+  }
   y+=3;
 
   /* ============================================================
-     ANEXO 01 — FOTOGRAFÍAS
+     ANEXO 01 — FOTOGRAFÍAS (3 por fila)
      ============================================================ */
-
-  band(
-    'Anexo 01. FOTOGRAFÍAS DEL EVENTO (Evidencias / Reconstrucción del accidente)'
-  );
-
+  band('Anexo 01. FOTOGRAFÍAS DEL EVENTO (Evidencias / Reconstrucción del accidente)');
   {
+    /* Mínimo 3 casillas visibles, aunque estén vacías */
     const fotos=c.fotosInvestigacion||[];
-
-    if(!fotos.length){
-      npi(20);
-      cell(M,W,20,'Sin fotografías registradas.');
-      y+=20;
-    }else{
-      for(let i=0;i<fotos.length;i+=2){
-
-        const grupo=fotos.slice(i,i+2);
-        const cw=(W-4)/2;
-        const fh=55;
-
-        npi(fh+6);
-
+    const fotosAMostrar = fotos.length ? fotos : [null,null,null];
+    {
+      for(let i=0;i<fotosAMostrar.length;i+=3){
+        const grupo=fotosAMostrar.slice(i,i+3);
+        const cw=(W-2*4)/3;
+        const fh=50;
+        npi(fh+8);
         grupo.forEach((f,j)=>{
           const x=M+j*(cw+4);
-
-          pdf.setFillColor(...BL);
-          pdf.setDrawColor(...NE);
+          pdf.setFillColor(...BL); pdf.setDrawColor(...NE);
           pdf.rect(x,y,cw,fh,'FD');
-
-          pdf.setFontSize(5.5);
-          pdf.setTextColor(150,150,150);
-
-          pdf.text(
-            '[imagen: '+(f.nombre||'')+']',
-            x+cw/2,
-            y+fh/2,
-            {
-              align:'center',
-              baseline:'middle'
-            }
-          );
-
-          pdf.setFontSize(5.5);
-          pdf.setTextColor(...NE);
-
-          const descLines=pdf.splitTextToSize(
-            f.descripcion||'',
-            cw-4
-          );
-
-          descLines.forEach((line,k)=>{
-            pdf.text(
-              line,
-              x+2,
-              y+fh+4+k*2.5
-            );
-          });
+          pdf.setFontSize(5); pdf.setTextColor(150,150,150);
+          pdf.text(f?('[imagen: '+(f.nombre||'')+']'):'', x+cw/2, y+fh/2, {align:'center',baseline:'middle'});
+          pdf.setFontSize(5); pdf.setTextColor(...NE);
+          if(f){
+            const descLines=pdf.splitTextToSize(f.descripcion||'', cw-4);
+            descLines.forEach((line,k)=>{
+              pdf.text(line, x+2, y+fh+4+k*2.5);
+            });
+          }
         });
-
-        y+=fh+6;
+        y+=fh+8;
       }
     }
   }
-
   y+=3;
 
   /* ============================================================
-     ANEXO 02
+     ANEXO 02 — sin cambios
      ============================================================ */
-
   band('Anexo 02. MANIFESTACIONES DE TESTIGOS');
-
-  npi(6);
-
-  cell(
-    M,W,6,
-    'Ver archivo(s) adjunto(s) en el expediente digital del caso.',
-    {fs:6}
-  );
-
-  y+=6;
+  npi(6); cell(M,W,6,'Ver archivo(s) adjunto(s) en el expediente digital del caso.',{fs:6}); y+=6;
   y+=3;
 
   /* ============================================================
-     ANEXO 03
+     ANEXO 03 — un solo cuadro, numerado en línea "1. 2. 3."
      ============================================================ */
-
   band('Anexo 03. DOCUMENTOS DE ATENCIÓN MÉDICA');
-
-  npi(6);
-
-  cell(
-    M,W,6,
-    'Ver archivo(s) adjunto(s) en el expediente digital del caso.',
-    {fs:6}
-  );
-
-  y+=6;
-
-  /* ============================================================
-     NUMERACIÓN FINAL DE TODAS LAS PÁGINAS
-     ============================================================ */
-
-  const totalPaginas=pdf.internal.getNumberOfPages();
-
-  for(let p=1;p<=totalPaginas;p++){
-
-    pdf.setPage(p);
-
-    pdf.setTextColor(...NE);
-    pdf.setFont('helvetica','normal');
-    pdf.setFontSize(5.5);
-
-    pdf.text(
-      `PÁGINA: ${p} DE ${totalPaginas}`,
-      202,
-      15,
-      {align:'right'}
-    );
+  {
+    const nombres = c.documentosMedicosNombres || ['Receta médica','Constancia SCTR','Informe médico'];
+    const texto = nombres.length
+      ? nombres.map((n,i)=>(i+1)+'. '+n).join('   ')
+      : 'Ver archivos adjuntos.';
+    npi(6);
+    cell(M,W,6,texto,{fs:5.5,left:true});
+    y+=6;
   }
 
   /* ============================================================
-     SALIDA
+     ANEXO 04 — ANÁLISIS DE CAUSA RAÍZ (tabla de 7 columnas)
      ============================================================ */
+  /* El Anexo 04 nunca puede dejar el encabezado separado de sus filas. */
+  {
+    const totalFilasCausaRaiz = catsCount_(c);
+    npi(6 + totalFilasCausaRaiz*8 + 3);
+  }
+  band('Anexo 04. ANÁLISIS DE CAUSA RAÍZ');
+  {
+    const wCol=[24,24,24,24,24,24,50];
+    const xCol=[]; let acc=M; wCol.forEach(v=>{xCol.push(acc); acc+=v;});
+    const h=6;
+
+    npi(h);
+    ['CAUSA IDENTIFICADA\\n(AS, CS, FP, FT)','Por qué 01','Por qué 02','Por qué 03','Por qué 04','Por qué 05','CAUSA RAÍZ IDENTIFICADA'].forEach((s,i)=>{
+      cell(xCol[i],wCol[i],h,s,{bg:PL,bold:true,fs:4.2});
+    });
+    y+=h;
+
+    const catsRef=[
+      {k:'actos',abrev:'AS'},{k:'condiciones',abrev:'CS'},
+      {k:'factoresPersonales',abrev:'FP'},{k:'factoresTrabajo',abrev:'FT'}
+    ];
+
+    catsRef.forEach(cat=>{
+      (c.scat[cat.k]||[]).forEach((item,i)=>{
+        const analisis=c.analisisCausaRaiz[item.id];
+        if(!analisis) return;
+
+        const etiqueta=cat.abrev+' '+String(i+1).padStart(2,'0');
+        const porques=analisis.porques.map(p=>p.texto||'');
+        const raiz = analisis.porques.find(p=>p.esRaiz===true);
+        const raizTxt = raiz ? raiz.texto : '-';
+
+        const hh=8;
+        npi(hh);
+        cell(xCol[0],wCol[0],hh,etiqueta,{fs:4.4,bold:true});
+        for(let k=0;k<5;k++){
+          cell(xCol[1+k],wCol[1+k],hh, porques[k]||'', {fs:4.4,left:true});
+        }
+        cell(xCol[6],wCol[6],hh,raizTxt,{fs:4.2,left:true,bold:true,bg:[228,242,236]});
+        y+=hh;
+      });
+    });
+  }
+  y+=3;
+
+
+  } // fin de construirContenido()
+
+  /* ============================================================
+     DOBLE PASADA:
+     1) generación silenciosa solo para contar páginas reales.
+     2) generación final, ahora con TOTAL_PAG ya conocido, así el
+        header nunca necesita "borrar y redibujar" (eso era lo que
+        cortaba la línea de fecha).
+     ============================================================ */
+  crearPdf();
+  construirContenido();
+  TOTAL_PAG = pdf.internal.getNumberOfPages();
+
+  crearPdf();
+  construirContenido();
 
   const blob=pdf.output('blob');
   const url=URL.createObjectURL(blob);
-
   window.open(url,'_blank');
 
   document.getElementById('info').textContent=
