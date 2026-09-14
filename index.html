@@ -856,8 +856,9 @@ async function generarPDFInvestigacion(datos){
 
     /* Fila superior de col3: encabezados Existía/Implement./Cumplía/Eficaz/No aplica */
     const wMarca=[10,11,10,10,11]; // Existía, Implement., Cumplía, Eficaz, No aplica — deben sumar wCol3 (55)
+    const xMarca=[]; { let acc=xCol3; wMarca.forEach(w=>{xMarca.push(acc); acc+=w;}); }
     ['Existía','Implement.','Cumplía','Eficaz','No aplica'].forEach((s,i)=>{
-      cellAt(xCol3+i*wMarca, yBase7, wMarca, 4, s, {bg:PL,fg:NE,bold:true,fs:4});
+      cellAt(xMarca[i], yBase7, wMarca[i], 4, s, {bg:PL,fg:NE,bold:true,fs:4});
     });
 
     /* SI [ ] | NO [ ] | PARC. [ ] — 6 celdas, una sola fila */
@@ -919,7 +920,7 @@ async function generarPDFInvestigacion(datos){
 
       const marks=[ctrl.existia,ctrl.implementado,ctrl.cumplia,ctrl.eficaz,ctrl.noAplica];
       marks.forEach((m,i)=>{
-        cellAt(xCol3+i*wMarca, y, wMarca, h, m?'X':'', {fs:5.5,bold:true});
+        cellAt(xMarca[i], y, wMarca[i], h, m?'X':'', {fs:5.5,bold:true});
       });
       y+=h;
     });
