@@ -932,7 +932,7 @@ async function generarPDFInvestigacion(datos){
      ============================================================ */
   band('CAUSAS DEL ACCIDENTE (Cuadro III — Metodología SCAT)');
   {
-    const wNum=12, wOpcionSel=23, wDesc=62; // dentro de cada mitad de 97 (12+23+62=97)
+    const wNum=8, wOpcionSel=27, wDesc=62; // dentro de cada mitad de 97 (12+23+62=97)
 
     function bandaMitad(xBase, titulo){
       pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
@@ -1008,7 +1008,7 @@ async function generarPDFInvestigacion(datos){
      ============================================================ */
   function alturaPorLineas_(n){
     if(n<=1) return 4;
-    return 2*n+1;
+    return 2*n+2;
   }
 
   band('MEDIDAS CORRECTIVAS');
