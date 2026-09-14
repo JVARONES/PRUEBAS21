@@ -108,7 +108,8 @@ const DATOS_PRUEBA = {
     ],
     fotosInvestigacion: [
       { url:'', nombre:'Foto 01.jpg', descripcion:'Vista general del compresor afectado', ratio:1.33 },
-      { url:'', nombre:'Foto 02.jpg', descripcion:'Detalle de la tapa desasegurada', ratio:0.9 }
+      { url:'', nombre:'Foto 02.jpg', descripcion:'Detalle de la tapa desasegurada', ratio:0.9 },
+      { url:'', nombre:'Foto 03.jpg', descripcion:'Traba de la tapa desgastada, vista de cerca', ratio:1.5 }
     ]
   },
   porTrabajador: {
@@ -166,6 +167,7 @@ async function generarPDFInvestigacion(datos){
   const PL=[225,224,215]; // gris claro original (el mismo del Flash Report)
   const NE=[0,0,0];
   const BL=[255,255,255];
+  const GR=[170,170,159]; //gris oscuro
 
   const M=8;
   const W=194;
@@ -225,14 +227,14 @@ async function generarPDFInvestigacion(datos){
     y+=5;
   }
 
-  /* Banda plomo oscuro de instrucción — SIEMPRE alto 4 */
+  /* Banda plomo oscuro de instrucción — SIEMPRE alto 3 */
   function bandaInstruccion(s, centrado){
-    npi(4);
+    npi(3);
     pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
-    pdf.rect(M,y,W,4,'FD');
+    pdf.rect(M,y,W,3,'FD');
     pdf.setTextColor(...NE); pdf.setFont('helvetica','italic'); pdf.setFontSize(5);
-    pdf.text(s, centrado?(M+W/2):(M+2), y+2.7, centrado?{align:'center'}:{});
-    y+=4;
+    pdf.text(s, centrado?(M+W/2):(M+2), y+2.0, centrado?{align:'center'}:{});
+    y+=3;
   }
 
   /* Banda de 2 líneas en una sola fila de alto 5 (título + instrucción) */
@@ -256,7 +258,7 @@ async function generarPDFInvestigacion(datos){
 
     pdf.setTextColor(...(o.fg||NE));
     pdf.setFont('helvetica',o.bold?'bold':'normal');
-    pdf.setFontSize(5);
+    pdf.setFontSize(o.fs||5);
 
     const s=String(txt??'');
     if(!s) return;
@@ -280,7 +282,7 @@ async function generarPDFInvestigacion(datos){
 
     pdf.setTextColor(...(o.fg||NE));
     pdf.setFont('helvetica',o.bold?'bold':'normal');
-    pdf.setFontSize(5);
+    pdf.setFontSize(o.fs||5);
 
     const s=String(txt??'');
     if(!s) return;
@@ -504,7 +506,7 @@ async function generarPDFInvestigacion(datos){
        */
       const w=[18,19,27,23,9,13,21,32,32];
       const x=[]; let ax=M; w.forEach(v=>{x.push(ax); ax+=v;});
-      const h=4;
+      const h=5;
 
       npi(h);
       cell(x[0],w[0],h,'PROYECTO',{bg:PL,fg:NE,bold:true,fs:4.4});
@@ -529,7 +531,7 @@ async function generarPDFInvestigacion(datos){
     }
 
     /*
-     * FILA 3 — Actividad/Tarea (sin cambios respecto a la ronda anterior)
+     * FILA 3 — Actividad/Tarea (instrucción=3, opciones=5, total sigue siendo 8)
      */
     {
       const w=[64,66,64];
@@ -539,12 +541,12 @@ async function generarPDFInvestigacion(datos){
       npi(8);
       cell(x[0],w[0],8,'ACTIVIDAD',{bg:PL,fg:NE,bold:true,fs:6});
       cell(x[1],w[1],8,'TAREA ESPECÍFICA',{bg:PL,fg:NE,bold:true,fs:6});
-      cell(x[2],w[2],4,'(marcar con una X la opción que aplique)',{bg:PL,fg:NE,fs:4.6});
+      cell(x[2],w[2],3,'(marcar con una X la opción que aplique)',{bg:PL,fg:NE,fs:4.6});
 
-      y=yBase+4;
+      y=yBase+3;
       const wOpts=[20,20,24];
       ['TAREA RUTINARIA','TAREA NO RUTINARIA','SITUACIÓN EMERGENCIA'].forEach((op,i)=>{
-        const off=i===0?0:i===1?20:40; cell(x[2]+off,wOpts[i],4,op,{bg:PL,fg:NE,bold:true,fs:4.2});
+        const off=i===0?0:i===1?20:40; cell(x[2]+off,wOpts[i],5,op,{bg:PL,fg:NE,bold:true,fs:4.2});
       });
 
       y=yBase+8;
@@ -618,7 +620,7 @@ async function generarPDFInvestigacion(datos){
 
     /* día/mes/año, hora y fecha de inicio = ancho de "PROYECTO" (18).
        El espacio liberado (12mm) se suma a Lugar Exacto. */
-    const wFecOc=18, wHora=10, wFI=26, wLu=36, wGrav=32, wGravOpt=wGrav/3, wGra=34, wGraOpt=wGra/4, wDias=19, wNTrab=19;
+    const wFecOc=18, wHora=10, wFI=25.5, wLu=36, wGrav=32, wGravOpt=wGrav/3, wGra=34, wGraOpt=wGra/4, wDias=19.5, wNTrab=19;
 
     const xFecOc=M;
     const xHora=xFecOc+wFecOc;
@@ -722,11 +724,12 @@ async function generarPDFInvestigacion(datos){
     }
 
     /*
-     * DERECHA — Label=35, Opciones=62. ¿Por qué? label=18(mitad de 35),
-     * valor=79 (62 + los 17 liberados de la mitad del label).
+     * DERECHA — Label=34(=Directa+Indirecta), Opciones=63. ¿Por qué?
+     * label=17(=Directa/Sin Supervisión), valor=80, altura=4 (para que
+     * 2 filas de evaluación (8+4=12 c/u) sumen 24, igual que las 3 de Lesión (8 c/u).
      */
     function filaEvaluacion(label, opciones, seleccionado, porque){
-      const wLabel=35, wOpt=62/opciones.length;
+      const wLabel=34, wOpt=63/opciones.length;
       const yBase=y;
       npi(8);
       cellAt(xDer, yBase, wLabel, 8, label, {bg:PL,fg:NE,bold:true,left:true,fs:5});
@@ -739,10 +742,10 @@ async function generarPDFInvestigacion(datos){
       });
       y = yBase+8;
 
-      const h2=5;
+      const h2=4;
       npi(h2);
-      cellAt(xDer, y, 18, h2, '¿POR QUÉ?', {bg:AZ,fg:BL,bold:true,left:true,fs:5});
-      cellAt(xDer+18, y, 79, h2, porque||'-', {fs:5.3,left:true});
+      cellAt(xDer, y, 17, h2, '¿POR QUÉ?', {bg:AZ,fg:BL,bold:true,left:true,fs:5});
+      cellAt(xDer+17, y, 80, h2, porque||'-', {fs:5.3,left:true});
       y+=h2;
     }
 
@@ -809,7 +812,7 @@ async function generarPDFInvestigacion(datos){
     /*
      * Responsable=35 (=label "POTENCIAL DE DAÑO"), Fecha=26 y
      * Estado=26 (=ancho de "SITUACIÓN DE EMERGENCIA", 77/3).
-     * Descripción absorbe el resto.
+     * Descripción absorbe el resto. Descripción con letra "normal" (fs 6).
      */
     const wA=[107,35,26,26];
     const xA=[]; let acc3=M; wA.forEach(w=>{xA.push(acc3); acc3+=w;});
@@ -827,7 +830,7 @@ async function generarPDFInvestigacion(datos){
         a.fechaEjecucion||'-',
         a.estado||'-'
       ].forEach((s,i)=>{
-        cell(xA[i],wA[i],h,s,{fs:5.3});
+        cell(xA[i],wA[i],h,s,{fs:i===0?6:5.3});
       });
       y+=h;
     });
@@ -850,11 +853,17 @@ async function generarPDFInvestigacion(datos){
     /* Col2 = bloque alto de 8mm (fila1+fila2), combinado con la celda de abajo */
     cellAt(xCol2, yBase7, wCol2, 8, 'EVALUACIÓN DE CONTROLES DEL IPERC VIGENTE — Describir el control existente', {bg:PL,bold:true,fs:4.2,left:true});
 
-    /* SI [ ] | NO [ ] | PARCIALMENTE [ ] — 6 celdas, una sola fila */
+    /* Fila superior de col3: encabezados Existía/Implement./Cumplía/Eficaz/No aplica */
+    const wMarca=wCol3/5;
+    ['Existía','Implement.','Cumplía','Eficaz','No aplica'].forEach((s,i)=>{
+      cellAt(xCol3+i*wMarca, yBase7, wMarca, 4, s, {bg:PL,fg:NE,bold:true,fs:4});
+    });
+
+    /* SI [ ] | NO [ ] | PARC. [ ] — 6 celdas, una sola fila */
     y = yBase7+4;
     {
       const wLab=16, wMark=wCol1/3-wLab;
-      const opciones=[['SI','SI'],['NO','NO'],['PARCIALMENTE','PARCIALMENTE']];
+      const opciones=[['SI','SI'],['NO','NO'],['PARC.','PARCIALMENTE']];
       opciones.forEach((op,i)=>{
         const xBase=xCol1+i*(wLab+wMark);
         const on = accTextoIgual_(c.ipercIdentificado, op[1]);
@@ -862,10 +871,8 @@ async function generarPDFInvestigacion(datos){
         cellAt(xBase+wLab, y, wMark, 4, on?'X':'', {fs:6,bold:true});
       });
     }
-    const wMarca=wCol3/5;
-    ['Existía','Implement.','Cumplía','Eficaz','No aplica'].forEach((s,i)=>{
-      cellAt(xCol3+i*wMarca, y, wMarca, 4, s, {bg:PL,fg:NE,bold:true,fs:4});
-    });
+    /* Fila inferior de col3: instrucción de marcado */
+    cellAt(xCol3, y, wCol3, 4, 'Marcar con una X las opciones que aplican', {bg:PL,fg:NE,fs:4.2});
     y = yBase7+8;
 
     const jer=[
@@ -875,11 +882,15 @@ async function generarPDFInvestigacion(datos){
       {k:'administrativo',t:'ADM:'},
       {k:'epp',t:'EPP:'}
     ];
-    /* Etiqueta corta (gris, tipo "Obs:") + descripción, igual que en Lesión */
+    /* Etiqueta corta (gris, tipo "Obs:") + descripción, igual que en Lesión.
+       ADM (justificación) + EPP: la celda de xCol1 se combina en una sola,
+       de alto = h(ADM)+h(EPP), porque EPP no tiene contenido propio en xCol1. */
     const wCol2Label=8, wCol2Valor=wCol2-wCol2Label;
-    jer.forEach(j=>{
+    const hFila=5;
+    let yAdmInicio=null;
+    jer.forEach((j,idxJer)=>{
       const ctrl=c.ipercControles[j.k]||{};
-      const h=5;
+      const h=hFila;
       npi(h);
       if(j.k==='eliminacion'){
         cellAt(xCol1, y, wCol1, h, '¿GENERA NECESIDAD DE ACTUALIZACIÓN DEL IPERC?', {bg:PL,bold:true,fs:4});
@@ -896,9 +907,10 @@ async function generarPDFInvestigacion(datos){
       } else if(j.k==='ingenieria'){
         cellAt(xCol1, y, wCol1, h, 'JUSTIFICACIÓN:', {bg:PL,bold:true,left:true,fs:4.6});
       } else if(j.k==='administrativo'){
-        cellAt(xCol1, y, wCol1, h, c.ipercJustificacion||'-', {fs:4.6,left:true});
-      } else {
-        cellAt(xCol1, y, wCol1, h, '', {bg:BL});
+        /* Se dibuja al terminar EPP, combinando ADM+EPP en una sola celda */
+        yAdmInicio=y;
+      } else if(j.k==='epp'){
+        cellAt(xCol1, yAdmInicio, wCol1, h*2, c.ipercJustificacion||'-', {fs:4.6,left:true});
       }
 
       cellAt(xCol2, y, wCol2Label, h, j.t, {bg:PL,fg:NE,bold:true,fs:4.4});
@@ -920,7 +932,7 @@ async function generarPDFInvestigacion(datos){
      ============================================================ */
   band('CAUSAS DEL ACCIDENTE (Cuadro III — Metodología SCAT)');
   {
-    const wOpcion=35, wDesc=62; // dentro de cada mitad de 97
+    const wNum=12, wOpcionSel=23, wDesc=62; // dentro de cada mitad de 97 (12+23+62=97)
 
     function bandaMitad(xBase, titulo){
       pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
@@ -930,18 +942,18 @@ async function generarPDFInvestigacion(datos){
     }
 
     /*
-     * Dibuja una fila de causa con su numeral (AS01, CS01, FP01, FT01...).
-     * Si el ítem no existe (la categoría tiene menos causas que su par),
-     * se dibuja igual con guion, para que ambas columnas coincidan en alto.
+     * Dibuja una fila de causa: numeral (AS01) | opción seleccionada del
+     * catálogo (item.opcion) | descripción de la desviación (item.descripcion).
+     * Si el ítem no existe se dibuja igual con celdas vacías, para que
+     * ambas columnas coincidan en alto.
      */
     function filaCausa(xBase, abrev, indice, item){
       const h=5;
       npi(h);
       const numeral = abrev+String(indice+1).padStart(2,'0');
-      const opcionTxt = numeral;
-      const descTxt = item ? (item.descripcion||'') : '';
-      cellAt(xBase, y, wOpcion, h, opcionTxt, {bold:true});
-      cellAt(xBase+wOpcion, y, wDesc, h, descTxt, {left:true});
+      cellAt(xBase, y, wNum, h, numeral, {bold:true});
+      cellAt(xBase+wNum, y, wOpcionSel, h, item?(item.opcion||''):'', {left:true,fs:4.4});
+      cellAt(xBase+wNum+wOpcionSel, y, wDesc, h, item?(item.descripcion||''):'', {left:true});
     }
 
     /* Título de cada mitad */
@@ -950,18 +962,20 @@ async function generarPDFInvestigacion(datos){
     bandaMitad(M+MITAD, 'CAUSAS BÁSICAS');
     y+=5;
 
-    /* Encabezado "Seleccionar opción / Descripción" — UNA SOLA VEZ por mitad */
+    /* Encabezado — UNA SOLA VEZ por mitad */
     npi(5);
-    cellAt(M, y, wOpcion, 5, 'Seleccionar la opción', {bg:PL,bold:true,fs:4.4});
-    cellAt(M+wOpcion, y, wDesc, 5, 'Descripción de la desviación', {bg:PL,bold:true,fs:4.4});
-    cellAt(M+MITAD, y, wOpcion, 5, 'Seleccionar la opción', {bg:PL,bold:true,fs:4.4});
-    cellAt(M+MITAD+wOpcion, y, wDesc, 5, 'Descripción de la desviación', {bg:PL,bold:true,fs:4.4});
+    cellAt(M, y, wNum, 5, 'N°', {bg:PL,bold:true,fs:4.4});
+    cellAt(M+wNum, y, wOpcionSel, 5, 'Opción seleccionada', {bg:PL,bold:true,fs:4.2});
+    cellAt(M+wNum+wOpcionSel, y, wDesc, 5, 'Descripción de la desviación', {bg:PL,bold:true,fs:4.4});
+    cellAt(M+MITAD, y, wNum, 5, 'N°', {bg:PL,bold:true,fs:4.4});
+    cellAt(M+MITAD+wNum, y, wOpcionSel, 5, 'Opción seleccionada', {bg:PL,bold:true,fs:4.2});
+    cellAt(M+MITAD+wNum+wOpcionSel, y, wDesc, 5, 'Descripción de la desviación', {bg:PL,bold:true,fs:4.4});
     y+=5;
 
     /*
      * Por cada par (Actos<->Factores Personales, Condiciones<->Factores
      * de Trabajo): mismo número de filas en ambos lados, rellenando con
-     * guion el lado que tenga menos causas.
+     * vacío el lado que tenga menos causas.
      */
     function bloquePar(catIzq, tituloIzq, abrevIzq, catDer, tituloDer, abrevDer){
       npi(4);
@@ -989,7 +1003,14 @@ async function generarPDFInvestigacion(datos){
 
   /* ============================================================
      MEDIDAS CORRECTIVAS
+     Altura dinámica por N° de líneas: 1 línea=4, 2=5, 3=7, 4=9...
+     (a partir de 2, +2 por cada línea adicional).
      ============================================================ */
+  function alturaPorLineas_(n){
+    if(n<=1) return 4;
+    return 2*n+1;
+  }
+
   band('MEDIDAS CORRECTIVAS');
   {
     /* Fecha y Estado reducidos; el espacio liberado va a Evidencia (texto largo). */
@@ -1004,15 +1025,24 @@ async function generarPDFInvestigacion(datos){
     });
     y+=h;
 
+    pdf.setFont('helvetica','normal');
     (c.medidasCorrectivas||[]).forEach(m=>{
-      npi(h);
+      const textos=[m.causaRaizTexto||'-', m.descripcion||'-'];
+      let maxLineas=1;
+      textos.forEach((txt,i)=>{
+        pdf.setFontSize(4.8);
+        const lns=pdf.splitTextToSize(String(txt), Math.max(3,wM[i]-2.5));
+        maxLineas=Math.max(maxLineas,lns.length);
+      });
+      const hFila=alturaPorLineas_(maxLineas);
+      npi(hFila);
       [
         m.causaRaizTexto||'-', m.descripcion||'-', (m.responsable&&m.responsable.nombre)||'-',
         m.fecha||'-', m.estado||'-', m.evidencia||'-'
       ].forEach((s,i)=>{
-        cell(xM[i],wM[i],h,s,{fs:4.8});
+        cell(xM[i],wM[i],hFila,s,{fs:4.8});
       });
-      y+=h;
+      y+=hFila;
     });
   }
   y+=3;
@@ -1125,11 +1155,11 @@ async function generarPDFInvestigacion(datos){
 
   /* ============================================================
      ANEXO 04 — ANÁLISIS DE CAUSA RAÍZ (tabla de 7 columnas)
+     Altura dinámica por N° de líneas (misma regla que Medidas Correctivas).
      ============================================================ */
-  /* El Anexo 04 nunca puede dejar el encabezado separado de sus filas. */
   {
     const totalFilasCausaRaiz = catsCount_(c);
-    npi(6 + totalFilasCausaRaiz*8 + 3);
+    npi(6 + totalFilasCausaRaiz*9 + 3);
   }
   band('Anexo 04. ANÁLISIS DE CAUSA RAÍZ');
   {
@@ -1158,7 +1188,19 @@ async function generarPDFInvestigacion(datos){
         const raiz = analisis.porques.find(p=>p.esRaiz===true);
         const raizTxt = raiz ? raiz.texto : '-';
 
-        const hh=8;
+        /* Altura dinámica: máximo N° de líneas entre los 5 "por qué" y la causa raíz */
+        pdf.setFont('helvetica','normal');
+        let maxLineas=1;
+        for(let k=0;k<5;k++){
+          pdf.setFontSize(4.4);
+          const lns=pdf.splitTextToSize(String(porques[k]||''), Math.max(3,wCol[1+k]-2.5));
+          maxLineas=Math.max(maxLineas,lns.length);
+        }
+        pdf.setFontSize(4.2);
+        const lnsRaiz=pdf.splitTextToSize(String(raizTxt), Math.max(3,wCol[6]-2.5));
+        maxLineas=Math.max(maxLineas,lnsRaiz.length);
+
+        const hh=alturaPorLineas_(maxLineas);
         npi(hh);
         cell(xCol[0],wCol[0],hh,etiqueta,{fs:4.4,bold:true});
         for(let k=0;k<5;k++){
