@@ -544,7 +544,7 @@ async function generarPDFInvestigacion(datos){
       cell(x[2],w[2],3,'(marcar con una X la opción que aplique)',{bg:PL,fg:NE,fs:4.6});
 
       y=yBase+3;
-      const wOpts=[20,20,24];
+      const wOpts=[21,21,22];
       ['TAREA RUTINARIA','TAREA NO RUTINARIA','SITUACIÓN EMERGENCIA'].forEach((op,i)=>{
         const off=i===0?0:i===1?20:40; cell(x[2]+off,wOpts[i],5,op,{bg:PL,fg:NE,bold:true,fs:4.2});
       });
@@ -590,7 +590,7 @@ async function generarPDFInvestigacion(datos){
   }
 
   {
-    const w=[96,17,81];
+    const w=[97,16.5,80.5];
     const x=[M, M+w[0], M+w[0]+w[1]];
     const h=5;
     npi(h);
@@ -896,7 +896,7 @@ async function generarPDFInvestigacion(datos){
         cellAt(xCol1, y, wCol1, h, '¿GENERA NECESIDAD DE ACTUALIZACIÓN DEL IPERC?', {bg:PL,bold:true,fs:4});
       } else if(j.k==='sustitucion'){
         /* SI/NO + CÓDIGO IPERC, todo en una sola fila */
-        const wSiNo=12, wSiNoMark=8;
+        const wSiNo=8, wSiNoMark=5.5;
         cellAt(xCol1, y, wSiNo, h, 'SI', {fs:4.6});
         cellAt(xCol1+wSiNo, y, wSiNoMark, h, c.ipercActualizacion==='SI'?'X':'', {fs:5.5,bold:true});
         cellAt(xCol1+wSiNo+wSiNoMark, y, wSiNo, h, 'NO', {fs:4.6});
