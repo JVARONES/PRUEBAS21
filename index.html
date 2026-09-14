@@ -263,14 +263,17 @@ async function generarPDFInvestigacion(datos){
     const s=String(txt??'');
     if(!s) return;
 
+    /* align: 'left' | 'center' | 'right' — por compatibilidad, o.left:true equivale a align:'left' */
+    const align = o.align || (o.left ? 'left' : 'center');
+    const tx = align==='left' ? x+1.5 : align==='right' ? x+w-1.5 : x+w/2;
+
     const lines=pdf.splitTextToSize(s, Math.max(3,w-2.5));
     const lh=o.lh||2.5;
     const tot=(lines.length-1)*lh;
     const sy=y+h/2-tot/2;
 
     lines.forEach((l,i)=>{
-      pdf.text(l, o.left?x+1.5:x+w/2, sy+i*lh,
-        {align:o.left?'left':'center', baseline:'middle'});
+      pdf.text(l, tx, sy+i*lh, {align, baseline:'middle'});
     });
   }
 
@@ -287,14 +290,17 @@ async function generarPDFInvestigacion(datos){
     const s=String(txt??'');
     if(!s) return;
 
+    /* align: 'left' | 'center' | 'right' — por compatibilidad, o.left:true equivale a align:'left' */
+    const align = o.align || (o.left ? 'left' : 'center');
+    const tx = align==='left' ? x+1.5 : align==='right' ? x+w-1.5 : x+w/2;
+
     const lines=pdf.splitTextToSize(s, Math.max(3,w-2.5));
     const lh=o.lh||2.3;
     const tot=(lines.length-1)*lh;
     const sy=yy+h/2-tot/2;
 
     lines.forEach((l,i)=>{
-      pdf.text(l, o.left?x+1.5:x+w/2, sy+i*lh,
-        {align:o.left?'left':'center', baseline:'middle'});
+      pdf.text(l, tx, sy+i*lh, {align, baseline:'middle'});
     });
   }
 
@@ -355,14 +361,14 @@ async function generarPDFInvestigacion(datos){
   pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
   pdf.rect(M,y,W,4,'FD');
   pdf.setTextColor(...NE); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
-  pdf.text('DATOS DEL EMPLEADOR',M+2,y+2.7);
+  pdf.text('DATOS DEL EMPLEADOR',M+2,y+2.7, {align:'left'});
   y+=4;
 
   npi(5);
   pdf.setFillColor(...AZ); pdf.setDrawColor(...NE);
   pdf.rect(M,y,W,5,'FD');
   pdf.setTextColor(...BL); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
-  pdf.text('DATOS DEL EMPLEADOR PRINCIPAL',M+2,y+3.2);
+  pdf.text('DATOS DEL EMPLEADOR PRINCIPAL',M+2,y+3.2, {align:'center'});
   y+=5;
 
   {
