@@ -218,13 +218,28 @@ async function generarPDFInvestigacion(datos){
     }
   }
 
-  function band(s){
+  function band(s, o={}){
+    const align = o.align || 'left';
     npi(5);
     pdf.setFillColor(...AZ); pdf.setDrawColor(...NE);
     pdf.rect(M,y,W,5,'FD');
     pdf.setTextColor(...BL); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
-    pdf.text(s,M+2,y+3.2);
+    const tx = align==='left' ? M+2 : align==='right' ? M+W-2 : M+W/2;
+    pdf.text(s,tx,y+3.2,{align});
     y+=5;
+  }
+
+  /* Banda de título genérica (reemplaza los bloques sueltos de rect+text que
+     no tenían opción de align). h/bg/fg/fs/align configurables por llamada. */
+  function bandaTitulo(texto, o={}){
+    const h=o.h||4, bg=o.bg||PL, fg=o.fg||NE, fs=o.fs||7, align=o.align||'left';
+    npi(h);
+    pdf.setFillColor(...bg); pdf.setDrawColor(...NE);
+    pdf.rect(M,y,W,h,'FD');
+    pdf.setTextColor(...fg); pdf.setFont('helvetica','bold'); pdf.setFontSize(fs);
+    const tx = align==='left' ? M+2 : align==='right' ? M+W-2 : M+W/2;
+    pdf.text(texto, tx, y+h/2, {align, baseline:'middle'});
+    y+=h;
   }
 
   /* Banda plomo oscuro de instrucción — SIEMPRE alto 3 */
@@ -357,19 +372,9 @@ async function generarPDFInvestigacion(datos){
      ============================================================ */
   const c=datos.compartido;
 
-  npi(4);
-  pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
-  pdf.rect(M,y,W,4,'FD');
-  pdf.setTextColor(...NE); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
-  pdf.text('DATOS DEL EMPLEADOR',M+2,y+2.7, {align:'left'});
-  y+=4;
+  bandaTitulo('DATOS DEL EMPLEADOR', {h:4, bg:PL, fg:NE, fs:7, align:'left'});
 
-  npi(5);
-  pdf.setFillColor(...AZ); pdf.setDrawColor(...NE);
-  pdf.rect(M,y,W,5,'FD');
-  pdf.setTextColor(...BL); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
-  pdf.text('DATOS DEL EMPLEADOR PRINCIPAL',M+2,y+3.2, {align:'center'});
-  y+=5;
+  bandaTitulo('DATOS DEL EMPLEADOR PRINCIPAL', {h:5, bg:AZ, fg:BL, fs:7, align:'center'});
 
   {
     const w=[32,32,66,32,32];
@@ -414,12 +419,7 @@ async function generarPDFInvestigacion(datos){
     y+=h;
   }
 
-  npi(4);
-  pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
-  pdf.rect(M,y,W,4,'FD');
-  pdf.setTextColor(...NE); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
-  pdf.text('DATOS DEL EMPLEADOR DE INTERMEDIACION, TERCERIZACION, CONTRATISTA, SUBCONTRATISTA, OTROS',M+2,y+2.7);
-  y+=4;
+  bandaTitulo('DATOS DEL EMPLEADOR DE INTERMEDIACION, TERCERIZACION, CONTRATISTA, SUBCONTRATISTA, OTROS', {h:4, bg:PL, fg:NE, fs:7, align:'left'});
 
   const contAplica=c.contratistaAplica==='SI';
 
@@ -535,12 +535,7 @@ async function generarPDFInvestigacion(datos){
       y+=h;
     }
 
-    npi(4);
-    pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
-    pdf.rect(M,y,W,4,'FD');
-    pdf.setTextColor(...NE); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
-    pdf.text('CIRCUNSTANCIAS DEL TRABAJO',M+2,y+2.7);
-    y+=4;
+    bandaTitulo('CIRCUNSTANCIAS DEL TRABAJO', {h:4, bg:PL, fg:NE, fs:7, align:'left'});
 
     /*
      * FILA 3 — Actividad/Tarea (instrucción=3, opciones=5, total sigue siendo 8)
