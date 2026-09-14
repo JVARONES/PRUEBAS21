@@ -504,7 +504,7 @@ async function generarPDFInvestigacion(datos){
        * Contrato termina donde empieza "Nombre de la aseguradora" (129).
        * Experiencia sigue alineada con el inicio de DNI/Edad.
        */
-      const w=[18,19,27,23,9,13,21,32,32];
+      const w=[18,19,27,23,10,13,20,32,32];
       const x=[]; let ax=M; w.forEach(v=>{x.push(ax); ax+=v;});
       const h=5;
 
@@ -572,7 +572,7 @@ async function generarPDFInvestigacion(datos){
   );
 
   {
-    const w=[96,17,17,64];
+    const w=[97,16.5,16.5,64];
     const x=[M, M+w[0], M+w[0]+w[1], M+w[0]+w[1]+w[2]];
     const h=5;
     npi(h);
@@ -620,7 +620,7 @@ async function generarPDFInvestigacion(datos){
 
     /* día/mes/año, hora y fecha de inicio = ancho de "PROYECTO" (18).
        El espacio liberado (12mm) se suma a Lugar Exacto. */
-    const wFecOc=18, wHora=10, wFI=21.5, wLu=36.5, wGrav=30, wGravOpt=wGrav/3, wGra=36, wGraOpt=wGra/4, wDias=21, wNTrab=21;
+    const wFecOc=18, wHora=10, wFI=21.5, wLu=37.5, wGrav=30, wGravOpt=wGrav/3, wGra=36, wGraOpt=wGra/4, wDias=20, wNTrab=21;
 
     const xFecOc=M;
     const xHora=xFecOc+wFecOc;
@@ -646,7 +646,7 @@ async function generarPDFInvestigacion(datos){
     cell(xFecOc, wFecOc, 5, 'DD/MM/YYYY', {bg:PL,fg:NE,fs:4.6});
     cell(xHora, wHora, 5, 'Hora', {bg:PL,fg:NE,fs:4.6});
     cell(xFI, wFI, 5, 'DD/MM/YYYY', {bg:PL,fg:NE,fs:4.6});
-    ['LEVE','INCAPACITANTE','MORTAL'].forEach((op,i)=>{
+    ['LEVE','INCAP.','MORTAL'].forEach((op,i)=>{
       cell(xGrav+i*wGravOpt, wGravOpt, 5, op, {bg:PL,fg:NE,bold:true,fs:4.6});
     });
     ['TOTAL TEMP.','PARC. TEMP.','PARC. PERM.','TOTAL PERM.'].forEach((op,i)=>{
