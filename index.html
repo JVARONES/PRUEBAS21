@@ -733,17 +733,19 @@ async function generarPDFInvestigacion(datos){
      * label=20, valor=77 (20+77=97=MITAD), altura=4 (para que
      * 2 filas de evaluación (8+4=12 c/u) sumen 24, igual que las 3 de Lesión (8 c/u).
      */
-    function filaEvaluacion(label, opciones, seleccionado, porque){
-      const wLabel=29, wOpt=68/opciones.length;
+    function filaEvaluacion(label, opciones, seleccionado, porque, wOptsManual){
+      const wLabel=29;
+      const wOpts = wOptsManual || opciones.map(()=>68/opciones.length);
+      const offOpts=[]; { let acc=0; wOpts.forEach(w=>{offOpts.push(acc); acc+=w;}); }
       const yBase=y;
       npi(8);
       cellAt(xDer, yBase, wLabel, 8, label, {bg:PL,fg:NE,bold:true,fs:5});
       opciones.forEach((op,i)=>{
-        cellAt(xDer+wLabel+i*wOpt, yBase, wOpt, 4, op, {bg:PL,fg:NE,bold:true,fs:5});
+        cellAt(xDer+wLabel+offOpts[i], yBase, wOpts[i], 4, op, {bg:PL,fg:NE,bold:true,fs:5});
       });
       opciones.forEach((op,i)=>{
         const on = accTextoIgual_(seleccionado, op);
-        cellAt(xDer+wLabel+i*wOpt, yBase+4, wOpt, 4, on?'X':'', {fs:5,bold:true});
+        cellAt(xDer+wLabel+offOpts[i], yBase+4, wOpts[i], 4, on?'X':'', {fs:5,bold:true});
       });
       y = yBase+8;
 
@@ -763,9 +765,9 @@ async function generarPDFInvestigacion(datos){
 
     y = yInicioBloque;
     filaEvaluacion('POTENCIAL DE DAÑO:', ['GRAVE O FATAL','MODERADO','LEVE'],
-      t.potencialDano==='GRAVE_O_FATAL'?'GRAVE O FATAL':t.potencialDano, t.potencialPorque);
+      t.potencialDano==='GRAVE_O_FATAL'?'GRAVE O FATAL':t.potencialDano, t.potencialPorque, [28,22,18]);
     filaEvaluacion('PROBABILIDAD DE OCURRENCIA:', ['ALTA','MEDIA','BAJA'],
-      t.probabilidad, t.probabilidadPorque);
+      t.probabilidad, t.probabilidadPorque, [21,26,21]);
     const yFinDerecha = y;
 
     y = Math.max(yFinIzquierda, yFinDerecha);
