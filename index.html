@@ -168,7 +168,7 @@ async function generarPDFInvestigacion(datos){
   });
 
   const AZ=[0,65,84];
-  const PL=[225,224,215];
+  const PL=[170,170,159];
   const NE=[0,0,0];
   const BL=[255,255,255];
 
@@ -199,26 +199,10 @@ async function generarPDFInvestigacion(datos){
     pdf.setFont('helvetica','normal');
     pdf.setFontSize(5.5);
 
-    pdf.text(
-      'CÓDIGO: SGSST_INDRAGROUP_F 013',
-      202,
-      y+2,
-      {align:'right'}
-    );
-
-    pdf.text(
-      'VERSIÓN: 02',
-      202,
-      y+4.5,
-      {align:'right'}
-    );
-
-    pdf.text(
-      'FECHA: 2026-09-23',
-      202,
-      y+7,
-      {align:'right'}
-    );
+    // Los metadatos quedan alineados y sin superposición.
+    pdf.text('CÓDIGO: SGSST_INDRAGROUP_F 013',202,y+2,{align:'right'});
+    pdf.text('VERSIÓN: 02',202,y+4.5,{align:'right'});
+    pdf.text('FECHA: 2026-09-23',202,y+7,{align:'right'});
 
     y+=14;
   }
@@ -234,6 +218,7 @@ async function generarPDFInvestigacion(datos){
 
   function band(s){
     npi(5);
+
     pdf.setFillColor(...AZ);
     pdf.setDrawColor(...NE);
     pdf.rect(M,y,W,5,'FD');
@@ -241,6 +226,7 @@ async function generarPDFInvestigacion(datos){
     pdf.setTextColor(...BL);
     pdf.setFont('helvetica','bold');
     pdf.setFontSize(7);
+
     pdf.text(s,M+2,y+3.2);
 
     y+=5;
@@ -263,7 +249,7 @@ async function generarPDFInvestigacion(datos){
       Math.max(3,w-2.5)
     );
 
-    const lh=2.5;
+    const lh=o.lh||2.5;
     const tot=(lines.length-1)*lh;
     const sy=y+h/2-tot/2;
 
@@ -340,27 +326,41 @@ async function generarPDFInvestigacion(datos){
 
   const c=datos.compartido;
 
-  band('DATOS DEL EMPLEADOR');
-
-  /* EMPLEADOR PRINCIPAL */
-
+  // IMPORTANTE: "DATOS DEL EMPLEADOR" es PLOMO (#AAAA9F),
+  // no una banda azul.
   npi(5);
   pdf.setFillColor(...PL);
   pdf.setDrawColor(...NE);
   pdf.rect(M,y,W,5,'FD');
-
   pdf.setTextColor(...NE);
   pdf.setFont('helvetica','bold');
-  pdf.setFontSize(6.5);
-  pdf.text(
-    'DATOS DEL EMPLEADOR PRINCIPAL',
-    M+2,
-    y+3.2
-  );
+  pdf.setFontSize(7);
+  pdf.text('DATOS DEL EMPLEADOR',M+2,y+3.2);
   y+=5;
 
+
+  /* ------------------------------------------------------------
+     EMPLEADOR PRINCIPAL — título azul
+     ------------------------------------------------------------ */
+
+  npi(5);
+  pdf.setFillColor(...AZ);
+  pdf.setDrawColor(...NE);
+  pdf.rect(M,y,W,5,'FD');
+  pdf.setTextColor(...BL);
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(7);
+  pdf.text('DATOS DEL EMPLEADOR PRINCIPAL',M+2,y+3.2);
+  y+=5;
+
+
+  /* ------------------------------------------------------------
+     RAZÓN SOCIAL / RUC / DOMICILIO / ACTIVIDAD / N° TRABAJADORES
+     Encabezado en PLOMO.
+     ------------------------------------------------------------ */
+
   {
-    const w=[48.5,19.4,48.5,38.8,38.8];
+    const w=[42,18,46,38,50];
 
     const x=[
       M,
@@ -370,7 +370,7 @@ async function generarPDFInvestigacion(datos){
       M+w[0]+w[1]+w[2]+w[3]
     ];
 
-    const h=8;
+    const h=5;
 
     npi(h);
 
@@ -382,8 +382,8 @@ async function generarPDFInvestigacion(datos){
       'N° TRABAJADORES EN EL CENTRO LABORAL'
     ].forEach((txt,i)=>{
       cell(x[i],w[i],h,txt,{
-        bg:AZ,
-        fg:BL,
+        bg:PL,
+        fg:NE,
         bold:true,
         fs:5.2
       });
@@ -396,8 +396,10 @@ async function generarPDFInvestigacion(datos){
     [
       datos.caso.sociedad||'-',
       datos.caso.ruc||'-',
-      'AV. JORGE BASADRE NRO. 233 INT. 901, SAN ISIDRO',
-      'ACTIVIDADES DE CONSULTORÍA DE GESTIÓN',
+      c.domicilioEmpleador ||
+        'AV. JORGE BASADRE NRO. 233 INT. 901, SAN ISIDRO',
+      c.actividadEconomicaEmpleador ||
+        'ACTIVIDADES DE CONSULTORÍA DE GESTIÓN',
       c.numTrabajadores||'-'
     ].forEach((txt,i)=>{
       cell(x[i],w[i],h,txt,{fs:5.8});
@@ -406,11 +408,15 @@ async function generarPDFInvestigacion(datos){
     y+=h;
   }
 
+
+  /* ------------------------------------------------------------
+     ALTO RIESGO — texto PLOMO #AAAA9F
+     ------------------------------------------------------------ */
+
   npi(5);
   pdf.setFillColor(...PL);
   pdf.setDrawColor(...NE);
   pdf.rect(M,y,W,5,'FD');
-
   pdf.setTextColor(...NE);
   pdf.setFont('helvetica','italic');
   pdf.setFontSize(5.3);
@@ -421,8 +427,13 @@ async function generarPDFInvestigacion(datos){
   );
   y+=5;
 
+
+  /* ------------------------------------------------------------
+     SCTR — SIEMPRE 3 COLUMNAS IGUALES
+     ------------------------------------------------------------ */
+
   {
-    const w=[67.9,58.2,67.9];
+    const w=[W/3,W/3,W/3];
 
     const x=[
       M,
@@ -430,7 +441,7 @@ async function generarPDFInvestigacion(datos){
       M+w[0]+w[1]
     ];
 
-    const h=8;
+    const h=5;
 
     npi(h);
 
@@ -440,10 +451,10 @@ async function generarPDFInvestigacion(datos){
       'NOMBRE DE LA ASEGURADORA'
     ].forEach((txt,i)=>{
       cell(x[i],w[i],h,txt,{
-        bg:AZ,
-        fg:BL,
+        bg:PL,
+        fg:NE,
         bold:true,
-        fs:5.3
+        fs:5.2
       });
     });
 
@@ -464,16 +475,18 @@ async function generarPDFInvestigacion(datos){
 
   y+=2;
 
-  /* CONTRATISTA */
+
+  /* ------------------------------------------------------------
+     INTERMEDIACIÓN / CONTRATISTA — título PLOMO
+     ------------------------------------------------------------ */
 
   npi(5);
   pdf.setFillColor(...PL);
   pdf.setDrawColor(...NE);
   pdf.rect(M,y,W,5,'FD');
-
   pdf.setTextColor(...NE);
   pdf.setFont('helvetica','bold');
-  pdf.setFontSize(5.8);
+  pdf.setFontSize(6.3);
   pdf.text(
     'DATOS DEL EMPLEADOR DE INTERMEDIACION, TERCERIZACION, CONTRATISTA, SUBCONTRATISTA, OTROS',
     M+2,
@@ -483,18 +496,24 @@ async function generarPDFInvestigacion(datos){
 
   const contAplica=c.contratistaAplica==='SI';
 
+
+  /* ------------------------------------------------------------
+     CONTRATISTA — incluye N° TRABAJADORES
+     ------------------------------------------------------------ */
+
   {
-    const w=[16,67,19,48,44];
+    const w=[15,43,18,43,42,33];
 
     const x=[
       M,
       M+w[0],
       M+w[0]+w[1],
       M+w[0]+w[1]+w[2],
-      M+w[0]+w[1]+w[2]+w[3]
+      M+w[0]+w[1]+w[2]+w[3],
+      M+w[0]+w[1]+w[2]+w[3]+w[4]
     ];
 
-    const h=8;
+    const h=5;
 
     npi(h);
 
@@ -502,14 +521,15 @@ async function generarPDFInvestigacion(datos){
       '¿APLICA?',
       'RAZÓN SOCIAL O DENOMINACIÓN SOCIAL',
       'RUC',
-      'DOMICILIO',
-      'ACTIVIDAD ECONÓMICA'
+      'DOMICILIO (Dirección, Distrito, Departamento, Provincia)',
+      'ACTIVIDAD ECONÓMICA',
+      'N° TRABAJADORES EN EL CENTRO LABORAL'
     ].forEach((txt,i)=>{
       cell(x[i],w[i],h,txt,{
-        bg:AZ,
-        fg:BL,
+        bg:PL,
+        fg:NE,
         bold:true,
-        fs:5
+        fs:4.9
       });
     });
 
@@ -522,7 +542,8 @@ async function generarPDFInvestigacion(datos){
       contAplica?(c.contratistaRazonSocial||'-'):'-',
       contAplica?(c.contratistaRuc||'-'):'-',
       contAplica?(c.contratistaDomicilio||'-'):'-',
-      contAplica?(c.contratistaActividad||'-'):'-'
+      contAplica?(c.contratistaActividad||'-'):'-',
+      contAplica?(c.contratistaNumTrabajadores||'-'):'-'
     ].forEach((txt,i)=>{
       cell(x[i],w[i],h,txt,{fs:5.5});
     });
@@ -530,11 +551,15 @@ async function generarPDFInvestigacion(datos){
     y+=h;
   }
 
+
+  /* ------------------------------------------------------------
+     ALTO RIESGO — CONTRATISTA
+     ------------------------------------------------------------ */
+
   npi(5);
   pdf.setFillColor(...PL);
   pdf.setDrawColor(...NE);
   pdf.rect(M,y,W,5,'FD');
-
   pdf.setTextColor(...NE);
   pdf.setFont('helvetica','italic');
   pdf.setFontSize(5.3);
@@ -545,8 +570,9 @@ async function generarPDFInvestigacion(datos){
   );
   y+=5;
 
+
   {
-    const w=[67.9,58.2,67.9];
+    const w=[W/3,W/3,W/3];
 
     const x=[
       M,
@@ -554,7 +580,7 @@ async function generarPDFInvestigacion(datos){
       M+w[0]+w[1]
     ];
 
-    const h=8;
+    const h=5;
 
     npi(h);
 
@@ -564,10 +590,10 @@ async function generarPDFInvestigacion(datos){
       'NOMBRE DE LA ASEGURADORA'
     ].forEach((txt,i)=>{
       cell(x[i],w[i],h,txt,{
-        bg:AZ,
-        fg:BL,
+        bg:PL,
+        fg:NE,
         bold:true,
-        fs:5.3
+        fs:5.2
       });
     });
 
@@ -576,9 +602,17 @@ async function generarPDFInvestigacion(datos){
     npi(h);
 
     [
-      (contAplica&&c.contratistaAltoRiesgo==='SI')?(c.contratistaSctrAfiliados||'-'):'-',
-      (contAplica&&c.contratistaAltoRiesgo==='SI')?(c.contratistaSctrNoAfiliados||'-'):'-',
-      (contAplica&&c.contratistaAltoRiesgo==='SI')?(c.contratistaAseguradora||'-'):'-'
+      (contAplica&&c.contratistaAltoRiesgo==='SI')
+        ?(c.contratistaSctrAfiliados||'-')
+        :'-',
+
+      (contAplica&&c.contratistaAltoRiesgo==='SI')
+        ?(c.contratistaSctrNoAfiliados||'-')
+        :'-',
+
+      (contAplica&&c.contratistaAltoRiesgo==='SI')
+        ?(c.contratistaAseguradora||'-')
+        :'-'
     ].forEach((txt,i)=>{
       cell(x[i],w[i],h,txt,{fs:6});
     });
@@ -592,36 +626,270 @@ async function generarPDFInvestigacion(datos){
      BLOQUE 2 — DATOS DEL TRABAJADOR
      ============================================================ */
 
+  // Encabezado de sección en azul.
   band('DATOS DEL TRABAJADOR');
 
   const trabajadores=datos.caso.involucrados||[];
 
-  {
-    const wT=[38,25,25,20,18,16,26,26];
-    const xT=[];
-    let acc=M;
-    wT.forEach(w=>{
-      xT.push(acc);
-      acc+=w;
-    });
+  trabajadores.forEach(p=>{
 
-    const h=7;
+    const t=datos.porTrabajador[p.idInvolucrado]||{};
+
+
+    /* ----------------------------------------------------------
+       FILA 1:
+       NOMBRES Y APELLIDOS | DNI | EDAD
+       ---------------------------------------------------------- */
+
+    {
+      const w=[118,45,31];
+
+      const x=[
+        M,
+        M+w[0],
+        M+w[0]+w[1]
+      ];
+
+      const h=5;
+
+      npi(h);
+
+      [
+        'NOMBRES Y APELLIDOS:',
+        'DNI:',
+        'EDAD:'
+      ].forEach((txt,i)=>{
+        cell(x[i],w[i],h,txt,{
+          bg:PL,
+          fg:NE,
+          bold:true,
+          left:true,
+          fs:6
+        });
+      });
+
+      y+=h;
+
+      npi(h);
+
+      [
+        p.nombre||'-',
+        p.dni||'-',
+        t.edad||'-'
+      ].forEach((txt,i)=>{
+        cell(x[i],w[i],h,txt,{fs:6});
+      });
+
+      y+=h;
+    }
+
+
+    /* ----------------------------------------------------------
+       FILA 2 — ENCABEZADOS DE DATOS LABORALES
+       ---------------------------------------------------------- */
+
+    {
+      const w=[
+        24, // Proyecto
+        22, // Área
+        27, // Puesto
+        25, // Antigüedad
+        15, // Sexo
+        15, // Turno
+        19, // Contrato
+        25, // Experiencia
+        22  // Horas
+      ];
+
+      const x=[];
+      let ax=M;
+      w.forEach(v=>{
+        x.push(ax);
+        ax+=v;
+      });
+
+      const h=5;
+
+      npi(h);
+
+      [
+        'PROYECTO',
+        'ÁREA',
+        'PUESTO DE TRABAJO',
+        'ANTIGÜEDAD EN EL EMPLEO',
+        'SEXO F/M',
+        'TURNO D/T/N',
+        'TIPO DE CONTRATO',
+        'TIEMPO DE EXPERIENCIA EN EL PUESTO DE TRABAJO',
+        'N° HORAS TRABAJADAS (Antes del Accidente)'
+      ].forEach((txt,i)=>{
+        cell(x[i],w[i],h,txt,{
+          bg:PL,
+          fg:NE,
+          bold:true,
+          fs:4.7
+        });
+      });
+
+      y+=h;
+
+      npi(h);
+
+      [
+        p.proyecto||'-',
+        p.area||t.area||'-',
+        p.cargo||'-',
+        t.antiguedad||'-',
+        t.sexo||'-',
+        t.turno||'-',
+        t.tipoContrato||'-',
+        t.tiempoExperiencia||'-',
+        t.horasTrabajadas||'-'
+      ].forEach((txt,i)=>{
+        cell(x[i],w[i],h,txt,{fs:5.2});
+      });
+
+      y+=h;
+    }
+
+
+    /* ----------------------------------------------------------
+       FILA 3 — ACTIVIDAD / TAREA ESPECÍFICA
+       ---------------------------------------------------------- */
+
+    {
+      const w=[55,62,77];
+
+      const x=[
+        M,
+        M+w[0],
+        M+w[0]+w[1]
+      ];
+
+      const h=5;
+
+      npi(h);
+
+      cell(x[0],w[0],h,'ACTIVIDAD',{
+        bg:PL,
+        fg:NE,
+        bold:true,
+        left:true,
+        fs:6
+      });
+
+      cell(x[1],w[1],h,'TAREA ESPECÍFICA',{
+        bg:PL,
+        fg:NE,
+        bold:true,
+        left:true,
+        fs:6
+      });
+
+      cell(x[2],w[2],h,'(marcar con una X la opción que aplique)',{
+        bg:PL,
+        fg:NE,
+        bold:false,
+        fs:5.2
+      });
+
+      y+=h;
+
+      npi(h);
+
+      cell(
+        x[0],w[0],h,
+        c.actividad||'-',
+        {fs:5.8}
+      );
+
+      cell(
+        x[1],w[1],h,
+        t.tareaEspecifica||c.tareaEspecifica||'-',
+        {fs:5.8}
+      );
+
+      const opRut=t.tareaTipo||c.tareaTipo||'';
+
+      cell(
+        x[2],w[2],h,
+        [
+          opRut==='RUTINARIA'?'[X] TAREA RUTINARIA':'[ ] TAREA RUTINARIA',
+          opRut==='NO_RUTINARIA'?'[X] TAREA NO RUTINARIA':'[ ] TAREA NO RUTINARIA',
+          opRut==='EMERGENCIA'?'[X] SITUACIÓN DE EMERGENCIA':'[ ] SITUACIÓN DE EMERGENCIA'
+        ].join('  '),
+        {
+          fs:4.8,
+          left:true
+        }
+      );
+
+      y+=h;
+    }
+
+    y+=2;
+  });
+
+
+  /* ------------------------------------------------------------
+     SUPERVISIÓN — estructura según Excel
+     ------------------------------------------------------------ */
+
+  npi(5);
+  pdf.setFillColor(...PL);
+  pdf.setDrawColor(...NE);
+  pdf.rect(M,y,W,5,'FD');
+  pdf.setTextColor(...NE);
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(6.5);
+  pdf.text(
+    'SUPERVISIÓN DURANTE EL ACCIDENTE',
+    M+W/2,
+    y+3.2,
+    {align:'center'}
+  );
+  y+=5;
+
+
+  // Instrucción.
+  npi(5);
+  pdf.setFillColor(...PL);
+  pdf.setDrawColor(...NE);
+  pdf.rect(M,y,W,5,'FD');
+  pdf.setTextColor(...NE);
+  pdf.setFont('helvetica','normal');
+  pdf.setFontSize(5.2);
+  pdf.text(
+    'Marcar con una (X) si hubo supervisión directa, indirecta, o si no hubo supervisión.',
+    M+W/2,
+    y+3.2,
+    {align:'center'}
+  );
+  y+=5;
+
+
+  // Encabezados de supervisión.
+  {
+    const w=[80,40,40,34];
+    const x=[
+      M,
+      M+w[0],
+      M+w[0]+w[1],
+      M+w[0]+w[1]+w[2]
+    ];
+    const h=5;
 
     npi(h);
 
     [
-      'NOMBRES Y APELLIDOS',
-      'PROYECTO',
-      'PUESTO DE TRABAJO',
-      'ANTIGÜEDAD',
-      'TURNO',
-      'SEXO',
-      'TIPO DE CONTRATO',
-      'EXPERIENCIA / HORAS'
-    ].forEach((s,i)=>{
-      cell(xT[i],wT[i],h,s,{
-        bg:AZ,
-        fg:BL,
+      'DETALLAR EL TRABAJO REALIZADO:',
+      'DIRECTA',
+      'INDIRECTA',
+      '¿POR QUIÉN?'
+    ].forEach((txt,i)=>{
+      cell(x[i],w[i],h,txt,{
+        bg:PL,
+        fg:NE,
         bold:true,
         fs:5.2
       });
@@ -629,38 +897,115 @@ async function generarPDFInvestigacion(datos){
 
     y+=h;
 
-    trabajadores.forEach(p=>{
-      const t=datos.porTrabajador[p.idInvolucrado]||{};
 
-      npi(h);
+    // Valores.
+    npi(h);
 
-      [
-        p.nombre||'-',
-        p.proyecto||'-',
-        p.cargo||'-',
-        t.antiguedad||'-',
-        '-',
-        '-',
-        t.tipoContrato||'-',
-        (t.tiempoExperiencia||'-')+' / '+(t.horasTrabajadas||'-')+'h'
-      ].forEach((s,i)=>{
-        cell(xT[i],wT[i],h,s,{fs:5.5});
+    const tipo=c.supervisionTipo||'';
+
+    cell(
+      x[0],w[0],h,
+      c.supervisionDetalle||'-',
+      {fs:5.5}
+    );
+
+    cell(
+      x[1],w[1],h,
+      tipo==='DIRECTA'?'X':'',
+      {fs:6,bold:true}
+    );
+
+    cell(
+      x[2],w[2],h,
+      tipo==='INDIRECTA'?'X':'',
+      {fs:6,bold:true}
+    );
+
+    cell(
+      x[3],w[3],h,
+      tipo==='SIN_SUPERVISION'
+        ?'-'
+        :(c.supervisionPorQuien&&c.supervisionPorQuien.nombre)||'-',
+      {fs:5.2}
+    );
+
+    y+=h;
+  }
+
+
+  // Segunda fila: trabajo ordenado + sin supervisión + por qué.
+  {
+    const w=[80,40,40,34];
+    const x=[
+      M,
+      M+w[0],
+      M+w[0]+w[1],
+      M+w[0]+w[1]+w[2]
+    ];
+    const h=5;
+
+    npi(h);
+
+    [
+      'TRABAJO ORDENADO POR:',
+      'SIN SUPERVISIÓN',
+      '',
+      '¿POR QUÉ?'
+    ].forEach((txt,i)=>{
+      cell(x[i],w[i],h,txt,{
+        bg:PL,
+        fg:NE,
+        bold:true,
+        fs:5.2
       });
-
-      y+=h;
     });
+
+    y+=h;
+
+    npi(h);
+
+    cell(
+      x[0],w[0],h,
+      (c.supervisionOrdenadoPor&&c.supervisionOrdenadoPor.nombre)||'-',
+      {fs:5.5}
+    );
+
+    cell(
+      x[1],w[1],h,
+      c.supervisionTipo==='SIN_SUPERVISION'?'X':'',
+      {fs:6,bold:true}
+    );
+
+    cell(x[2],w[2],h,'',{fs:6});
+
+    cell(
+      x[3],w[3],h,
+      c.supervisionTipo==='SIN_SUPERVISION'
+        ?(c.supervisionPorQue||'-')
+        :'-',
+      {fs:5.2}
+    );
+
+    y+=h;
   }
 
   y+=3;
 
   /* ============================================================
      BLOQUE 3 — CIRCUNSTANCIAS DEL TRABAJO
+     La actividad/tarea y la supervisión se imprimen en el bloque
+     de trabajador, siguiendo la distribución solicitada.
      ============================================================ */
 
+  // Se deja la sección como separador para mantener el expediente
+  // y evitar duplicar los campos ya impresos en BLOQUE 2.
   band('CIRCUNSTANCIAS DEL TRABAJO');
 
   row('ACTIVIDAD:',c.actividad);
-  row('TAREA ESPECÍFICA:',c.tareaEspecifica);
+  row(
+    'TAREA ESPECÍFICA:',
+    c.tareaEspecifica
+  );
 
   filaOpciones(
     ['TAREA RUTINARIA','TAREA NO RUTINARIA','SITUACIÓN DE EMERGENCIA'],
@@ -671,48 +1016,6 @@ async function generarPDFInvestigacion(datos){
         :c.tareaTipo==='EMERGENCIA'
           ?'SITUACIÓN DE EMERGENCIA'
           :''
-  );
-
-  npi(5);
-  pdf.setFillColor(...PL);
-  pdf.setDrawColor(...NE);
-  pdf.rect(M,y,W,5,'FD');
-
-  pdf.setTextColor(...NE);
-  pdf.setFont('helvetica','bold');
-  pdf.setFontSize(6);
-  pdf.text(
-    'SUPERVISIÓN DURANTE EL ACCIDENTE',
-    M+2,
-    y+3.2
-  );
-  y+=5;
-
-  row('DETALLAR EL TRABAJO REALIZADO:',c.supervisionDetalle);
-
-  filaOpciones(
-    ['DIRECTA','INDIRECTA','SIN SUPERVISIÓN'],
-    c.supervisionTipo==='DIRECTA'
-      ?'DIRECTA'
-      :c.supervisionTipo==='INDIRECTA'
-        ?'INDIRECTA'
-        :c.supervisionTipo==='SIN_SUPERVISION'
-          ?'SIN SUPERVISIÓN'
-          :''
-  );
-
-  if(c.supervisionTipo==='SIN_SUPERVISION'){
-    row('¿POR QUÉ?:',c.supervisionPorQue);
-  }else{
-    row(
-      '¿POR QUIÉN?:',
-      (c.supervisionPorQuien&&c.supervisionPorQuien.nombre)||'-'
-    );
-  }
-
-  row(
-    'TRABAJO ORDENADO POR:',
-    (c.supervisionOrdenadoPor&&c.supervisionOrdenadoPor.nombre)||'-'
   );
 
   y+=3;
@@ -757,7 +1060,7 @@ async function generarPDFInvestigacion(datos){
       acc2+=w;
     });
 
-    const h=7;
+    const h=5;
 
     npi(h);
 
@@ -1027,7 +1330,7 @@ async function generarPDFInvestigacion(datos){
       acc4+=w;
     });
 
-    const h=7;
+    const h=5;
 
     npi(h);
 
@@ -1111,7 +1414,7 @@ async function generarPDFInvestigacion(datos){
       const xS=[M,M+wS[0]];
 
       lista.forEach(item=>{
-        const h=7;
+        const h=5;
 
         npi(h);
 
@@ -1181,7 +1484,7 @@ async function generarPDFInvestigacion(datos){
         y+=6;
 
         analisis.porques.forEach((p,pi)=>{
-          const h=6;
+          const h=5;
           const esRaiz=p.esRaiz===true;
 
           npi(h);
@@ -1236,7 +1539,7 @@ async function generarPDFInvestigacion(datos){
       acc5+=w;
     });
 
-    const h=8;
+    const h=5;
 
     npi(h);
 
@@ -1489,7 +1792,7 @@ async function generarPDFInvestigacion(datos){
   window.open(url,'_blank');
 
   document.getElementById('info').textContent=
-    'PDF generado: '+nombrePDFInvestigacion(datos.caso);
+    'PDF generado: '+nombrePDFInvestigacion(datos.caso)+' — diseño F013 actualizado';
 }
 </script>
 </body>
