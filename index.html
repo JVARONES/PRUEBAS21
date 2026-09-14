@@ -778,7 +778,7 @@ async function generarPDFInvestigacion(datos){
      * "TIPO:" (label angosto = ancho de una opción ALTA/MEDIA/BAJA,
      * ~20.67) + su valor, ambos en UNA SOLA fila (no en filas separadas).
      */
-    const wSob=97, wTipo=97, wTipoLabel=62/3, wTipoValor=wTipo-wTipoLabel;
+    const wSob=97, wTipo=97, wTipoLabel=20, wTipoValor=wTipo-wTipoLabel;
     const yBase=y;
     npi(8);
     cell(M, wSob, 4, 'SOBRE EL ACCIDENTE', {bg:AZ,fg:BL,bold:true,left:true,fs:6});
