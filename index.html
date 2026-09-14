@@ -815,7 +815,7 @@ async function generarPDFInvestigacion(datos){
      * Estado=26 (=ancho de "SITUACIÓN DE EMERGENCIA", 77/3).
      * Descripción absorbe el resto. Descripción con letra "normal" (fs 6).
      */
-    const wA=[107,45,21,21];
+    const wA=[117,36,20,21];
     const xA=[]; let acc3=M; wA.forEach(w=>{xA.push(acc3); acc3+=w;});
     const h=5;
     npi(h);
@@ -855,7 +855,7 @@ async function generarPDFInvestigacion(datos){
     cellAt(xCol2, yBase7, wCol2, 8, 'EVALUACIÓN DE CONTROLES DEL IPERC VIGENTE — Describir el control existente', {bg:PL,bold:true,fs:4.2,left:true});
 
     /* Fila superior de col3: encabezados Existía/Implement./Cumplía/Eficaz/No aplica */
-    const wMarca=wCol3/5;
+    const wMarca=[10,11,10,10,11]; // Existía, Implement., Cumplía, Eficaz, No aplica — deben sumar wCol3 (55)
     ['Existía','Implement.','Cumplía','Eficaz','No aplica'].forEach((s,i)=>{
       cellAt(xCol3+i*wMarca, yBase7, wMarca, 4, s, {bg:PL,fg:NE,bold:true,fs:4});
     });
