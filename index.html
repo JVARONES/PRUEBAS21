@@ -1233,7 +1233,17 @@ async function generarPDFInvestigacion(datos){
 
   const blob=pdf.output('blob');
   const url=URL.createObjectURL(blob);
-  window.open(url,'_blank');
+
+  /* Descarga forzada real (no depende de que el navegador permita popups) */
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=nombrePDFInvestigacion(datos.caso);
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  /* Vista previa en pestaña nueva — puede ser bloqueada por el navegador, no es crítico */
+  try{ window.open(url,'_blank'); }catch(e){}
 
   document.getElementById('info').textContent=
     'PDF generado: '+nombrePDFInvestigacion(datos.caso)+' — diseño F013 actualizado';
