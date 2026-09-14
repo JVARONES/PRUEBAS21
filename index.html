@@ -730,7 +730,7 @@ async function generarPDFInvestigacion(datos){
      * 2 filas de evaluación (8+4=12 c/u) sumen 24, igual que las 3 de Lesión (8 c/u).
      */
     function filaEvaluacion(label, opciones, seleccionado, porque){
-      const wLabel=31, wOpt=66/opciones.length;
+      const wLabel=29, wOpt=68/opciones.length;
       const yBase=y;
       npi(8);
       cellAt(xDer, yBase, wLabel, 8, label, {bg:PL,fg:NE,bold:true,left:true,fs:5});
