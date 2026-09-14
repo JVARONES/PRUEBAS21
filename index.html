@@ -544,9 +544,10 @@ async function generarPDFInvestigacion(datos){
       cell(x[2],w[2],3,'(marcar con una X la opción que aplique)',{bg:PL,fg:NE,fs:4.6});
 
       y=yBase+3;
-      const wOpts=[22,22,22];
+      const wOpts=[w[2]/3,w[2]/3,w[2]/3];
+      const offOpts=[0, wOpts[0], wOpts[0]+wOpts[1]];
       ['TAREA RUTINARIA','TAREA NO RUTINARIA','SITUACIÓN EMERGENCIA'].forEach((op,i)=>{
-        const off=i===0?0:i===1?20:40; cell(x[2]+off,wOpts[i],5,op,{bg:PL,fg:NE,bold:true,fs:4.2});
+        cell(x[2]+offOpts[i],wOpts[i],5,op,{bg:PL,fg:NE,bold:true,fs:4.2});
       });
 
       y=yBase+8;
@@ -558,7 +559,7 @@ async function generarPDFInvestigacion(datos){
       const opActual=t.tareaTipo||c.tareaTipo||'';
       const codigos=['RUTINARIA','NO_RUTINARIA','EMERGENCIA'];
       codigos.forEach((cod,i)=>{
-        const off=i===0?0:i===1?20:40; cell(x[2]+off,wOpts[i],h2, opActual===cod?'X':'', {fs:6,bold:true});
+        cell(x[2]+offOpts[i],wOpts[i],h2, opActual===cod?'X':'', {fs:6,bold:true});
       });
       y+=h2;
     }
@@ -723,7 +724,7 @@ async function generarPDFInvestigacion(datos){
       y = yBase+8;
     }
 
-        /*
+    /*
      * DERECHA — Label=32, Opciones=65 (32+65=97=MITAD). ¿Por qué?
      * label=20, valor=77 (20+77=97=MITAD), altura=4 (para que
      * 2 filas de evaluación (8+4=12 c/u) sumen 24, igual que las 3 de Lesión (8 c/u).
@@ -749,10 +750,28 @@ async function generarPDFInvestigacion(datos){
       y+=h2;
     }
 
+    const yInicioBloque = y;
+
+    filaLesion('PARTE DEL CUERPO:', t.parteLesionada, t.parteLesionadaObs);
+    filaLesion('TIPO DE LESIÓN:', t.tipoLesion, t.tipoLesionObs);
+    filaLesion('FUENTE DE LA LESIÓN:', t.fuenteLesion, t.fuenteLesionObs);
+    const yFinIzquierda = y;
+
+    y = yInicioBloque;
+    filaEvaluacion('POTENCIAL DE DAÑO:', ['GRAVE O FATAL','MODERADO','LEVE'],
+      t.potencialDano==='GRAVE_O_FATAL'?'GRAVE O FATAL':t.potencialDano, t.potencialPorque);
+    filaEvaluacion('PROBABILIDAD DE OCURRENCIA:', ['ALTA','MEDIA','BAJA'],
+      t.probabilidad, t.probabilidadPorque);
+    const yFinDerecha = y;
+
+    y = Math.max(yFinIzquierda, yFinDerecha);
+    y+=1;
+  });
+
   /* ============================================================
      BLOQUE 6 — SOBRE EL ACCIDENTE
-     "SOBRE EL ACCIDENTE"=97 (hasta donde termina el label de
-     ¿POR QUÉ?, 97+18) | "TIPO DE ACCIDENTE"=97 (=valor de ¿por qué?)
+     "SOBRE EL ACCIDENTE"=115 (hasta donde termina el label de
+     ¿POR QUÉ?, 97+18) | "TIPO DE ACCIDENTE"=79 (=valor de ¿por qué?)
      ============================================================ */
   {
     /*
@@ -914,7 +933,7 @@ async function generarPDFInvestigacion(datos){
      ============================================================ */
   band('CAUSAS DEL ACCIDENTE (Cuadro III — Metodología SCAT)');
   {
-    const wNum=8, wOpcionSel=27, wDesc=62; // dentro de cada mitad de 97 (12+23+62=97)
+    const wNum=8, wOpcionSel=27, wDesc=62; // dentro de cada mitad de 97 (8+27+62=97)
 
     function bandaMitad(xBase, titulo){
       pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
