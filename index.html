@@ -528,9 +528,6 @@ async function generarPDFInvestigacion(datos){
       });
       y+=h;
     }
-      });
-      y+=h;
-    }
 
     npi(4);
     pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
@@ -539,10 +536,6 @@ async function generarPDFInvestigacion(datos){
     pdf.text('CIRCUNSTANCIAS DEL TRABAJO',M+2,y+2.7);
     y+=4;
 
-    /*
-     * FILA 3 — Actividad/Tarea (instrucción=3, opciones=5, total sigue siendo 8)
-     */
-    {
     /*
      * FILA 3 — Actividad/Tarea (instrucción=3, opciones=5, total sigue siendo 8)
      */
@@ -728,7 +721,7 @@ async function generarPDFInvestigacion(datos){
       const wLabel=18, wValor=79, wObsLabel=10, wObsValor=69;
       const yBase=y;
       npi(8);
-      cellAt(xIzq, yBase, wLabel, 8, label, {bg:PL,fg:NE,bold:true,left:true,fs:5});
+      cellAt(xIzq, yBase, wLabel, 8, label, {bg:PL,fg:NE,bold:true,fs:5});
       cellAt(xIzq+wLabel, yBase, wValor, 4, valor||'-', {fs:5});
       cellAt(xIzq+wLabel, yBase+4, wObsLabel, 4, 'Obs:', {bg:PL,fg:NE,bold:true,fs:5});
       cellAt(xIzq+wLabel+wObsLabel, yBase+4, wObsValor, 4, obs||'-', {fs:5,left:true});
@@ -744,7 +737,7 @@ async function generarPDFInvestigacion(datos){
       const wLabel=29, wOpt=68/opciones.length;
       const yBase=y;
       npi(8);
-      cellAt(xDer, yBase, wLabel, 8, label, {bg:PL,fg:NE,bold:true,left:true,fs:5});
+      cellAt(xDer, yBase, wLabel, 8, label, {bg:PL,fg:NE,bold:true,fs:5});
       opciones.forEach((op,i)=>{
         cellAt(xDer+wLabel+i*wOpt, yBase, wOpt, 4, op, {bg:PL,fg:NE,bold:true,fs:5});
       });
@@ -756,7 +749,7 @@ async function generarPDFInvestigacion(datos){
 
       const h2=4;
       npi(h2);
-      cellAt(xDer, y, 20, h2, '¿POR QUÉ?', {bg:AZ,fg:BL,bold:true,left:true,fs:5});
+      cellAt(xDer, y, 20, h2, '¿POR QUÉ?', {bg:AZ,fg:BL,bold:true,fs:5});
       cellAt(xDer+20, y, 77, h2, porque||'-', {fs:5,left:true});
       y+=h2;
     }
@@ -791,20 +784,20 @@ async function generarPDFInvestigacion(datos){
     const wSob=97, wTipo=97, wTipoLabel=20, wTipoValor=wTipo-wTipoLabel;
     const yBase=y;
     npi(8);
-    cell(M, wSob, 4, 'SOBRE EL ACCIDENTE', {bg:AZ,fg:BL,bold:true,left:true,fs:5});
-    cell(M+wSob, wTipo, 4, 'TIPO DE ACCIDENTE (Cuadro II) — Seleccionar una opción de la lista', {bg:AZ,fg:BL,bold:true,left:true,fs:5});
+    cell(M, wSob, 4, 'SOBRE EL ACCIDENTE', {bg:AZ,fg:BL,bold:true,fs:5});
+    cell(M+wSob, wTipo, 4, 'TIPO DE ACCIDENTE (Cuadro II) — Seleccionar una opción de la lista', {bg:AZ,fg:BL,bold:true,fs:5});
 
     y=yBase+4;
     const trab0 = trabajadores[0] ? (datos.porTrabajador[trabajadores[0].idInvolucrado]||{}) : {};
     const tipoAccVal = trab0.tipoAccidente==='Otros.' ? ('Otros: '+(trab0.tipoAccidenteOtro||'')) : (trab0.tipoAccidente||'-');
     cell(M, wSob, 4, '', {bg:BL});
     cell(M+wSob, wTipoLabel, 4, 'TIPO:', {bg:PL,fg:NE,bold:true,fs:5});
-    cell(M+wSob+wTipoLabel, wTipoValor, 4, tipoAccVal, {fs:5,left:true});
+    cell(M+wSob+wTipoLabel, wTipoValor, 4, tipoAccVal, {fs:5});
 
     y=yBase+8;
   }
 
-  npi(5); cell(M,W,5,'DESCRIPCIÓN DEL ACCIDENTE DE TRABAJO',{bg:AZ,fg:BL,bold:true,left:true,fs:5}); y+=5;
+  npi(5); cell(M,W,5,'DESCRIPCIÓN DEL ACCIDENTE DE TRABAJO',{bg:AZ,fg:BL,bold:true,fs:5}); y+=5;
   {
     pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5);
     const dlines=pdf.splitTextToSize(c.descripcionAccidente||'-', W-5);
@@ -817,7 +810,7 @@ async function generarPDFInvestigacion(datos){
     y+=h;
   }
 
-  npi(5); cell(M,W,5,'CORRECCIÓN O ACCIONES INMEDIATAS',{bg:AZ,fg:BL,bold:true,left:true,fs:5}); y+=5;
+  npi(5); cell(M,W,5,'CORRECCIÓN O ACCIONES INMEDIATAS',{bg:AZ,fg:BL,bold:true,fs:5}); y+=5;
   {
     /*
      * Responsable=35 (=label "POTENCIAL DE DAÑO"), Fecha=26 y
@@ -861,7 +854,7 @@ async function generarPDFInvestigacion(datos){
     npi(8);
     cell(xCol1,wCol1,4,'¿PELIGRO IDENTIFICADO EN EL IPERC VIGENTE APLICABLE?',{bg:PL,bold:true,fs:5});
     /* Col2 = bloque alto de 8mm (fila1+fila2), combinado con la celda de abajo */
-    cellAt(xCol2, yBase7, wCol2, 8, 'EVALUACIÓN DE CONTROLES DEL IPERC VIGENTE — Describir el control existente', {bg:PL,bold:true,fs:5,left:true});
+    cellAt(xCol2, yBase7, wCol2, 8, 'EVALUACIÓN DE CONTROLES DEL IPERC VIGENTE — Describir el control existente', {bg:PL,bold:true,fs:5});
 
     /* Fila superior de col3: encabezados Existía/Estaba imple../Se cumplía/Eficaz/No aplica */
     const wMarca=[10,11,10,10,11]; // Existía, Estaba impl., Se cumplía, Fue eficaz, No aplica — deben sumar wCol3 (52)
@@ -913,19 +906,19 @@ async function generarPDFInvestigacion(datos){
         cellAt(xCol1+wSiNo+wSiNoMark, y, wSiNo, h, 'NO', {fs:5});
         cellAt(xCol1+2*wSiNo+wSiNoMark, y, wSiNoMark, h, c.ipercActualizacion==='NO'?'X':'', {fs:5,bold:true});
         const xCod=xCol1+2*wSiNo+2*wSiNoMark;
-        cellAt(xCod, y, 16, h, 'CÓD. IPERC:', {bg:AZ,fg:BL,bold:true,left:true,fs:5});
-        cellAt(xCod+16, y, wCol1-(xCod-xCol1)-16, h, c.ipercCodigo||'-', {fs:5,left:true});
+        cellAt(xCod, y, 16, h, 'CÓD. IPERC:', {bg:AZ,fg:BL,bold:true,fs:5});
+        cellAt(xCod+16, y, wCol1-(xCod-xCol1)-16, h, c.ipercCodigo||'-', {fs:5});
       } else if(j.k==='ingenieria'){
-        cellAt(xCol1, y, wCol1, h, 'JUSTIFICACIÓN:', {bg:PL,bold:true,left:true,fs:5});
+        cellAt(xCol1, y, wCol1, h, 'JUSTIFICACIÓN:', {bg:PL,bold:true,fs:5});
       } else if(j.k==='administrativo'){
         /* Se dibuja al terminar EPP, combinando ADM+EPP en una sola celda */
         yAdmInicio=y;
       } else if(j.k==='epp'){
-        cellAt(xCol1, yAdmInicio, wCol1, h*2, c.ipercJustificacion||'-', {fs:5,left:true});
+        cellAt(xCol1, yAdmInicio, wCol1, h*2, c.ipercJustificacion||'-', {fs:5});
       }
 
       cellAt(xCol2, y, wCol2Label, h, j.t, {bg:PL,fg:NE,bold:true,fs:5});
-      cellAt(xCol2+wCol2Label, y, wCol2Valor, h, ctrl.descripcion||'-', {fs:5,left:true});
+      cellAt(xCol2+wCol2Label, y, wCol2Valor, h, ctrl.descripcion||'-', {fs:5});
 
       const marks=[ctrl.existia,ctrl.implementado,ctrl.cumplia,ctrl.eficaz,ctrl.noAplica];
       marks.forEach((m,i)=>{
@@ -963,8 +956,8 @@ async function generarPDFInvestigacion(datos){
       npi(h);
       const numeral = abrev+String(indice+1).padStart(2,'0');
       cellAt(xBase, y, wNum, h, numeral, {bold:true});
-      cellAt(xBase+wNum, y, wOpcionSel, h, item?(item.opcion||''):'', {left:true,fs:5});
-      cellAt(xBase+wNum+wOpcionSel, y, wDesc, h, item?(item.descripcion||''):'', {left:true});
+      cellAt(xBase+wNum, y, wOpcionSel, h, item?(item.opcion||''):'', {fs:5});
+      cellAt(xBase+wNum+wOpcionSel, y, wDesc, h, item?(item.descripcion||''):'', {});
     }
 
     /* Título de cada mitad */
@@ -990,8 +983,8 @@ async function generarPDFInvestigacion(datos){
      */
     function bloquePar(catIzq, tituloIzq, abrevIzq, catDer, tituloDer, abrevDer){
       npi(4);
-      cellAt(M,y,MITAD,4,tituloIzq,{bg:AZ,fg:BL,bold:true,left:true,fs:5});
-      cellAt(M+MITAD,y,MITAD,4,tituloDer,{bg:AZ,fg:BL,bold:true,left:true,fs:5});
+      cellAt(M,y,MITAD,4,tituloIzq,{bg:AZ,fg:BL,bold:true,fs:5});
+      cellAt(M+MITAD,y,MITAD,4,tituloDer,{bg:AZ,fg:BL,bold:true,fs:5});
       y+=4;
 
       const listaIzq = c.scat[catIzq]||[];
@@ -1067,7 +1060,7 @@ async function generarPDFInvestigacion(datos){
     const wR=[62,48,42,42];
     const xR=[]; let acc6=M; wR.forEach(w=>{xR.push(acc6); acc6+=w;});
 
-    npi(4); cell(M,W,4,'RESPONSABLE DEL REGISTRO',{bg:PL,bold:true,left:true,fs:5}); y+=4;
+    npi(4); cell(M,W,4,'RESPONSABLE DEL REGISTRO',{bg:PL,bold:true,fs:5}); y+=4;
     npi(4);
     ['NOMBRE','CARGO','FECHA','FIRMA'].forEach((s,i)=>{
       cell(xR[i],wR[i],4,s,{bg:AZ,fg:BL,bold:true,fs:5});
@@ -1080,7 +1073,7 @@ async function generarPDFInvestigacion(datos){
     cell(xR[3],wR[3],5,'',{fs:5});
     y+=5;
 
-    npi(4); cell(M,W,4,'RESPONSABLE(S) DE LA INVESTIGACIÓN',{bg:PL,bold:true,left:true,fs:5}); y+=4;
+    npi(4); cell(M,W,4,'RESPONSABLE(S) DE LA INVESTIGACIÓN',{bg:PL,bold:true,fs:5}); y+=4;
     npi(4);
     ['NOMBRE','CARGO','FECHA','FIRMA'].forEach((s,i)=>{
       cell(xR[i],wR[i],4,s,{bg:AZ,fg:BL,bold:true,fs:5});
@@ -1159,7 +1152,7 @@ async function generarPDFInvestigacion(datos){
       ? nombres.map((n,i)=>(i+1)+'. '+n).join('   ')
       : 'Ver archivos adjuntos.';
     npi(6);
-    cell(M,W,6,texto,{fs:5,left:true});
+    cell(M,W,6,texto,{fs:5});
     y+=6;
   }
 
@@ -1214,9 +1207,9 @@ async function generarPDFInvestigacion(datos){
         npi(hh);
         cell(xCol[0],wCol[0],hh,etiqueta,{fs:5,bold:true});
         for(let k=0;k<5;k++){
-          cell(xCol[1+k],wCol[1+k],hh, porques[k]||'', {fs:5,left:true});
+          cell(xCol[1+k],wCol[1+k],hh, porques[k]||'', {fs:5});
         }
-        cell(xCol[6],wCol[6],hh,raizTxt,{fs:5,left:true,bold:true,bg:[228,242,236]});
+        cell(xCol[6],wCol[6],hh,raizTxt,{fs:5,bold:true,bg:[228,242,236]});
         y+=hh;
       });
     });
