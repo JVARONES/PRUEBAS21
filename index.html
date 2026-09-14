@@ -481,7 +481,7 @@ async function generarPDFInvestigacion(datos){
      * FILA 1 — Nombre(130) + DNI(32,=Actividad Económica) + Edad(32,=NTrabajadores)
      */
     {
-      const w=[38,92,10,22,10,22];
+      const w=[37,93,11,21,11,21];
       const x=[]; let acc=M; w.forEach(v=>{x.push(acc); acc+=v;});
       const h=4;
       npi(h);
@@ -528,7 +528,21 @@ async function generarPDFInvestigacion(datos){
       });
       y+=h;
     }
+      });
+      y+=h;
+    }
 
+    npi(4);
+    pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
+    pdf.rect(M,y,W,4,'FD');
+    pdf.setTextColor(...NE); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
+    pdf.text('CIRCUNSTANCIAS DEL TRABAJO',M+2,y+2.7);
+    y+=4;
+
+    /*
+     * FILA 3 — Actividad/Tarea (instrucción=3, opciones=5, total sigue siendo 8)
+     */
+    {
     /*
      * FILA 3 — Actividad/Tarea (instrucción=3, opciones=5, total sigue siendo 8)
      */
@@ -849,8 +863,8 @@ async function generarPDFInvestigacion(datos){
     /* Col2 = bloque alto de 8mm (fila1+fila2), combinado con la celda de abajo */
     cellAt(xCol2, yBase7, wCol2, 8, 'EVALUACIÓN DE CONTROLES DEL IPERC VIGENTE — Describir el control existente', {bg:PL,bold:true,fs:5,left:true});
 
-    /* Fila superior de col3: encabezados Existía/Implement./Cumplía/Eficaz/No aplica */
-    const wMarca=[10,11,10,10,11]; // Existía, Implement., Cumplía, Eficaz, No aplica — deben sumar wCol3 (52)
+    /* Fila superior de col3: encabezados Existía/Estaba imple../Se cumplía/Eficaz/No aplica */
+    const wMarca=[10,11,10,10,11]; // Existía, Estaba impl., Se cumplía, Fue eficaz, No aplica — deben sumar wCol3 (52)
     const xMarca=[]; { let acc=xCol3; wMarca.forEach(w=>{xMarca.push(acc); acc+=w;}); }
     ['Existía','Implement.','Cumplía','Eficaz','No aplica'].forEach((s,i)=>{
       cellAt(xMarca[i], yBase7, wMarca[i], 4, s, {bg:PL,fg:NE,bold:true,fs:5});
@@ -869,7 +883,7 @@ async function generarPDFInvestigacion(datos){
       });
     }
     /* Fila inferior de col3: instrucción de marcado */
-    cellAt(xCol3, y, wCol3, 4, 'Marcar con una X las opciones que aplican', {bg:PL,fg:NE,fs:5});
+    cellAt(xCol3, y, wCol3, 4, '(marcar con una X las opciones que aplique)', {bg:PL,fg:NE,fs:5});
     y = yBase7+8;
 
     const jer=[
