@@ -896,7 +896,7 @@ async function generarPDFInvestigacion(datos){
         cellAt(xCol1, y, wCol1, h, '¿GENERA NECESIDAD DE ACTUALIZACIÓN DEL IPERC?', {bg:PL,bold:true,fs:4});
       } else if(j.k==='sustitucion'){
         /* SI/NO + CÓDIGO IPERC, todo en una sola fila */
-        const wSiNo=8, wSiNoMark=5.4;
+        const wSiNo=8, wSiNoMark=5;
         cellAt(xCol1, y, wSiNo, h, 'SI', {fs:4.6});
         cellAt(xCol1+wSiNo, y, wSiNoMark, h, c.ipercActualizacion==='SI'?'X':'', {fs:5.5,bold:true});
         cellAt(xCol1+wSiNo+wSiNoMark, y, wSiNo, h, 'NO', {fs:4.6});
