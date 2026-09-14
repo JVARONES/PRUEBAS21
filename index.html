@@ -544,7 +544,7 @@ async function generarPDFInvestigacion(datos){
       cell(x[2],w[2],3,'(marcar con una X la opción que aplique)',{bg:PL,fg:NE,fs:4.6});
 
       y=yBase+3;
-      const wOpts=[21,21,22];
+      const wOpts=[22,22,22];
       ['TAREA RUTINARIA','TAREA NO RUTINARIA','SITUACIÓN EMERGENCIA'].forEach((op,i)=>{
         const off=i===0?0:i===1?20:40; cell(x[2]+off,wOpts[i],5,op,{bg:PL,fg:NE,bold:true,fs:4.2});
       });
