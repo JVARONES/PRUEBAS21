@@ -808,8 +808,7 @@ async function generarPDFInvestigacion(datos){
 
     y=yBase+8;
   }
-
-  npi(5); cell(M,W,4,'DESCRIPCIÓN DEL ACCIDENTE DE TRABAJO',{bg:AZ,fg:BL,bold:true,FS:6}); y+=5;
+bandaTitulo('DESCRIPCIÓN DEL ACCIDENTE DE TRABAJO', {h:4, bg:AZ, fg:BL, FS:6, align:'center'});
   {
     pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5);
     const dlines=pdf.splitTextToSize(c.descripcionAccidente||'-', W-5);
@@ -821,8 +820,7 @@ async function generarPDFInvestigacion(datos){
     dlines.forEach((l,i)=>pdf.text(l,M+2.5,y+4+i*3.4));
     y+=h;
   }
-
-  npi(5); cell(M,W,5,'CORRECCIÓN O ACCIONES INMEDIATAS',{bg:AZ,fg:BL,bold:true,FS:6}); y+=5;
+bandaTitulo('CORRECCIÓN O ACCIONES INMEDIATAS', {h:4, bg:AZ, fg:BL, FS:6, align:'center'});
   {
     /*
      * Responsable=35 (=label "POTENCIAL DE DAÑO"), Fecha=26 y
@@ -850,7 +848,6 @@ async function generarPDFInvestigacion(datos){
       y+=h;
     });
   }
-  y+=3;
 
   /* ============================================================
      BLOQUE 7 — RELACIÓN CON EL IPERC
@@ -939,7 +936,6 @@ async function generarPDFInvestigacion(datos){
       y+=h;
     });
   }
-  y+=3;
 
   /* ============================================================
      BLOQUE 8 — CAUSAS SCAT (Cuadro III)
@@ -973,9 +969,8 @@ async function generarPDFInvestigacion(datos){
 
     /* Título de cada mitad */
     npi(5);
-    bandaMitad(M, 'CAUSAS INMEDIATAS',true);
-    bandaMitad(M+MITAD, 'CAUSAS BÁSICAS',true);
-    y+=5;
+    bandaMitad(M, 'CAUSAS INMEDIATAS',{h:4, bg:GR, fg:NE, FS:6, align:'center'};
+    bandaMitad(M+MITAD, 'CAUSAS BÁSICAS',{h:4, bg:GR, fg:NE, FS:6, align:'center'};
 
     /* Encabezado — UNA SOLA VEZ por mitad */
     npi(5);
