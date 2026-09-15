@@ -876,24 +876,15 @@ bandaTitulo('CORRECCIÓN O ACCIONES INMEDIATAS (Describir las acciones inmediata
     npi(8);
     cellAt(xCol1, yBase7, wCol1, 8, '', {bg:PL});
 
-pdf.setTextColor(...NE);
-pdf.setFont('helvetica','bold');
-pdf.setFontSize(5.5);
-pdf.text(
-  '¿PELIGRO IDENTIFICADO EN EL IPERC VIGENTE APLICABLE?',
-  xCol1+wCol1/2,
-  yBase7+3.0,
-  {align:'center',baseline:'middle'}
-);
-
-pdf.setFont('helvetica','normal');
-pdf.setFontSize(3.5);
-pdf.text(
-  '(marcar con una X la opción que aplique)',
-  xCol1+wCol1/2,
-  yBase7+5.8,
-  {align:'center',baseline:'middle'}
-);
+npi(10);
+{
+  pdf.setFillColor(...PL); pdf.setDrawColor(...NE);
+  pdf.rect(xCol1, yBase7, wCol1, 6, 'FD');
+  pdf.setTextColor(...NE); pdf.setFont('helvetica','bold'); pdf.setFontSize(5);
+  pdf.text('¿PELIGRO IDENTIFICADO EN EL IPERC VIGENTE APLICABLE?', xCol1+wCol1/2, yBase7+2.3, {align:'center',baseline:'middle'});
+  pdf.setFont('helvetica','normal'); pdf.setFontSize(3.5);
+  pdf.text('(marcar con una X la opción que aplique)', xCol1+wCol1/2, yBase7+4.6, {align:'center',baseline:'middle'});
+}
     /* Col2 = bloque alto de 8mm (fila1+fila2), combinado con la celda de abajo */
     cellAt(xCol2, yBase7, wCol2, 8, 'EVALUACIÓN DE CONTROLES DEL IPERC VIGENTE — Describir el control existente', {bg:PL,bold:true,fs:5.5});
 
