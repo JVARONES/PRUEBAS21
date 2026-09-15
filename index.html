@@ -476,7 +476,7 @@ async function generarPDFInvestigacion(datos){
   /* ============================================================
      BLOQUE 2 — DATOS DEL TRABAJADOR
      ============================================================ */
-  band('DATOS DEL TRABAJADOR',true);
+  bandaTitulo('DATOS DEL EMPLEADOR PRINCIPAL', {h:5, bg:AZ, fg:BL, fs:7, align:'center'});
 
   const trabajadores=datos.caso.involucrados||[];
 
