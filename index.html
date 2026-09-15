@@ -374,7 +374,7 @@ async function generarPDFInvestigacion(datos){
 
   bandaTitulo('DATOS DEL EMPLEADOR', {h:4, bg:PL, fg:NE, fs:7, align:'left'});
 
-  bandaTitulo('DATOS DEL EMPLEADOR PRINCIPAL', {h:5, bg:AZ, fg:BL, fs:7, align:'center'});
+  bandaTitulo('DATOS DEL EMPLEADOR PRINCIPAL', {h:4, bg:AZ, fg:BL, fs:7, align:'center'});
 
   {
     const w=[32,32,66,32,32];
@@ -476,7 +476,7 @@ async function generarPDFInvestigacion(datos){
   /* ============================================================
      BLOQUE 2 — DATOS DEL TRABAJADOR
      ============================================================ */
-  bandaTitulo('DATOS DEL EMPLEADOR PRINCIPAL', {h:5, bg:AZ, fg:BL, fs:7, align:'center'});
+  bandaTitulo('DATOS DEL TRABAJADOR', {h:5, bg:AZ, fg:BL, fs:7, align:'center'});
 
   const trabajadores=datos.caso.involucrados||[];
 
@@ -575,8 +575,7 @@ async function generarPDFInvestigacion(datos){
 
   bandaDoble(AZ,
     'SUPERVISIÓN DURANTE EL ACCIDENTE',
-    'Marcar con una (X) si hubo supervisión directa, indirecta, o si no hubo supervisión',true
-  );
+    'Marcar con una (X) si hubo supervisión directa, indirecta, o si no hubo supervisión',{h:5, bg:AZ, fg:BL, fs:7, align:'center'});
 
   {
     const w=[97,16.5,16.5,64];
@@ -619,7 +618,7 @@ async function generarPDFInvestigacion(datos){
      partes iguales de 22 (≈1/3 de 194). Días/N°Trab = 3/4 de
      "situación de emergencia" (25.67 → 19).
      ============================================================ */
-  band('INVESTIGACIÓN DEL ACCIDENTE',true);
+  bandaTitulo('INVESTIGACIÓN DEL ACCIDENTE', {h:4, bg:AZ, fg:BL, fs:7, align:'center'});
 
   {
     const e=datos.caso.evento||{};
@@ -800,7 +799,7 @@ async function generarPDFInvestigacion(datos){
     y=yBase+8;
   }
 
-  npi(5); cell(M,W,5,'DESCRIPCIÓN DEL ACCIDENTE DE TRABAJO',{bg:AZ,fg:BL,bold:true,fs:5}); y+=5;
+  npi(5); cell(M,W,4,'DESCRIPCIÓN DEL ACCIDENTE DE TRABAJO',{bg:AZ,fg:BL,bold:true,fs:7}); y+=5;
   {
     pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5);
     const dlines=pdf.splitTextToSize(c.descripcionAccidente||'-', W-5);
@@ -813,7 +812,7 @@ async function generarPDFInvestigacion(datos){
     y+=h;
   }
 
-  npi(5); cell(M,W,5,'CORRECCIÓN O ACCIONES INMEDIATAS',{bg:AZ,fg:BL,bold:true,fs:5}); y+=5;
+  npi(5); cell(M,W,5,'CORRECCIÓN O ACCIONES INMEDIATAS',{bg:AZ,fg:BL,bold:true,fs:7}); y+=5;
   {
     /*
      * Responsable=35 (=label "POTENCIAL DE DAÑO"), Fecha=26 y
@@ -848,7 +847,7 @@ async function generarPDFInvestigacion(datos){
      ============================================================ */
   /* Mantener todo el módulo IPERC en una sola página. */
   npi(5+8+(5*5)+3);
-  band('RELACIÓN CON EL IPERC');
+  bandaTitulo('RELACIÓN CON EL IPERC', {h:4, bg:AZ, fg:BL, fs:7, align:'center'});
   {
     const wCol1=62, wCol2=80, wCol3=52;
     const xCol1=M, xCol2=M+wCol1, xCol3=xCol2+wCol2;
