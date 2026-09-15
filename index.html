@@ -386,7 +386,14 @@ function saltoPagina(){
      BLOQUE 1 — DATOS DEL EMPLEADOR
      ============================================================ */
   const c=datos.compartido;
-
+{
+    const w=[32,162];
+    const x=[M, M+w[0], M+w[0]+w[1], M+w[0]+w[1]+w[2], M+w[0]+w[1]+w[2]+w[3]];
+    const h=5;
+    npi(h);
+    ['N° REGISTRO',''].forEach((txt,i)=>{
+      cell(x[i],w[i],h,txt,{bg:PL,fg:NE,bold:true,fs:5.5});
+    })};
   bandaTitulo('DATOS DEL EMPLEADOR', {h:4, bg:PL, fg:NE, fs:5.5, align:'left'});
 
   bandaTitulo('DATOS DEL EMPLEADOR PRINCIPAL', {h:4, bg:AZ, fg:BL, fs:7, align:'center'});
@@ -894,7 +901,7 @@ pdf.text(
     const wMarca=[10,11,10,10,11]; // Existía, Estaba impl., Se cumplía, Fue eficaz, No aplica — deben sumar wCol3 (52)
     const xMarca=[]; { let acc=xCol3; wMarca.forEach(w=>{xMarca.push(acc); acc+=w;}); }
     ['Existía','Estaba imple.','Se cumplía','Fue eficaz','No aplica'].forEach((s,i)=>{
-      cellAt(xMarca[i], yBase7, wMarca[i], 4, s, {bg:PL,fg:NE,bold:true,fs:4});
+      cellAt(xMarca[i], yBase7, wMarca[i], 5, s, {bg:PL,fg:NE,bold:true,fs:4});
     });
 
     /* SI [ ] | NO [ ] | PARC. [ ] — 6 celdas, una sola fila */
@@ -1000,11 +1007,11 @@ pdf.text(
     /* Encabezado — UNA SOLA VEZ por mitad */
     npi(5);
     cellAt(M, y, wNum, 5, 'N°', {bg:PL,bold:true,fs:5.5});
-    cellAt(M+wNum, y, wOpcionSel, 5, 'Opción seleccionada', {bg:PL,bold:true,fs:5.5});
-    cellAt(M+wNum+wOpcionSel, y, wDesc, 5, 'Descripción de la desviación', {bg:PL,bold:true,fs:5.5});
+    cellAt(M+wNum, y, wOpcionSel, 5, 'OPCIÓN SELECCIONADA', {bg:PL,bold:true,fs:5.5});
+    cellAt(M+wNum+wOpcionSel, y, wDesc, 5, 'DESCRIPCIÓN DE LA DESVIACIÓN', {bg:PL,bold:true,fs:5.5});
     cellAt(M+MITAD, y, wNum, 5, 'N°', {bg:PL,bold:true,fs:5.5});
-    cellAt(M+MITAD+wNum, y, wOpcionSel, 5, 'Opción seleccionada', {bg:PL,bold:true,fs:5.5});
-    cellAt(M+MITAD+wNum+wOpcionSel, y, wDesc, 5, 'Descripción de la desviación', {bg:PL,bold:true,fs:5.5});
+    cellAt(M+MITAD+wNum, y, wOpcionSel, 5, 'OPCIÓN SELECCIONADA', {bg:PL,bold:true,fs:5.5});
+    cellAt(M+MITAD+wNum+wOpcionSel, y, wDesc, 5, 'DESCRIPCIÓN DE LA DESVIACIÓN', {bg:PL,bold:true,fs:5.5});
     y+=5;
 
     /*
@@ -1148,16 +1155,12 @@ pdf.text(
       y+=h;
     }
   }
-function saltoPagina(){
-    pdf.addPage();
-    page++;
-    y=8;
-    header();
-  }
+
   /* ============================================================
      ANEXO 01 — FOTOGRAFÍAS (3 por fila)
      ============================================================ */
-  bandaTitulo(['Anexo 01. FOTOGRAFÍAS DEL EVENTO','(Evidencias / Reconstrucción del accidente)'], {h:6, bg:AZ, fg:BL, fs:7, align:'center'});
+ saltoPagina();
+    bandaTitulo(['Anexo 01. FOTOGRAFÍAS DEL EVENTO','(Evidencias / Reconstrucción del accidente)'], {h:6, bg:AZ, fg:BL, fs:7, align:'center'});
   {
     /* Mínimo 3 casillas visibles, aunque estén vacías */
     const fotos=c.fotosInvestigacion||[];
