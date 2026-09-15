@@ -397,7 +397,7 @@ async function generarPDFInvestigacion(datos){
     y+=h;
   }
 
-  bandaInstruccion('COMPLETAR SÓLO EN CASO QUE LAS ACTIVIDADES DEL EMPLEADOR SEAN CONSIDERADAS DE ALTO RIESGO',true);
+  bandaInstruccion('COMPLETAR SÓLO EN CASO QUE LAS ACTIVIDADES DEL EMPLEADOR SEAN CONSIDERADAS DE ALTO RIESGO',true,[170,170,159],{ fg:[0,0,0], bold:true, italic:false, fs:6 });
 
   {
     const w=[64,66,64];
@@ -419,7 +419,7 @@ async function generarPDFInvestigacion(datos){
     y+=h;
   }
 
-  bandaTitulo('DATOS DEL EMPLEADOR DE INTERMEDIACION, TERCERIZACION, CONTRATISTA, SUBCONTRATISTA, OTROS', {h:4, bg:PL, fg:NE, fs:7, align:'center'});
+  bandaTitulo('DATOS DEL EMPLEADOR DE INTERMEDIACION, TERCERIZACION, CONTRATISTA, SUBCONTRATISTA, OTROS', {h:4, bg:AZ, fg:BL, fs:7, align:'center'});
 
   const contAplica=c.contratistaAplica==='SI';
 
@@ -450,7 +450,7 @@ async function generarPDFInvestigacion(datos){
     y+=h;
   }
 
-  bandaInstruccion('COMPLETAR SÓLO EN CASO QUE LAS ACTIVIDADES DEL EMPLEADOR SEAN CONSIDERADAS DE ALTO RIESGO',true);
+  bandaInstruccion('COMPLETAR SÓLO EN CASO QUE LAS ACTIVIDADES DEL EMPLEADOR SEAN CONSIDERADAS DE ALTO RIESGO',true,[170,170,159],{ fg:[0,0,0], bold:true, italic:false, fs:6 });
 
   {
     const w=[64,66,64];
