@@ -435,7 +435,7 @@ function saltoPagina(){
   }
 
   bandaTitulo('DATOS DEL EMPLEADOR DE INTERMEDIACION, TERCERIZACION, CONTRATISTA, SUBCONTRATISTA, OTROS', {h:4, bg:AZ, fg:BL, fs:7, align:'center'});
-
+ bandaInstruccion('COMPLETAR SÓLO SI CONTRATA SERVICIOS DE INTERMEDIACIÓN, CONTRATISTA, SUBCONTRATISTA, OTROS',true,[170,170,159],{ fg:[0,0,0], bold:true, italic:false, fs:5.5 });
   const contAplica=c.contratistaAplica==='SI';
 
   /*
@@ -656,17 +656,17 @@ function saltoPagina(){
     npi(10);
 
     cell(xFecOc, wFecOc+wHora, 5, 'FECHA Y HORA DE OCURRENCIA DEL ACC.', {bg:PL,fg:NE,bold:true,fs:5.5});
-    cell(xFI, wFI, 5, 'FECHA DE INICIO DE LA INVESTIGACIÓN', {bg:PL,fg:NE,bold:true,fs:5.5});
+    cell(xFI, wFI, 5, 'FECHA DE INICIO DE LA INV.', {bg:PL,fg:NE,bold:true,fs:5.5});
     cellAt(xLu, yBase, wLu, 10, 'LUGAR EXACTO DONDE OCURRIÓ EL ACCIDENTE', {bg:PL,fg:NE,bold:true,fs:5.5});
-    cell(xGrav, wGrav, 5, 'MARCAR (X) GRAVEDAD', {bg:PL,fg:NE,bold:true,fs:5.5});
+    cell(xGrav, wGrav, 5, 'MARCAR (X) GRAVEDAD DEL ACC. DE TRABAJO (DE SER EL CASO)', {bg:PL,fg:NE,bold:true,fs:5.5});
     cell(xGra, wGra, 5, 'MARCAR (X) GRADO ACC. INCAPACITANTE', {bg:PL,fg:NE,bold:true,fs:5.5});
     cellAt(xDias, yBase, wDias, 10, 'DÍAS DESCANSO MÉDICO', {bg:PL,fg:NE,bold:true,fs:5.5});
     cellAt(xNTrab, yBase, wNTrab, 10, 'N°TRAB. AFECTADOS', {bg:PL,fg:NE,bold:true,fs:5.5});
 
     y = yBase+5;
-    cell(xFecOc, wFecOc, 5, 'DD/MM/YYYY', {bg:PL,fg:NE,fs:5.5});
+    cell(xFecOc, wFecOc, 5, 'dd/mm/yyyy', {bg:PL,fg:NE,fs:5.5});
     cell(xHora, wHora, 5, 'Hora', {bg:PL,fg:NE,fs:5.5});
-    cell(xFI, wFI, 5, 'DD/MM/YYYY', {bg:PL,fg:NE,fs:5.5});
+    cell(xFI, wFI, 5, 'dd/mm/yyyy', {bg:PL,fg:NE,fs:5.5});
     ['LEVE','INCAP.','MORTAL'].forEach((op,i)=>{
       cell(xGrav+i*wGravOpt, wGravOpt, 5, op, {bg:PL,fg:NE,bold:true,fs:5.5});
     });
@@ -766,7 +766,7 @@ function saltoPagina(){
 
       const h2=4;
       npi(h2);
-      cellAt(xDer, y, 20, h2, '¿POR QUÉ?', {bg:AZ,fg:BL,bold:true,fs:5.5});
+      cellAt(xDer, y, 20, h2, '¿POR QUÉ?', {bg:PL,fg:NE,bold:true,fs:5.5});
       cellAt(xDer+20, y, 77, h2, porque||'-', {fs:5.5,left:true});
       y+=h2;
     }
@@ -813,7 +813,7 @@ function saltoPagina(){
 
     y=yBase+8;
   }
-bandaTitulo('DESCRIPCIÓN DEL ACCIDENTE DE TRABAJO', {h:4, bg:AZ, fg:BL, fs:7, align:'center'});
+bandaTitulo('DESCRIPCIÓN DEL ACCIDENTE DE TRABAJO', {h:4, bg:PL, fg:NE, fs:7, align:'center'});
   {
     pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5);
     const dlines=pdf.splitTextToSize(c.descripcionAccidente||'-', W-5);
@@ -826,7 +826,7 @@ bandaTitulo('DESCRIPCIÓN DEL ACCIDENTE DE TRABAJO', {h:4, bg:AZ, fg:BL, fs:7, a
     y+=h;
   }
     saltoPagina();
-bandaTitulo('CORRECCIÓN O ACCIONES INMEDIATAS', {h:4, bg:AZ, fg:BL, fs:7, align:'center'});
+bandaTitulo('CORRECCIÓN O ACCIONES INMEDIATAS (Describir las acciones inmediatas durante y después del accidente)', {h:4, bg:PL, fg:NE, fs:7, align:'center'});
   {
     /*
      * Responsable=35 (=label "POTENCIAL DE DAÑO"), Fecha=26 y
@@ -837,7 +837,7 @@ bandaTitulo('CORRECCIÓN O ACCIONES INMEDIATAS', {h:4, bg:AZ, fg:BL, fs:7, align
     const xA=[]; let acc3=M; wA.forEach(w=>{xA.push(acc3); acc3+=w;});
     const h=5;
     npi(h);
-    ['DESCRIPCIÓN','RESP.','FECHA','ESTADO'].forEach((s,i)=>{
+    ['DESCRIPCIÓN DE LA CORRECCIÓN Y/O ACCIONES INMEDIATAS','RESPONSABLE','FECHA DE EJECUCIÓN','ESTADO'].forEach((s,i)=>{
       cell(xA[i],wA[i],h,s,{bg:PL,bold:true,fs:5.5});
     });
     y+=h;
@@ -867,15 +867,34 @@ bandaTitulo('CORRECCIÓN O ACCIONES INMEDIATAS', {h:4, bg:AZ, fg:BL, fs:7, align
     const yBase7=y;
 
     npi(8);
-    cell(xCol1,wCol1,4,'¿PELIGRO IDENTIFICADO EN EL IPERC VIGENTE APLICABLE?',{bg:PL,bold:true,fs:5.5});
+    cellAt(xCol1, yBase7, wCol1, 8, '', {bg:PL});
+
+pdf.setTextColor(...NE);
+pdf.setFont('helvetica','bold');
+pdf.setFontSize(5.5);
+pdf.text(
+  '¿PELIGRO IDENTIFICADO EN EL IPERC VIGENTE APLICABLE?',
+  xCol1+wCol1/2,
+  yBase7+3.0,
+  {align:'center',baseline:'middle'}
+);
+
+pdf.setFont('helvetica','normal');
+pdf.setFontSize(3.5);
+pdf.text(
+  '(marcar con una X la opción que aplique)',
+  xCol1+wCol1/2,
+  yBase7+5.8,
+  {align:'center',baseline:'middle'}
+);
     /* Col2 = bloque alto de 8mm (fila1+fila2), combinado con la celda de abajo */
     cellAt(xCol2, yBase7, wCol2, 8, 'EVALUACIÓN DE CONTROLES DEL IPERC VIGENTE — Describir el control existente', {bg:PL,bold:true,fs:5.5});
 
     /* Fila superior de col3: encabezados Existía/Estaba imple../Se cumplía/Eficaz/No aplica */
     const wMarca=[10,11,10,10,11]; // Existía, Estaba impl., Se cumplía, Fue eficaz, No aplica — deben sumar wCol3 (52)
     const xMarca=[]; { let acc=xCol3; wMarca.forEach(w=>{xMarca.push(acc); acc+=w;}); }
-    ['Existía','Implement.','Cumplía','Eficaz','No aplica'].forEach((s,i)=>{
-      cellAt(xMarca[i], yBase7, wMarca[i], 4, s, {bg:PL,fg:NE,bold:true,fs:5.5});
+    ['Existía','Estaba imple.','Se cumplía','Fue eficaz','No aplica'].forEach((s,i)=>{
+      cellAt(xMarca[i], yBase7, wMarca[i], 4, s, {bg:PL,fg:NE,bold:true,fs:4});
     });
 
     /* SI [ ] | NO [ ] | PARC. [ ] — 6 celdas, una sola fila */
@@ -1129,8 +1148,12 @@ bandaTitulo('CORRECCIÓN O ACCIONES INMEDIATAS', {h:4, bg:AZ, fg:BL, fs:7, align
       y+=h;
     }
   }
-  y+=3;
-
+function saltoPagina(){
+    pdf.addPage();
+    page++;
+    y=8;
+    header();
+  }
   /* ============================================================
      ANEXO 01 — FOTOGRAFÍAS (3 por fila)
      ============================================================ */
@@ -1168,14 +1191,14 @@ bandaTitulo('CORRECCIÓN O ACCIONES INMEDIATAS', {h:4, bg:AZ, fg:BL, fs:7, align
   /* ============================================================
      ANEXO 02 — sin cambios
      ============================================================ */
-  bandaTitulo('Anexo 02. MANIFESTACIONES DE TESTIGOS', {h:4, bg:AZ, fg:NE, fs:7, align:'center'});  
+  bandaTitulo('Anexo 02. MANIFESTACIONES DE TESTIGOS', {h:4, bg:AZ, fg:BL, fs:7, align:'center'});  
   npi(6); cell(M,W,6,'Ver archivo(s) adjunto(s) en el expediente digital del caso.',{fs:5.5}); y+=6;
   y+=3;
 
   /* ============================================================
      ANEXO 03 — un solo cuadro, numerado en línea "1. 2. 3."
      ============================================================ */
- bandaTitulo('Anexo 03. DOCUMENTOS DE ATENCIÓN MÉDICA', {h:4, bg:AZ, fg:NE, fs:7, align:'center'});  
+ bandaTitulo('Anexo 03. DOCUMENTOS DE ATENCIÓN MÉDICA', {h:4, bg:AZ, fg:BL, fs:7, align:'center'});  
   {
     const nombres = c.documentosMedicosNombres || ['Receta médica','Constancia SCTR','Informe médico'];
     const texto = nombres.length
@@ -1194,7 +1217,7 @@ bandaTitulo('CORRECCIÓN O ACCIONES INMEDIATAS', {h:4, bg:AZ, fg:BL, fs:7, align
     const totalFilasCausaRaiz = catsCount_(c);
     npi(6 + totalFilasCausaRaiz*9 + 3);
   }
-   bandaTitulo('Anexo 04. ANÁLISIS DE CAUSA RAÍZ', {h:4, bg:AZ, fg:NE, fs:7, align:'center'});   
+   bandaTitulo('Anexo 04. ANÁLISIS DE CAUSA RAÍZ', {h:4, bg:AZ, fg:BL, fs:7, align:'center'});   
   {
     const wCol=[24,24,24,24,24,24,50];
     const xCol=[]; let acc=M; wCol.forEach(v=>{xCol.push(acc); acc+=v;});
