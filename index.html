@@ -217,7 +217,12 @@ async function generarPDFInvestigacion(datos){
       header();
     }
   }
-
+function saltoPagina(){
+    pdf.addPage();
+    page++;
+    y=8;
+    header();
+  }
   function band(s, o={}){
     const align = o.align || 'left';
     npi(5);
